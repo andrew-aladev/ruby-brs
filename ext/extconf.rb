@@ -7,7 +7,9 @@ def require_header(name)
   abort "Can't find #{name} header" unless find_header name
 end
 
-#require_header ""
+require_header "brotli/types.h"
+require_header "brotli/encode.h"
+require_header "brotli/decode.h"
 
 def require_library(name, functions)
   functions.each do |function|
@@ -15,11 +17,35 @@ def require_library(name, functions)
   end
 end
 
-functions = %w[
+encoder_functions = %w[
+  BrotliEncoderCompress
+  BrotliEncoderCompressStream
+  BrotliEncoderCreateInstance
+  BrotliEncoderDestroyInstance
+  BrotliEncoderHasMoreOutput
+  BrotliEncoderIsFinished
+  BrotliEncoderSetParameter
+  BrotliEncoderTakeOutput
 ]
 .freeze
 
-require_library "brotli", functions
+require_library "brotlienc", encoder_functions
+
+decoder_functions = %w[
+  BrotliDecoderCreateInstance
+  BrotliDecoderDecompress
+  BrotliDecoderDecompressStream
+  BrotliDecoderDestroyInstance
+  BrotliDecoderErrorString
+  BrotliDecoderGetErrorCode
+  BrotliDecoderHasMoreOutput
+  BrotliDecoderIsFinished
+  BrotliDecoderSetParameter
+  BrotliDecoderTakeOutput
+]
+.freeze
+
+require_library "brotlidec", decoder_functions
 
 extension_name = "brs_ext".freeze
 dir_config extension_name
