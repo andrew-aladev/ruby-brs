@@ -51,6 +51,7 @@ extension_name = "brs_ext".freeze
 dir_config extension_name
 
 sources = %w[
+  error
 ]
 .freeze
 
