@@ -52,6 +52,7 @@ dir_config extension_name
 
 sources = %w[
   error
+  option
 ]
 .freeze
 
