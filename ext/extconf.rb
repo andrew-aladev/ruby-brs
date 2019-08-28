@@ -53,6 +53,7 @@ dir_config extension_name
 sources = %w[
   stream/compressor
   error
+  option
 ]
 .freeze
 

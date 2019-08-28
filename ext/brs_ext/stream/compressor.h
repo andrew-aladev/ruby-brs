@@ -10,15 +10,14 @@
 
 typedef struct {
   BrotliEncoderState* state_ptr;
-  // uint8_t*                 destination_buffer;
-  // size_t                   destination_buffer_length;
-  // uint8_t*                 remaining_destination_buffer;
-  // size_t                   remaining_destination_buffer_length;
+  uint8_t*            destination_buffer;
+  size_t              destination_buffer_length;
+  uint8_t*            remaining_destination_buffer;
+  size_t              remaining_destination_buffer_length;
 } brs_ext_compressor_t;
 
 VALUE brs_ext_allocate_compressor(VALUE klass);
-// VALUE brs_ext_initialize_compressor(VALUE self, VALUE options);
-// VALUE brs_ext_compressor_write_magic_header(VALUE self);
+VALUE brs_ext_initialize_compressor(VALUE self, VALUE options);
 // VALUE brs_ext_compress(VALUE self, VALUE source);
 // VALUE brs_ext_flush_compressor(VALUE self);
 // VALUE brs_ext_compressor_read_result(VALUE self);
