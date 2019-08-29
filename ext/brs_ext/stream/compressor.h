@@ -18,8 +18,9 @@ typedef struct {
 
 VALUE brs_ext_allocate_compressor(VALUE klass);
 VALUE brs_ext_initialize_compressor(VALUE self, VALUE options);
-// VALUE brs_ext_compress(VALUE self, VALUE source);
-// VALUE brs_ext_flush_compressor(VALUE self);
+VALUE brs_ext_compress(VALUE self, VALUE source);
+VALUE brs_ext_flush_compressor(VALUE self);
+VALUE brs_ext_finish_compressor(VALUE self);
 // VALUE brs_ext_compressor_read_result(VALUE self);
 // VALUE brs_ext_compressor_close(VALUE self);
 

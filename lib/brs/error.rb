@@ -7,4 +7,6 @@ module BRS
   class ValidateError   < BaseError; end
   class AllocateError   < BaseError; end
   class UnexpectedError < BaseError; end
+
+  class UsedAfterCloseError < BaseError; end
 end

@@ -15,13 +15,13 @@ uint32_t *    brs_ext_get_bool_option(VALUE options, const char *name);
   type name = brs_ext_get_required_fixnum_option(options, #name);
 
 #define BRS_EXT_GET_MODE_OPTION() \
-  uint32_t *mode = brs_ext_get_mode_option(options);
+  uint32_t *mode##_ptr = brs_ext_get_mode_option(options);
 
 #define BRS_EXT_GET_FIXNUM_OPTION(name) \
-  uint32_t *name = brs_ext_get_fixnum_option(options, #name);
+  uint32_t *name##_ptr = brs_ext_get_fixnum_option(options, #name);
 
 #define BRS_EXT_GET_BOOL_OPTION(name) \
-  uint32_t *name = brs_ext_get_bool_option(options, #name);
+  uint32_t *name##_ptr = brs_ext_get_bool_option(options, #name);
 
 #define BRS_EXT_GET_COMPRESSOR_OPTIONS(options)              \
   Check_Type(options, T_HASH);                               \

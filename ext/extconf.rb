@@ -18,14 +18,13 @@ def require_library(name, functions)
 end
 
 encoder_functions = %w[
-  BrotliEncoderCompress
-  BrotliEncoderCompressStream
   BrotliEncoderCreateInstance
-  BrotliEncoderDestroyInstance
-  BrotliEncoderHasMoreOutput
-  BrotliEncoderIsFinished
   BrotliEncoderSetParameter
+  BrotliEncoderCompressStream
+  BrotliEncoderHasMoreOutput
   BrotliEncoderTakeOutput
+  BrotliEncoderIsFinished
+  BrotliEncoderDestroyInstance
 ]
 .freeze
 
@@ -33,15 +32,14 @@ require_library "brotlienc", encoder_functions
 
 decoder_functions = %w[
   BrotliDecoderCreateInstance
-  BrotliDecoderDecompress
+  BrotliDecoderSetParameter
   BrotliDecoderDecompressStream
+  BrotliDecoderHasMoreOutput
+  BrotliDecoderTakeOutput
+  BrotliDecoderIsFinished
   BrotliDecoderDestroyInstance
   BrotliDecoderErrorString
   BrotliDecoderGetErrorCode
-  BrotliDecoderHasMoreOutput
-  BrotliDecoderIsFinished
-  BrotliDecoderSetParameter
-  BrotliDecoderTakeOutput
 ]
 .freeze
 
