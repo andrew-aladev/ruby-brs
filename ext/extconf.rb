@@ -22,8 +22,6 @@ encoder_functions = %w[
   BrotliEncoderSetParameter
   BrotliEncoderCompressStream
   BrotliEncoderHasMoreOutput
-  BrotliEncoderTakeOutput
-  BrotliEncoderIsFinished
   BrotliEncoderDestroyInstance
 ]
 .freeze
@@ -35,11 +33,7 @@ decoder_functions = %w[
   BrotliDecoderSetParameter
   BrotliDecoderDecompressStream
   BrotliDecoderHasMoreOutput
-  BrotliDecoderTakeOutput
-  BrotliDecoderIsFinished
   BrotliDecoderDestroyInstance
-  BrotliDecoderErrorString
-  BrotliDecoderGetErrorCode
 ]
 .freeze
 
@@ -50,7 +44,9 @@ dir_config extension_name
 
 sources = %w[
   stream/compressor
+  stream/decompressor
   error
+  main
   option
 ]
 .freeze

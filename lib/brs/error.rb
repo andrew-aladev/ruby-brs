@@ -8,5 +8,6 @@ module BRS
   class AllocateError   < BaseError; end
   class UnexpectedError < BaseError; end
 
-  class UsedAfterCloseError < BaseError; end
+  class NotEnoughDestinationError < BaseError; end
+  class UsedAfterCloseError       < BaseError; end
 end

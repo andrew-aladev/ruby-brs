@@ -6,27 +6,23 @@
 
 #include "ruby.h"
 
-unsigned long brs_ext_get_required_fixnum_option(VALUE options, const char *name);
-uint32_t *    brs_ext_get_mode_option(VALUE options);
-uint32_t *    brs_ext_get_fixnum_option(VALUE options, const char *name);
-uint32_t *    brs_ext_get_bool_option(VALUE options, const char *name);
-
-#define BRS_EXT_GET_REQUIRED_FIXNUM_OPTION(type, name) \
-  type name = brs_ext_get_required_fixnum_option(options, #name);
+uint8_t *      brs_ext_get_mode_option(VALUE options);
+uint8_t *      brs_ext_get_bool_option(VALUE options, const char *name);
+unsigned long *brs_ext_get_fixnum_option(VALUE options, const char *name);
 
 #define BRS_EXT_GET_MODE_OPTION() \
-  uint32_t *mode##_ptr = brs_ext_get_mode_option(options);
-
-#define BRS_EXT_GET_FIXNUM_OPTION(name) \
-  uint32_t *name##_ptr = brs_ext_get_fixnum_option(options, #name);
+  uint8_t *mode##_ptr = brs_ext_get_mode_option(options);
 
 #define BRS_EXT_GET_BOOL_OPTION(name) \
-  uint32_t *name##_ptr = brs_ext_get_bool_option(options, #name);
+  uint8_t *name##_ptr = brs_ext_get_bool_option(options, #name);
+
+#define BRS_EXT_GET_FIXNUM_OPTION(name) \
+  unsigned long *name##_ptr = brs_ext_get_fixnum_option(options, #name);
 
 #define BRS_EXT_GET_COMPRESSOR_OPTIONS(options)              \
   Check_Type(options, T_HASH);                               \
                                                              \
-  BRS_EXT_GET_REQUIRED_FIXNUM_OPTION(size_t, buffer_length); \
+  BRS_EXT_GET_FIXNUM_OPTION(buffer_length);                  \
   BRS_EXT_GET_MODE_OPTION();                                 \
   BRS_EXT_GET_FIXNUM_OPTION(quality);                        \
   BRS_EXT_GET_FIXNUM_OPTION(lgwin);                          \
@@ -40,7 +36,7 @@ uint32_t *    brs_ext_get_bool_option(VALUE options, const char *name);
 #define BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options)            \
   Check_Type(options, T_HASH);                               \
                                                              \
-  BRS_EXT_GET_REQUIRED_FIXNUM_OPTION(size_t, buffer_length); \
+  BRS_EXT_GET_FIXNUM_OPTION(buffer_length);                  \
   BRS_EXT_GET_BOOL_OPTION(disable_ring_buffer_reallocation); \
   BRS_EXT_GET_BOOL_OPTION(large_window);
 

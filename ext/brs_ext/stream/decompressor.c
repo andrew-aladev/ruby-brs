@@ -1,0 +1,185 @@
+// Ruby bindings for brotli library.
+// Copyright (c) 2019 AUTHORS, MIT License.
+
+#include <brotli/decode.h>
+
+#include "ruby.h"
+
+#include "brs_ext/error.h"
+#include "brs_ext/option.h"
+#include "brs_ext/stream/decompressor.h"
+
+static void free_decompressor(brs_ext_decompressor_t* decompressor_ptr)
+{
+  BrotliDecoderState* state_ptr = decompressor_ptr->state_ptr;
+  if (state_ptr != NULL) {
+    BrotliDecoderDestroyInstance(state_ptr);
+  }
+
+  uint8_t* destination_buffer = decompressor_ptr->destination_buffer;
+  if (destination_buffer != NULL) {
+    free(destination_buffer);
+  }
+
+  free(decompressor_ptr);
+}
+
+VALUE brs_ext_allocate_decompressor(VALUE klass)
+{
+  brs_ext_decompressor_t* decompressor_ptr;
+
+  VALUE self = Data_Make_Struct(klass, brs_ext_decompressor_t, NULL, free_decompressor, decompressor_ptr);
+
+  decompressor_ptr->state_ptr                           = NULL;
+  decompressor_ptr->destination_buffer                  = NULL;
+  decompressor_ptr->destination_buffer_length           = 0;
+  decompressor_ptr->remaining_destination_buffer        = NULL;
+  decompressor_ptr->remaining_destination_buffer_length = 0;
+
+  return self;
+}
+
+#define GET_DECOMPRESSOR()                  \
+  brs_ext_decompressor_t* decompressor_ptr; \
+  Data_Get_Struct(self, brs_ext_decompressor_t, decompressor_ptr);
+
+#define SET_PARAM(type, name)                                               \
+  if (name##_ptr != NULL) {                                                 \
+    uint32_t    value  = *name##_ptr;                                       \
+    BROTLI_BOOL result = BrotliDecoderSetParameter(state_ptr, type, value); \
+                                                                            \
+    if (!result) {                                                          \
+      brs_ext_raise_error("ValidateError", "invalid param value");          \
+    }                                                                       \
+  }
+
+VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
+{
+  GET_DECOMPRESSOR();
+  BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
+
+  BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
+  if (state_ptr == NULL) {
+    brs_ext_raise_error("AllocateError", "allocate error");
+  }
+
+  decompressor_ptr->state_ptr = state_ptr;
+
+  SET_PARAM(BROTLI_DECODER_PARAM_DISABLE_RING_BUFFER_REALLOCATION, disable_ring_buffer_reallocation);
+  SET_PARAM(BROTLI_DECODER_PARAM_LARGE_WINDOW, large_window);
+
+  // -----
+
+  size_t destination_buffer_length;
+  if (buffer_length_ptr == NULL) {
+    destination_buffer_length = DEFAULT_DECOMPRESSOR_BUFFER_LENGTH;
+  }
+  else {
+    destination_buffer_length = *buffer_length_ptr;
+  }
+
+  if (destination_buffer_length == 0) {
+    brs_ext_raise_error("ValidateError", "invalid buffer length value");
+  }
+
+  uint8_t* destination_buffer = malloc(destination_buffer_length);
+  if (destination_buffer == NULL) {
+    brs_ext_raise_error("AllocateError", "allocate error");
+  }
+
+  decompressor_ptr->destination_buffer                  = destination_buffer;
+  decompressor_ptr->destination_buffer_length           = destination_buffer_length;
+  decompressor_ptr->remaining_destination_buffer        = destination_buffer;
+  decompressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
+
+  return Qnil;
+}
+
+#define DO_NOT_USE_AFTER_CLOSE()                                                             \
+  if (decompressor_ptr->state_ptr == NULL || decompressor_ptr->destination_buffer == NULL) { \
+    brs_ext_raise_error("UsedAfterCloseError", "decompressor used after closed");            \
+  }
+
+#define GET_SOURCE_STRING()                        \
+  Check_Type(source, T_STRING);                    \
+                                                   \
+  const char* source_data   = RSTRING_PTR(source); \
+  size_t      source_length = RSTRING_LEN(source);
+
+VALUE brs_ext_decompress(VALUE self, VALUE source)
+{
+  GET_DECOMPRESSOR();
+  DO_NOT_USE_AFTER_CLOSE();
+  GET_SOURCE_STRING();
+
+  const uint8_t* remaining_source_data   = (const uint8_t*)source_data;
+  size_t         remaining_source_length = source_length;
+
+  BrotliDecoderResult result = BrotliDecoderDecompressStream(
+    decompressor_ptr->state_ptr,
+    &remaining_source_length,
+    &remaining_source_data,
+    &decompressor_ptr->remaining_destination_buffer_length,
+    &decompressor_ptr->remaining_destination_buffer,
+    NULL);
+
+  VALUE bytes_written = INT2NUM(source_length - remaining_source_length);
+
+  VALUE needs_more_destination;
+  if (result == BROTLI_DECODER_RESULT_SUCCESS || result == BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT) {
+    needs_more_destination = Qfalse;
+  }
+  else if (result == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
+    needs_more_destination = Qtrue;
+  }
+  else {
+    brs_ext_raise_error("UnexpectedError", "unexpected error");
+  }
+
+  return rb_ary_new_from_args(2, bytes_written, needs_more_destination);
+}
+
+VALUE brs_ext_decompressor_read_result(VALUE self)
+{
+  GET_DECOMPRESSOR();
+  DO_NOT_USE_AFTER_CLOSE();
+
+  uint8_t* destination_buffer                  = decompressor_ptr->destination_buffer;
+  size_t   destination_buffer_length           = decompressor_ptr->destination_buffer_length;
+  size_t   remaining_destination_buffer_length = decompressor_ptr->remaining_destination_buffer_length;
+
+  const char* result_data   = (const char*)destination_buffer;
+  size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
+
+  VALUE result = rb_str_new(result_data, result_length);
+
+  decompressor_ptr->remaining_destination_buffer        = destination_buffer;
+  decompressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
+
+  return result;
+}
+
+VALUE brs_ext_decompressor_close(VALUE self)
+{
+  GET_DECOMPRESSOR();
+  DO_NOT_USE_AFTER_CLOSE();
+
+  BrotliDecoderState* state_ptr = decompressor_ptr->state_ptr;
+  if (state_ptr != NULL) {
+    BrotliDecoderDestroyInstance(state_ptr);
+
+    decompressor_ptr->state_ptr = NULL;
+  }
+
+  uint8_t* destination_buffer = decompressor_ptr->destination_buffer;
+  if (destination_buffer != NULL) {
+    free(destination_buffer);
+
+    decompressor_ptr->destination_buffer = NULL;
+  }
+
+  // It is possible to keep "destination_buffer_length", "remaining_destination_buffer"
+  //   and "remaining_destination_buffer_length" as is.
+
+  return Qnil;
+}

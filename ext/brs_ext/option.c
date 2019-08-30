@@ -13,19 +13,10 @@ static inline VALUE get_option(VALUE options, const char *name)
   return rb_funcall(options, rb_intern("[]"), 1, ID2SYM(rb_intern(name)));
 }
 
-unsigned long brs_ext_get_required_fixnum_option(VALUE options, const char *name)
+uint8_t *brs_ext_get_mode_option(VALUE options)
 {
-  VALUE value = get_option(options, name);
-
-  Check_Type(value, T_FIXNUM);
-
-  return rb_num2uint(value);
-}
-
-uint32_t *brs_ext_get_mode_option(VALUE options)
-{
-  VALUE     value  = get_option(options, "mode");
-  uint32_t *option = NULL;
+  VALUE    value  = get_option(options, "mode");
+  uint8_t *option = NULL;
 
   if (value != Qnil) {
     Check_Type(value, T_SYMBOL);
@@ -48,24 +39,10 @@ uint32_t *brs_ext_get_mode_option(VALUE options)
   return option;
 }
 
-uint32_t *brs_ext_get_fixnum_option(VALUE options, const char *name)
+uint8_t *brs_ext_get_bool_option(VALUE options, const char *name)
 {
-  VALUE     value  = get_option(options, name);
-  uint32_t *option = NULL;
-
-  if (value != Qnil) {
-    Check_Type(value, T_FIXNUM);
-
-    *option = rb_num2uint(value);
-  }
-
-  return option;
-}
-
-uint32_t *brs_ext_get_bool_option(VALUE options, const char *name)
-{
-  VALUE     value  = get_option(options, name);
-  uint32_t *option = NULL;
+  VALUE    value  = get_option(options, name);
+  uint8_t *option = NULL;
 
   if (value != Qnil) {
     int type = TYPE(value);
@@ -74,6 +51,20 @@ uint32_t *brs_ext_get_bool_option(VALUE options, const char *name)
     }
 
     *option = type == T_TRUE ? 1 : 0;
+  }
+
+  return option;
+}
+
+unsigned long *brs_ext_get_fixnum_option(VALUE options, const char *name)
+{
+  VALUE          value  = get_option(options, name);
+  unsigned long *option = NULL;
+
+  if (value != Qnil) {
+    Check_Type(value, T_FIXNUM);
+
+    *option = rb_num2uint(value);
   }
 
   return option;

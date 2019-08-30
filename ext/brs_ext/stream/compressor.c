@@ -43,12 +43,14 @@ VALUE brs_ext_allocate_compressor(VALUE klass)
   brs_ext_compressor_t* compressor_ptr; \
   Data_Get_Struct(self, brs_ext_compressor_t, compressor_ptr);
 
-#define SET_PARAM(type, name)                                                     \
-  if (name##_ptr != NULL) {                                                       \
-    BROTLI_BOOL result = BrotliEncoderSetParameter(state_ptr, type, *name##_ptr); \
-    if (!result) {                                                                \
-      brs_ext_raise_error("ValidateError", "invalid param value");                \
-    }                                                                             \
+#define SET_PARAM(type, name)                                               \
+  if (name##_ptr != NULL) {                                                 \
+    uint32_t    value  = *name##_ptr;                                       \
+    BROTLI_BOOL result = BrotliEncoderSetParameter(state_ptr, type, value); \
+                                                                            \
+    if (!result) {                                                          \
+      brs_ext_raise_error("ValidateError", "invalid param value");          \
+    }                                                                       \
   }
 
 VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
@@ -75,15 +77,27 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
 
   // -----
 
-  uint8_t* destination_buffer = malloc(buffer_length);
+  size_t destination_buffer_length;
+  if (buffer_length_ptr == NULL) {
+    destination_buffer_length = DEFAULT_COMPRESSOR_BUFFER_LENGTH;
+  }
+  else {
+    destination_buffer_length = *buffer_length_ptr;
+  }
+
+  if (destination_buffer_length == 0) {
+    brs_ext_raise_error("ValidateError", "invalid buffer length value");
+  }
+
+  uint8_t* destination_buffer = malloc(destination_buffer_length);
   if (destination_buffer == NULL) {
     brs_ext_raise_error("AllocateError", "allocate error");
   }
 
   compressor_ptr->destination_buffer                  = destination_buffer;
-  compressor_ptr->destination_buffer_length           = buffer_length;
+  compressor_ptr->destination_buffer_length           = destination_buffer_length;
   compressor_ptr->remaining_destination_buffer        = destination_buffer;
-  compressor_ptr->remaining_destination_buffer_length = buffer_length;
+  compressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
 
   return Qnil;
 }
@@ -108,8 +122,6 @@ VALUE brs_ext_compress(VALUE self, VALUE source)
   const uint8_t* remaining_source_data   = (const uint8_t*)source_data;
   size_t         remaining_source_length = source_length;
 
-  size_t prev_remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
-
   BROTLI_BOOL result = BrotliEncoderCompressStream(
     compressor_ptr->state_ptr,
     BROTLI_OPERATION_PROCESS,
@@ -124,7 +136,7 @@ VALUE brs_ext_compress(VALUE self, VALUE source)
   }
 
   VALUE bytes_written          = INT2NUM(source_length - remaining_source_length);
-  VALUE needs_more_destination = (source_length != 0 && prev_remaining_destination_buffer_length == compressor_ptr->remaining_destination_buffer_length) ? Qtrue : Qfalse;
+  VALUE needs_more_destination = BrotliEncoderHasMoreOutput(compressor_ptr->state_ptr) ? Qtrue : Qfalse;
 
   return rb_ary_new_from_args(2, bytes_written, needs_more_destination);
 }
@@ -175,4 +187,49 @@ VALUE brs_ext_finish_compressor(VALUE self)
   }
 
   return BrotliEncoderHasMoreOutput(compressor_ptr->state_ptr) ? Qtrue : Qfalse;
+}
+
+VALUE brs_ext_compressor_read_result(VALUE self)
+{
+  GET_COMPRESSOR();
+  DO_NOT_USE_AFTER_CLOSE();
+
+  uint8_t* destination_buffer                  = compressor_ptr->destination_buffer;
+  size_t   destination_buffer_length           = compressor_ptr->destination_buffer_length;
+  size_t   remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
+
+  const char* result_data   = (const char*)destination_buffer;
+  size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
+
+  VALUE result = rb_str_new(result_data, result_length);
+
+  compressor_ptr->remaining_destination_buffer        = destination_buffer;
+  compressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
+
+  return result;
+}
+
+VALUE brs_ext_compressor_close(VALUE self)
+{
+  GET_COMPRESSOR();
+  DO_NOT_USE_AFTER_CLOSE();
+
+  BrotliEncoderState* state_ptr = compressor_ptr->state_ptr;
+  if (state_ptr != NULL) {
+    BrotliEncoderDestroyInstance(state_ptr);
+
+    compressor_ptr->state_ptr = NULL;
+  }
+
+  uint8_t* destination_buffer = compressor_ptr->destination_buffer;
+  if (destination_buffer != NULL) {
+    free(destination_buffer);
+
+    compressor_ptr->destination_buffer = NULL;
+  }
+
+  // It is possible to keep "destination_buffer_length", "remaining_destination_buffer"
+  //   and "remaining_destination_buffer_length" as is.
+
+  return Qnil;
 }

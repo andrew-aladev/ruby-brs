@@ -8,6 +8,8 @@
 
 #include "ruby.h"
 
+#define DEFAULT_COMPRESSOR_BUFFER_LENGTH (1 << 15) // 32 KB
+
 typedef struct {
   BrotliEncoderState* state_ptr;
   uint8_t*            destination_buffer;
@@ -21,7 +23,7 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options);
 VALUE brs_ext_compress(VALUE self, VALUE source);
 VALUE brs_ext_flush_compressor(VALUE self);
 VALUE brs_ext_finish_compressor(VALUE self);
-// VALUE brs_ext_compressor_read_result(VALUE self);
-// VALUE brs_ext_compressor_close(VALUE self);
+VALUE brs_ext_compressor_read_result(VALUE self);
+VALUE brs_ext_compressor_close(VALUE self);
 
 #endif // BRS_EXT_STREAM_COMPRESSOR_H
