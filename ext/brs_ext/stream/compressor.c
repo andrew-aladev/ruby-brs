@@ -43,20 +43,9 @@ VALUE brs_ext_allocate_compressor(VALUE klass)
   brs_ext_compressor_t* compressor_ptr; \
   Data_Get_Struct(self, brs_ext_compressor_t, compressor_ptr);
 
-#define SET_PARAM(type, name)                                               \
-  if (name##_ptr != NULL) {                                                 \
-    uint32_t    value  = *name##_ptr;                                       \
-    BROTLI_BOOL result = BrotliEncoderSetParameter(state_ptr, type, value); \
-                                                                            \
-    if (!result) {                                                          \
-      brs_ext_raise_error("ValidateError", "invalid param value");          \
-    }                                                                       \
-  }
-
 VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
 {
   GET_COMPRESSOR();
-  BRS_EXT_GET_COMPRESSOR_OPTIONS(options);
 
   BrotliEncoderState* state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
@@ -65,39 +54,23 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
 
   compressor_ptr->state_ptr = state_ptr;
 
-  SET_PARAM(BROTLI_PARAM_MODE, mode);
-  SET_PARAM(BROTLI_PARAM_QUALITY, quality);
-  SET_PARAM(BROTLI_PARAM_LGWIN, lgwin);
-  SET_PARAM(BROTLI_PARAM_LGBLOCK, lgblock);
-  SET_PARAM(BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING, disable_literal_context_modeling);
-  SET_PARAM(BROTLI_PARAM_SIZE_HINT, size_hint);
-  SET_PARAM(BROTLI_PARAM_LARGE_WINDOW, large_window);
-  SET_PARAM(BROTLI_PARAM_NPOSTFIX, npostfix);
-  SET_PARAM(BROTLI_PARAM_NDIRECT, ndirect);
+  BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(options, state_ptr);
 
   // -----
 
-  size_t destination_buffer_length;
-  if (buffer_length_ptr == NULL) {
-    destination_buffer_length = DEFAULT_COMPRESSOR_BUFFER_LENGTH;
-  }
-  else {
-    destination_buffer_length = *buffer_length_ptr;
+  if (buffer_length == 0) {
+    buffer_length = DEFAULT_COMPRESSOR_BUFFER_LENGTH;
   }
 
-  if (destination_buffer_length == 0) {
-    brs_ext_raise_error("ValidateError", "invalid buffer length value");
-  }
-
-  uint8_t* destination_buffer = malloc(destination_buffer_length);
-  if (destination_buffer == NULL) {
+  uint8_t* buffer = malloc(buffer_length);
+  if (buffer == NULL) {
     brs_ext_raise_error("AllocateError", "allocate error");
   }
 
-  compressor_ptr->destination_buffer                  = destination_buffer;
-  compressor_ptr->destination_buffer_length           = destination_buffer_length;
-  compressor_ptr->remaining_destination_buffer        = destination_buffer;
-  compressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
+  compressor_ptr->destination_buffer                  = buffer;
+  compressor_ptr->destination_buffer_length           = buffer_length;
+  compressor_ptr->remaining_destination_buffer        = buffer;
+  compressor_ptr->remaining_destination_buffer_length = buffer_length;
 
   return Qnil;
 }

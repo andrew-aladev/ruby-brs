@@ -43,20 +43,9 @@ VALUE brs_ext_allocate_decompressor(VALUE klass)
   brs_ext_decompressor_t* decompressor_ptr; \
   Data_Get_Struct(self, brs_ext_decompressor_t, decompressor_ptr);
 
-#define SET_PARAM(type, name)                                               \
-  if (name##_ptr != NULL) {                                                 \
-    uint32_t    value  = *name##_ptr;                                       \
-    BROTLI_BOOL result = BrotliDecoderSetParameter(state_ptr, type, value); \
-                                                                            \
-    if (!result) {                                                          \
-      brs_ext_raise_error("ValidateError", "invalid param value");          \
-    }                                                                       \
-  }
-
 VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
 {
   GET_DECOMPRESSOR();
-  BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
 
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
@@ -65,32 +54,23 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
 
   decompressor_ptr->state_ptr = state_ptr;
 
-  SET_PARAM(BROTLI_DECODER_PARAM_DISABLE_RING_BUFFER_REALLOCATION, disable_ring_buffer_reallocation);
-  SET_PARAM(BROTLI_DECODER_PARAM_LARGE_WINDOW, large_window);
+  BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(options, state_ptr);
 
   // -----
 
-  size_t destination_buffer_length;
-  if (buffer_length_ptr == NULL) {
-    destination_buffer_length = DEFAULT_DECOMPRESSOR_BUFFER_LENGTH;
-  }
-  else {
-    destination_buffer_length = *buffer_length_ptr;
+  if (buffer_length == 0) {
+    buffer_length = DEFAULT_DECOMPRESSOR_BUFFER_LENGTH;
   }
 
-  if (destination_buffer_length == 0) {
-    brs_ext_raise_error("ValidateError", "invalid buffer length value");
-  }
-
-  uint8_t* destination_buffer = malloc(destination_buffer_length);
-  if (destination_buffer == NULL) {
+  uint8_t* buffer = malloc(buffer_length);
+  if (buffer == NULL) {
     brs_ext_raise_error("AllocateError", "allocate error");
   }
 
-  decompressor_ptr->destination_buffer                  = destination_buffer;
-  decompressor_ptr->destination_buffer_length           = destination_buffer_length;
-  decompressor_ptr->remaining_destination_buffer        = destination_buffer;
-  decompressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
+  decompressor_ptr->destination_buffer                  = buffer;
+  decompressor_ptr->destination_buffer_length           = buffer_length;
+  decompressor_ptr->remaining_destination_buffer        = buffer;
+  decompressor_ptr->remaining_destination_buffer_length = buffer_length;
 
   return Qnil;
 }
