@@ -64,7 +64,7 @@ module BRS
             break
           end
 
-          write_result(&writer)
+          super
 
           nil
         end

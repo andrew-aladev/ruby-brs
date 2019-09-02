@@ -17,6 +17,10 @@ module BRS
 
         # -- write --
 
+        def flush(&writer)
+          write_result(&writer)
+        end
+
         protected def flush_destination_buffer(&writer)
           result_bytesize = write_result(&writer)
           raise NotEnoughDestinationError, "not enough destination" if result_bytesize == 0

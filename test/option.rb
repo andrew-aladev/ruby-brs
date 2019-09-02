@@ -10,13 +10,13 @@ module BRS
     module Option
       INVALID_COMPRESSOR_OPTIONS = [
         Validation::INVALID_HASHES,
-        Validation::INVALID_SYMBOLS.flat_map do |invalid_symbol|
+        (Validation::INVALID_SYMBOLS - [nil]).flat_map do |invalid_symbol|
           [
             { :mode => invalid_symbol },
             { :mode => :invalid_mode }
           ]
         end,
-        Validation::INVALID_NOT_NEGATIVE_INTEGERS.flat_map do |invalid_integer|
+        (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).flat_map do |invalid_integer|
           [
             { :buffer_length => invalid_integer },
             { :quality => invalid_integer },
@@ -25,7 +25,7 @@ module BRS
             { :size_hint => invalid_integer }
           ]
         end,
-        Validation::INVALID_BOOLS.flat_map do |invalid_bool|
+        (Validation::INVALID_BOOLS - [nil]).flat_map do |invalid_bool|
           [
             { :disable_literal_context_modeling => invalid_bool },
             { :large_window => invalid_bool }
@@ -37,10 +37,10 @@ module BRS
 
       INVALID_DECOMPRESSOR_OPTIONS = [
         Validation::INVALID_HASHES,
-        Validation::INVALID_NOT_NEGATIVE_INTEGERS.map do |invalid_integer|
+        (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).map do |invalid_integer|
           { :buffer_length => invalid_integer }
         end,
-        Validation::INVALID_BOOLS.flat_map do |invalid_bool|
+        (Validation::INVALID_BOOLS - [nil]).flat_map do |invalid_bool|
           [
             { :disable_ring_buffer_reallocation => invalid_bool },
             { :large_window => invalid_bool }
