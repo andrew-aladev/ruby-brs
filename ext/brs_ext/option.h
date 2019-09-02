@@ -22,6 +22,8 @@ void brs_ext_set_decompressor_option(BrotliDecoderState *state_ptr, BrotliDecode
 
 unsigned long brs_ext_get_fixnum_option(VALUE options, const char *name);
 
+void brs_ext_option_exports(VALUE root_module);
+
 #define BRS_EXT_GET_FIXNUM_OPTION(type, name) \
   type name = brs_ext_get_fixnum_option(options, #name);
 

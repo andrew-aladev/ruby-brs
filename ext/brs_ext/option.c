@@ -86,3 +86,24 @@ unsigned long brs_ext_get_fixnum_option(VALUE options, const char *name)
 
   return get_option_value(option, BRS_EXT_OPTION_TYPE_FIXNUM);
 }
+
+void brs_ext_option_exports(VALUE root_module)
+{
+  VALUE option = rb_define_module_under(root_module, "Option");
+
+  VALUE modes = rb_ary_new_from_args(
+    3,
+    ID2SYM(rb_intern("text")),
+    ID2SYM(rb_intern("font")),
+    ID2SYM(rb_intern("generic")));
+  rb_define_const(option, "MODES", modes);
+
+  rb_define_const(option, "MIN_QUALITY", INT2FIX(BROTLI_MIN_QUALITY));
+  rb_define_const(option, "MAX_QUALITY", INT2FIX(BROTLI_MAX_QUALITY));
+
+  rb_define_const(option, "MIN_LGWIN", INT2FIX(BROTLI_MIN_WINDOW_BITS));
+  rb_define_const(option, "MAX_LGWIN", INT2FIX(BROTLI_MAX_WINDOW_BITS));
+
+  rb_define_const(option, "MIN_LGBLOCK", INT2FIX(BROTLI_MIN_INPUT_BLOCK_BITS));
+  rb_define_const(option, "MAX_LGBLOCK", INT2FIX(BROTLI_MAX_INPUT_BLOCK_BITS));
+}

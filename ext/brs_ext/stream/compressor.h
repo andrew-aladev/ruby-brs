@@ -26,4 +26,6 @@ VALUE brs_ext_finish_compressor(VALUE self);
 VALUE brs_ext_compressor_read_result(VALUE self);
 VALUE brs_ext_compressor_close(VALUE self);
 
+void brs_ext_compressor_exports(VALUE root_module);
+
 #endif // BRS_EXT_STREAM_COMPRESSOR_H

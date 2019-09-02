@@ -24,4 +24,6 @@ VALUE brs_ext_decompress(VALUE self, VALUE source);
 VALUE brs_ext_decompressor_read_result(VALUE self);
 VALUE brs_ext_decompressor_close(VALUE self);
 
+void brs_ext_decompressor_exports(VALUE root_module);
+
 #endif // BRS_EXT_STREAM_DECOMPRESSOR_H
