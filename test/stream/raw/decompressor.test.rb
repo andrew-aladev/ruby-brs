@@ -16,11 +16,36 @@ module BRS
         class Decompressor < Abstract
           Target = BRS::Stream::Raw::Decompressor
 
+          TEXTS           = Common::TEXTS
+          PORTION_LENGTHS = Common::PORTION_LENGTHS
+
+          DECOMPRESSOR_OPTION_COMBINATIONS = Option::DECOMPRESSOR_OPTION_COMBINATIONS
+
           def test_invalid_initialize
             Option::INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
               assert_raises ValidateError do
                 Target.new invalid_options
               end
+            end
+          end
+
+          def test_invalid_read
+            decompressor = Target.new
+
+            Validation::INVALID_STRINGS.each do |invalid_string|
+              assert_raises ValidateError do
+                decompressor.read invalid_string, &NOOP_PROC
+              end
+            end
+
+            assert_raises ValidateError do
+              decompressor.read ""
+            end
+
+            decompressor.close(&NOOP_PROC)
+
+            assert_raises UsedAfterCloseError do
+              decompressor.read "", &NOOP_PROC
             end
           end
         end
