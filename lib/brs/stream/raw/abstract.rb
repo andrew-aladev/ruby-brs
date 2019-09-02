@@ -36,7 +36,7 @@ module BRS
         end
 
         def close(&writer)
-          flush(&writer)
+          write_result(&writer)
 
           @native_stream.close
           @is_closed = true

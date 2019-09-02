@@ -21,6 +21,10 @@ module BRS
       raise ValidateError, "invalid string" unless value.is_a? ::String
     end
 
+    def self.validate_symbol(value)
+      raise ValidateError, "invalid symbol" unless value.is_a? ::Symbol
+    end
+
     def self.validate_io(value)
       raise ValidateError, "invalid io" unless value.is_a? ::IO
     end

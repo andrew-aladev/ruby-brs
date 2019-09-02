@@ -17,8 +17,8 @@ enum {
 
 typedef uint16_t brs_ext_option_t;
 
-void brs_ext_set_compressor_option(BrotliEncoderState *state_ptr, BrotliEncoderParameter param, brs_ext_option_t type, const char *name);
-void brs_ext_set_decompressor_option(BrotliDecoderState *state_ptr, BrotliDecoderParameter param, brs_ext_option_t type, const char *name);
+void brs_ext_set_compressor_option(BrotliEncoderState *state_ptr, BrotliEncoderParameter param, VALUE options, const char *name, brs_ext_option_t type);
+void brs_ext_set_decompressor_option(BrotliDecoderState *state_ptr, BrotliDecoderParameter param, VALUE options, const char *name, brs_ext_option_t type);
 
 unsigned long brs_ext_get_fixnum_option(VALUE options, const char *name);
 
@@ -26,16 +26,16 @@ unsigned long brs_ext_get_fixnum_option(VALUE options, const char *name);
   type name = brs_ext_get_fixnum_option(options, #name);
 
 #define BRS_EXT_SET_COMPRESSOR_MODE_OPTION(param) \
-  brs_ext_set_compressor_option(state_ptr, param, BRS_EXT_OPTION_TYPE_MODE, "mode");
+  brs_ext_set_compressor_option(state_ptr, param, options, "mode", BRS_EXT_OPTION_TYPE_MODE);
 
 #define BRS_EXT_SET_COMPRESSOR_BOOL_OPTION(param, name) \
-  brs_ext_set_compressor_option(state_ptr, param, BRS_EXT_OPTION_TYPE_BOOL, #name);
+  brs_ext_set_compressor_option(state_ptr, param, options, #name, BRS_EXT_OPTION_TYPE_BOOL);
 
 #define BRS_EXT_SET_COMPRESSOR_FIXNUM_OPTION(param, name) \
-  brs_ext_set_compressor_option(state_ptr, param, BRS_EXT_OPTION_TYPE_FIXNUM, #name);
+  brs_ext_set_compressor_option(state_ptr, param, options, #name, BRS_EXT_OPTION_TYPE_FIXNUM);
 
 #define BRS_EXT_SET_DECOMPRESSOR_BOOL_OPTION(param, name) \
-  brs_ext_set_decompressor_option(state_ptr, param, BRS_EXT_OPTION_TYPE_BOOL, #name);
+  brs_ext_set_decompressor_option(state_ptr, param, options, #name, BRS_EXT_OPTION_TYPE_BOOL);
 
 #define BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(options, state_ptr)                                                         \
   Check_Type(options, T_HASH);                                                                                         \
@@ -47,9 +47,7 @@ unsigned long brs_ext_get_fixnum_option(VALUE options, const char *name);
   BRS_EXT_SET_COMPRESSOR_FIXNUM_OPTION(BROTLI_PARAM_LGBLOCK, lgblock);                                                 \
   BRS_EXT_SET_COMPRESSOR_BOOL_OPTION(BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING, disable_literal_context_modeling); \
   BRS_EXT_SET_COMPRESSOR_FIXNUM_OPTION(BROTLI_PARAM_SIZE_HINT, size_hint);                                             \
-  BRS_EXT_SET_COMPRESSOR_BOOL_OPTION(BROTLI_PARAM_LARGE_WINDOW, large_window);                                         \
-  BRS_EXT_SET_COMPRESSOR_FIXNUM_OPTION(BROTLI_PARAM_NPOSTFIX, npostfix);                                               \
-  BRS_EXT_SET_COMPRESSOR_FIXNUM_OPTION(BROTLI_PARAM_NDIRECT, ndirect);
+  BRS_EXT_SET_COMPRESSOR_BOOL_OPTION(BROTLI_PARAM_LARGE_WINDOW, large_window);
 
 #define BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(options, state_ptr)                                                                 \
   Check_Type(options, T_HASH);                                                                                                   \

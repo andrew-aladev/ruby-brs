@@ -1,6 +1,9 @@
 // Ruby bindings for brotli library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
+#include <brotli/decode.h>
+#include <brotli/encode.h>
+
 #include "ruby.h"
 
 #include "brs_ext/common.h"
@@ -36,4 +39,28 @@ void Init_brs_ext()
   rb_define_method(decompressor, "read", brs_ext_decompress, 1);
   rb_define_method(decompressor, "read_result", brs_ext_decompressor_read_result, 0);
   rb_define_method(decompressor, "close", brs_ext_decompressor_close, 0);
+
+  // -----
+
+  VALUE option = rb_define_module_under(root, "Option");
+
+  rb_define_const(
+    option,
+    "MODES",
+    rb_ary_new_from_args(
+      3,
+      ID2SYM(rb_intern("text")),
+      ID2SYM(rb_intern("font")),
+      ID2SYM(rb_intern("generic"))
+    )
+  );
+
+  rb_define_const(option, "MIN_QUALITY", INT2FIX(BROTLI_MIN_QUALITY));
+  rb_define_const(option, "MAX_QUALITY", INT2FIX(BROTLI_MAX_QUALITY));
+
+  rb_define_const(option, "MIN_LGWIN", INT2FIX(BROTLI_MIN_WINDOW_BITS));
+  rb_define_const(option, "MAX_LGWIN", INT2FIX(BROTLI_MAX_WINDOW_BITS));
+
+  rb_define_const(option, "MIN_LGBLOCK", INT2FIX(BROTLI_MIN_INPUT_BLOCK_BITS));
+  rb_define_const(option, "MAX_LGBLOCK", INT2FIX(BROTLI_MAX_INPUT_BLOCK_BITS));
 }

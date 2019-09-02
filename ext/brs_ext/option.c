@@ -14,86 +14,75 @@ static inline VALUE get_option(VALUE options, const char *name)
   return rb_funcall(options, rb_intern("[]"), 1, ID2SYM(rb_intern(name)));
 }
 
-// uint32_t *brs_ext_get_mode_option_ptr(VALUE options)
-// {
-//   VALUE     value      = get_option(options, "mode");
-//   uint32_t *option_ptr = NULL;
-//
-//   if (value != Qnil) {
-//     Check_Type(value, T_SYMBOL);
-//
-//     ID id = SYM2ID(value);
-//     if (id == rb_intern("text")) {
-//       *option_ptr = BROTLI_MODE_TEXT;
-//     }
-//     else if (id == rb_intern("font")) {
-//       *option_ptr = BROTLI_MODE_FONT;
-//     }
-//     else if (id == rb_intern("generic")) {
-//       *option_ptr = BROTLI_MODE_GENERIC;
-//     }
-//     else {
-//       brs_ext_raise_error("ValidateError", "invalid mode value");
-//     }
-//   }
-//
-//   return option_ptr;
-// }
-
-// uint32_t *brs_ext_get_bool_option_ptr(VALUE options, const char *name)
-// {
-//   VALUE     value      = get_option(options, name);
-//   uint32_t *option_ptr = NULL;
-//
-//   if (value != Qnil) {
-//     int type = TYPE(value);
-//     if (type != T_TRUE && type != T_FALSE) {
-//       brs_ext_raise_error("ValidateError", "invalid bool value");
-//     }
-//
-//     *option_ptr = type == T_TRUE ? 1 : 0;
-//   }
-//
-//   return option_ptr;
-// }
-
-// uint32_t *brs_ext_get_fixnum_option_ptr(VALUE options, const char *name)
-// {
-//   VALUE     value      = get_option(options, name);
-//   uint32_t *option_ptr = NULL;
-//
-//   if (value != Qnil) {
-//     Check_Type(value, T_FIXNUM);
-//
-//     *option_ptr = rb_num2uint(value);
-//   }
-//
-//   return option_ptr;
-// }
-
-void brs_ext_set_compressor_option(BrotliEncoderState *state_ptr, BrotliEncoderParameter param, brs_ext_option_t type, const char *name)
+static inline unsigned long get_option_value(VALUE option, brs_ext_option_t type)
 {
-  // BROTLI_BOOL result = BrotliEncoderSetParameter(state_ptr, param_name, *option_ptr);
-  //
-  // if (!result) {
-  //   brs_ext_raise_error("ValidateError", "invalid param value");
-  // }
+  if (type == BRS_EXT_OPTION_TYPE_MODE) {
+    Check_Type(option, T_SYMBOL);
+
+    ID id = SYM2ID(option);
+    if (id == rb_intern("text")) {
+      return BROTLI_MODE_TEXT;
+    }
+    else if (id == rb_intern("font")) {
+      return BROTLI_MODE_FONT;
+    }
+    else if (id == rb_intern("generic")) {
+      return BROTLI_MODE_GENERIC;
+    }
+    else {
+      brs_ext_raise_error("ValidateError", "invalid mode option");
+    }
+  }
+
+  if (type == BRS_EXT_OPTION_TYPE_BOOL) {
+    int type = TYPE(option);
+    if (type != T_TRUE && type != T_FALSE) {
+      brs_ext_raise_error("ValidateError", "invalid bool option");
+    }
+
+    return type == T_TRUE ? 1 : 0;
+  }
+
+  if (type == BRS_EXT_OPTION_TYPE_FIXNUM) {
+    Check_Type(option, T_FIXNUM);
+
+    return rb_num2uint(option);
+  }
+
+  brs_ext_raise_error("ValidateError", "invalid option type");
 }
 
-void brs_ext_set_decompressor_option(BrotliDecoderState *state_ptr, BrotliDecoderParameter param, brs_ext_option_t type, const char *name)
+void brs_ext_set_compressor_option(BrotliEncoderState *state_ptr, BrotliEncoderParameter param, VALUE options, const char *name, brs_ext_option_t type)
 {
-  // BROTLI_BOOL result = BrotliDecoderSetParameter(state_ptr, param_name, *option_ptr);
-  //
-  // if (!result) {
-  //   brs_ext_raise_error("ValidateError", "invalid param value");
-  // }
+  VALUE option = get_option(options, name);
+
+  if (option != Qnil) {
+    uint32_t value = get_option_value(option, type);
+
+    BROTLI_BOOL result = BrotliEncoderSetParameter(state_ptr, param, value);
+    if (!result) {
+      brs_ext_raise_error("ValidateError", "invalid param value");
+    }
+  }
+}
+
+void brs_ext_set_decompressor_option(BrotliDecoderState *state_ptr, BrotliDecoderParameter param, VALUE options, const char *name, brs_ext_option_t type)
+{
+  VALUE option = get_option(options, name);
+
+  if (option != Qnil) {
+    uint32_t value = get_option_value(option, type);
+
+    BROTLI_BOOL result = BrotliDecoderSetParameter(state_ptr, param, value);
+    if (!result) {
+      brs_ext_raise_error("ValidateError", "invalid param value");
+    }
+  }
 }
 
 unsigned long brs_ext_get_fixnum_option(VALUE options, const char *name)
 {
-  VALUE value = get_option(options, name);
+  VALUE option = get_option(options, name);
 
-  Check_Type(value, T_FIXNUM);
-
-  return rb_num2uint(value);
+  return get_option_value(option, BRS_EXT_OPTION_TYPE_FIXNUM);
 }
