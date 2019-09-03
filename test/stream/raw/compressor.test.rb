@@ -53,14 +53,14 @@ module BRS
             TEXTS.each do |text|
               PORTION_LENGTHS.each do |portion_length|
                 COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+                  compressed_buffer = ::StringIO.new
+                  compressed_buffer.set_encoding ::Encoding::BINARY
+
+                  writer = proc { |portion| compressed_buffer << portion }
+
                   compressor = Target.new compressor_options
 
                   begin
-                    compressed_buffer = ::StringIO.new
-                    compressed_buffer.set_encoding ::Encoding::BINARY
-
-                    writer = proc { |portion| compressed_buffer << portion }
-
                     source      = "".b
                     text_offset = 0
                     index       = 0
