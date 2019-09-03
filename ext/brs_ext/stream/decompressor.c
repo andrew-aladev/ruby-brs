@@ -5,6 +5,7 @@
 
 #include "ruby.h"
 
+#include "brs_ext/buffer.h"
 #include "brs_ext/error.h"
 #include "brs_ext/option.h"
 #include "brs_ext/stream/decompressor.h"
@@ -52,21 +53,15 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
     brs_ext_raise_error("AllocateError", "allocate error");
   }
 
-  decompressor_ptr->state_ptr = state_ptr;
+  BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(state_ptr, options);
 
-  BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(options, state_ptr);
-
-  // -----
-
-  if (buffer_length == 0) {
-    buffer_length = DEFAULT_DECOMPRESSOR_BUFFER_LENGTH;
-  }
-
-  uint8_t* buffer = malloc(buffer_length);
+  uint8_t* buffer = brs_ext_allocate_decompressor_buffer(&buffer_length);
   if (buffer == NULL) {
+    BrotliDecoderDestroyInstance(state_ptr);
     brs_ext_raise_error("AllocateError", "allocate error");
   }
 
+  decompressor_ptr->state_ptr                           = state_ptr;
   decompressor_ptr->destination_buffer                  = buffer;
   decompressor_ptr->destination_buffer_length           = buffer_length;
   decompressor_ptr->remaining_destination_buffer        = buffer;

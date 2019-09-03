@@ -5,6 +5,7 @@
 
 #include "ruby.h"
 
+#include "brs_ext/buffer.h"
 #include "brs_ext/error.h"
 #include "brs_ext/option.h"
 #include "brs_ext/stream/compressor.h"
@@ -52,21 +53,15 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
     brs_ext_raise_error("AllocateError", "allocate error");
   }
 
-  compressor_ptr->state_ptr = state_ptr;
+  BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(state_ptr, options);
 
-  BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(options, state_ptr);
-
-  // -----
-
-  if (buffer_length == 0) {
-    buffer_length = DEFAULT_COMPRESSOR_BUFFER_LENGTH;
-  }
-
-  uint8_t* buffer = malloc(buffer_length);
+  uint8_t* buffer = brs_ext_allocate_compressor_buffer(&buffer_length);
   if (buffer == NULL) {
+    BrotliEncoderDestroyInstance(state_ptr);
     brs_ext_raise_error("AllocateError", "allocate error");
   }
 
+  compressor_ptr->state_ptr                           = state_ptr;
   compressor_ptr->destination_buffer                  = buffer;
   compressor_ptr->destination_buffer_length           = buffer_length;
   compressor_ptr->remaining_destination_buffer        = buffer;
@@ -92,11 +87,13 @@ VALUE brs_ext_compress(VALUE self, VALUE source)
   DO_NOT_USE_AFTER_CLOSE();
   GET_SOURCE_STRING();
 
+  BrotliEncoderState* state_ptr = compressor_ptr->state_ptr;
+
   const uint8_t* remaining_source_data   = (const uint8_t*)source_data;
   size_t         remaining_source_length = source_length;
 
   BROTLI_BOOL result = BrotliEncoderCompressStream(
-    compressor_ptr->state_ptr,
+    state_ptr,
     BROTLI_OPERATION_PROCESS,
     &remaining_source_length,
     &remaining_source_data,
@@ -109,7 +106,7 @@ VALUE brs_ext_compress(VALUE self, VALUE source)
   }
 
   VALUE bytes_written          = INT2NUM(source_length - remaining_source_length);
-  VALUE needs_more_destination = BrotliEncoderHasMoreOutput(compressor_ptr->state_ptr) ? Qtrue : Qfalse;
+  VALUE needs_more_destination = BrotliEncoderHasMoreOutput(state_ptr) ? Qtrue : Qfalse;
 
   return rb_ary_new_from_args(2, bytes_written, needs_more_destination);
 }
@@ -119,11 +116,13 @@ VALUE brs_ext_flush_compressor(VALUE self)
   GET_COMPRESSOR();
   DO_NOT_USE_AFTER_CLOSE();
 
+  BrotliEncoderState* state_ptr = compressor_ptr->state_ptr;
+
   const uint8_t* remaining_source_data   = NULL;
   size_t         remaining_source_length = 0;
 
   BROTLI_BOOL result = BrotliEncoderCompressStream(
-    compressor_ptr->state_ptr,
+    state_ptr,
     BROTLI_OPERATION_FLUSH,
     &remaining_source_length,
     &remaining_source_data,
@@ -135,7 +134,7 @@ VALUE brs_ext_flush_compressor(VALUE self)
     brs_ext_raise_error("UnexpectedError", "unexpected error");
   }
 
-  return BrotliEncoderHasMoreOutput(compressor_ptr->state_ptr) ? Qtrue : Qfalse;
+  return BrotliEncoderHasMoreOutput(state_ptr) ? Qtrue : Qfalse;
 }
 
 VALUE brs_ext_finish_compressor(VALUE self)
@@ -143,11 +142,13 @@ VALUE brs_ext_finish_compressor(VALUE self)
   GET_COMPRESSOR();
   DO_NOT_USE_AFTER_CLOSE();
 
+  BrotliEncoderState* state_ptr = compressor_ptr->state_ptr;
+
   const uint8_t* remaining_source_data   = NULL;
   size_t         remaining_source_length = 0;
 
   BROTLI_BOOL result = BrotliEncoderCompressStream(
-    compressor_ptr->state_ptr,
+    state_ptr,
     BROTLI_OPERATION_FINISH,
     &remaining_source_length,
     &remaining_source_data,
@@ -159,7 +160,7 @@ VALUE brs_ext_finish_compressor(VALUE self)
     brs_ext_raise_error("UnexpectedError", "unexpected error");
   }
 
-  return BrotliEncoderHasMoreOutput(compressor_ptr->state_ptr) ? Qtrue : Qfalse;
+  return (BrotliEncoderHasMoreOutput(state_ptr) || !BrotliEncoderIsFinished(state_ptr)) ? Qtrue : Qfalse;
 }
 
 VALUE brs_ext_compressor_read_result(VALUE self)

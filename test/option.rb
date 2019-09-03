@@ -67,18 +67,21 @@ module BRS
       .freeze
 
       QUALITIES = [
+        nil,
         BRS::Option::MIN_QUALITY,
         BRS::Option::MAX_QUALITY
       ]
       .freeze
 
       LGWINS = [
+        nil,
         BRS::Option::MIN_LGWIN,
         BRS::Option::MAX_LGWIN
       ]
       .freeze
 
       LGBLOCKS = [
+        nil,
         BRS::Option::MIN_LGBLOCK,
         BRS::Option::MAX_LGBLOCK
       ]

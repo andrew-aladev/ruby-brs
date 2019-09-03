@@ -8,8 +8,6 @@
 
 #include "ruby.h"
 
-#define DEFAULT_COMPRESSOR_BUFFER_LENGTH (1 << 15) // 32 KB
-
 typedef struct {
   BrotliEncoderState* state_ptr;
   uint8_t*            destination_buffer;

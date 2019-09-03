@@ -8,8 +8,6 @@
 
 #include "ruby.h"
 
-#define DEFAULT_DECOMPRESSOR_BUFFER_LENGTH (1 << 16) // 64 KB
-
 typedef struct {
   BrotliDecoderState* state_ptr;
   uint8_t*            destination_buffer;

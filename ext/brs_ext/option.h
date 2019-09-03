@@ -39,7 +39,7 @@ void brs_ext_option_exports(VALUE root_module);
 #define BRS_EXT_SET_DECOMPRESSOR_BOOL_OPTION(param, name) \
   brs_ext_set_decompressor_option(state_ptr, param, options, #name, BRS_EXT_OPTION_TYPE_BOOL);
 
-#define BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(options, state_ptr)                                                         \
+#define BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(state_ptr, options)                                                         \
   Check_Type(options, T_HASH);                                                                                         \
                                                                                                                        \
   BRS_EXT_GET_FIXNUM_OPTION(size_t, buffer_length);                                                                    \
@@ -51,7 +51,7 @@ void brs_ext_option_exports(VALUE root_module);
   BRS_EXT_SET_COMPRESSOR_FIXNUM_OPTION(BROTLI_PARAM_SIZE_HINT, size_hint);                                             \
   BRS_EXT_SET_COMPRESSOR_BOOL_OPTION(BROTLI_PARAM_LARGE_WINDOW, large_window);
 
-#define BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(options, state_ptr)                                                                 \
+#define BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(state_ptr, options)                                                                 \
   Check_Type(options, T_HASH);                                                                                                   \
                                                                                                                                  \
   BRS_EXT_GET_FIXNUM_OPTION(size_t, buffer_length);                                                                              \
