@@ -45,7 +45,6 @@ dir_config extension_name
 sources = %w[
   stream/compressor
   stream/decompressor
-  buffer
   error
   main
   option

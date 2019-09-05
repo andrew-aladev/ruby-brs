@@ -2,6 +2,7 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 require "brs/stream/raw/compressor"
+require "brs/string"
 
 require_relative "abstract"
 require_relative "../../common"
@@ -15,11 +16,10 @@ module BRS
       module Raw
         class Compressor < Abstract
           Target = BRS::Stream::Raw::Compressor
+          String = BRS::String
 
           TEXTS           = Common::TEXTS
           PORTION_LENGTHS = Common::PORTION_LENGTHS
-
-          COMPRESSOR_OPTION_COMBINATIONS = Option::COMPRESSOR_OPTION_COMBINATIONS
 
           def test_invalid_initialize
             Option::INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
@@ -52,7 +52,7 @@ module BRS
           def test_texts
             TEXTS.each do |text|
               PORTION_LENGTHS.each do |portion_length|
-                COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+                Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                   compressed_buffer = ::StringIO.new
                   compressed_buffer.set_encoding ::Encoding::BINARY
 
@@ -87,10 +87,12 @@ module BRS
 
                   compressed_text = compressed_buffer.string
 
-                  # decompressed_text = String.decompress compressed_text, decompressor_options
-                  # decompressed_text.force_encoding text.encoding
-                  #
-                  # assert_equal text, decompressed_text
+                  Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                    decompressed_text = String.decompress compressed_text, decompressor_options
+                    decompressed_text.force_encoding text.encoding
+
+                    assert_equal text, decompressed_text
+                  end
                 end
               end
             end

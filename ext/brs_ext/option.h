@@ -6,6 +6,7 @@
 
 #include <brotli/decode.h>
 #include <brotli/encode.h>
+#include <stdbool.h>
 
 #include "ruby.h"
 
@@ -20,21 +21,24 @@ typedef uint16_t brs_ext_option_t;
 void brs_ext_set_compressor_option(BrotliEncoderState *state_ptr, BrotliEncoderParameter param, VALUE options, const char *name, brs_ext_option_t type);
 void brs_ext_set_decompressor_option(BrotliDecoderState *state_ptr, BrotliDecoderParameter param, VALUE options, const char *name, brs_ext_option_t type);
 
-unsigned long brs_ext_get_fixnum_option(VALUE options, const char *name);
+size_t brs_ext_get_buffer_length(VALUE options, bool is_compressor);
 
 void brs_ext_option_exports(VALUE root_module);
 
-#define BRS_EXT_GET_FIXNUM_OPTION(type, name) \
-  type name = brs_ext_get_fixnum_option(options, #name);
+#define BRS_EXT_GET_COMPRESSOR_BUFFER_LENGTH() \
+  size_t buffer_length = brs_ext_get_buffer_length(options, true);
+
+#define BRS_EXT_GET_DECOMPRESSOR_BUFFER_LENGTH() \
+  size_t buffer_length = brs_ext_get_buffer_length(options, false);
 
 #define BRS_EXT_SET_COMPRESSOR_MODE_OPTION(param) \
   brs_ext_set_compressor_option(state_ptr, param, options, "mode", BRS_EXT_OPTION_TYPE_MODE);
 
-#define BRS_EXT_SET_COMPRESSOR_BOOL_OPTION(param, name) \
-  brs_ext_set_compressor_option(state_ptr, param, options, #name, BRS_EXT_OPTION_TYPE_BOOL);
-
 #define BRS_EXT_SET_COMPRESSOR_FIXNUM_OPTION(param, name) \
   brs_ext_set_compressor_option(state_ptr, param, options, #name, BRS_EXT_OPTION_TYPE_FIXNUM);
+
+#define BRS_EXT_SET_COMPRESSOR_BOOL_OPTION(param, name) \
+  brs_ext_set_compressor_option(state_ptr, param, options, #name, BRS_EXT_OPTION_TYPE_BOOL);
 
 #define BRS_EXT_SET_DECOMPRESSOR_BOOL_OPTION(param, name) \
   brs_ext_set_decompressor_option(state_ptr, param, options, #name, BRS_EXT_OPTION_TYPE_BOOL);
@@ -42,7 +46,7 @@ void brs_ext_option_exports(VALUE root_module);
 #define BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(state_ptr, options)                                                         \
   Check_Type(options, T_HASH);                                                                                         \
                                                                                                                        \
-  BRS_EXT_GET_FIXNUM_OPTION(size_t, buffer_length);                                                                    \
+  BRS_EXT_GET_COMPRESSOR_BUFFER_LENGTH();                                                                              \
   BRS_EXT_SET_COMPRESSOR_MODE_OPTION(BROTLI_PARAM_MODE);                                                               \
   BRS_EXT_SET_COMPRESSOR_FIXNUM_OPTION(BROTLI_PARAM_QUALITY, quality);                                                 \
   BRS_EXT_SET_COMPRESSOR_FIXNUM_OPTION(BROTLI_PARAM_LGWIN, lgwin);                                                     \
@@ -54,7 +58,7 @@ void brs_ext_option_exports(VALUE root_module);
 #define BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(state_ptr, options)                                                                 \
   Check_Type(options, T_HASH);                                                                                                   \
                                                                                                                                  \
-  BRS_EXT_GET_FIXNUM_OPTION(size_t, buffer_length);                                                                              \
+  BRS_EXT_GET_DECOMPRESSOR_BUFFER_LENGTH();                                                                                      \
   BRS_EXT_SET_DECOMPRESSOR_BOOL_OPTION(BROTLI_DECODER_PARAM_DISABLE_RING_BUFFER_REALLOCATION, disable_ring_buffer_reallocation); \
   BRS_EXT_SET_DECOMPRESSOR_BOOL_OPTION(BROTLI_DECODER_PARAM_LARGE_WINDOW, large_window);
 

@@ -5,7 +5,6 @@
 
 #include "ruby.h"
 
-#include "brs_ext/buffer.h"
 #include "brs_ext/error.h"
 #include "brs_ext/option.h"
 #include "brs_ext/stream/compressor.h"
@@ -55,7 +54,7 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
 
   BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(state_ptr, options);
 
-  uint8_t* buffer = brs_ext_allocate_compressor_buffer(&buffer_length);
+  uint8_t* buffer = malloc(buffer_length);
   if (buffer == NULL) {
     BrotliEncoderDestroyInstance(state_ptr);
     brs_ext_raise_error("AllocateError", "allocate error");

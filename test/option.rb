@@ -140,8 +140,16 @@ module BRS
         end
       end
 
-      DECOMPRESSOR_OPTION_COMBINATIONS = get_option_combinations(DECOMPRESSOR_OPTION_DATA).freeze
       COMPRESSOR_OPTION_COMBINATIONS   = get_option_combinations(COMPRESSOR_OPTION_DATA).freeze
+      DECOMPRESSOR_OPTION_COMBINATIONS = get_option_combinations(DECOMPRESSOR_OPTION_DATA).freeze
+
+      def self.get_compatible_decompressor_options(compressor_options, &_block)
+        DECOMPRESSOR_OPTION_COMBINATIONS.each do |decompressor_options|
+          yield decompressor_options if
+            compressor_options[:buffer_length] == decompressor_options[:buffer_length] &&
+            compressor_options[:large_window]  == decompressor_options[:large_window]
+        end
+      end
     end
   end
 end

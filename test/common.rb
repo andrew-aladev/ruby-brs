@@ -45,7 +45,7 @@ module BRS
 
       TEXTS = generate_texts(
         "",
-        ::SecureRandom.random_bytes(1 << 10) # 1 KB
+        ::SecureRandom.random_bytes(1 << 9) # 512 B
       )
       .freeze
 

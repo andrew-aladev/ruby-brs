@@ -9,6 +9,9 @@
 #include "brs_ext/error.h"
 #include "brs_ext/option.h"
 
+#define DEFAULT_COMPRESSOR_BUFFER_LENGTH (1 << 16)   // 32 KB
+#define DEFAULT_DECOMPRESSOR_BUFFER_LENGTH (1 << 16) // 64 KB
+
 static inline VALUE get_option(VALUE options, const char *name)
 {
   return rb_funcall(options, rb_intern("[]"), 1, ID2SYM(rb_intern(name)));
@@ -80,11 +83,16 @@ void brs_ext_set_decompressor_option(BrotliDecoderState *state_ptr, BrotliDecode
   }
 }
 
-unsigned long brs_ext_get_fixnum_option(VALUE options, const char *name)
+size_t brs_ext_get_buffer_length(VALUE options, bool is_compressor)
 {
-  VALUE option = get_option(options, name);
+  VALUE option = get_option(options, "buffer_length");
 
-  return get_option_value(option, BRS_EXT_OPTION_TYPE_FIXNUM);
+  size_t buffer_length = get_option_value(option, BRS_EXT_OPTION_TYPE_FIXNUM);
+  if (buffer_length == 0) {
+    buffer_length = is_compressor ? DEFAULT_COMPRESSOR_BUFFER_LENGTH : DEFAULT_DECOMPRESSOR_BUFFER_LENGTH;
+  }
+
+  return buffer_length;
 }
 
 void brs_ext_option_exports(VALUE root_module)
