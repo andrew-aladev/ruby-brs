@@ -11,13 +11,13 @@
 #include "brs_ext/option.h"
 #include "brs_ext/string.h"
 
-#define GET_SOURCE_DATA(source)                                       \
-  Check_Type(source, T_STRING);                                       \
-                                                                      \
-  const uint8_t* source_data   = (const uint8_t*)RSTRING_PTR(source); \
-  size_t         source_length = RSTRING_LEN(source);
+#define GET_SOURCE_DATA(source_value)                                       \
+  Check_Type(source_value, T_STRING);                                       \
+                                                                            \
+  const uint8_t* source        = (const uint8_t*)RSTRING_PTR(source_value); \
+  size_t         source_length = RSTRING_LEN(source_value);
 
-VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE options)
+VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VALUE options)
 {
   BrotliEncoderState* state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
@@ -25,27 +25,27 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE op
   }
 
   BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(state_ptr, options);
-  GET_SOURCE_DATA(source);
+  GET_SOURCE_DATA(source_value);
 
-  VALUE  destination                         = rb_str_new(NULL, buffer_length);
+  VALUE  destination_value                   = rb_str_new(NULL, buffer_length);
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = buffer_length;
 
   while (true) {
-    uint8_t* destination_data                         = (uint8_t*)RSTRING_PTR(destination) + destination_length;
+    uint8_t* destination                              = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
     size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
     BROTLI_BOOL result = BrotliEncoderCompressStream(
       state_ptr,
       BROTLI_OPERATION_FINISH,
       &source_length,
-      &source_data,
+      &source,
       &remaining_destination_buffer_length,
-      &destination_data,
+      &destination,
       NULL);
 
     if (!result) {
-      rb_str_free(destination);
+      rb_str_free(destination_value);
       BrotliEncoderDestroyInstance(state_ptr);
       brs_ext_raise_error("UnexpectedError", "unexpected error");
     }
@@ -53,7 +53,7 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE op
     destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
 
     if (BrotliEncoderHasMoreOutput(state_ptr) || !BrotliEncoderIsFinished(state_ptr)) {
-      destination                         = rb_str_resize(destination, destination_length + buffer_length);
+      destination_value                   = rb_str_resize(destination_value, destination_length + buffer_length);
       remaining_destination_buffer_length = buffer_length;
     }
     else {
@@ -63,10 +63,10 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE op
 
   BrotliEncoderDestroyInstance(state_ptr);
 
-  return rb_str_resize(destination, destination_length);
+  return rb_str_resize(destination_value, destination_length);
 }
 
-VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE options)
+VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VALUE options)
 {
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
@@ -74,28 +74,28 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE 
   }
 
   BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(state_ptr, options);
-  GET_SOURCE_DATA(source);
+  GET_SOURCE_DATA(source_value);
 
-  VALUE  destination                         = rb_str_new(NULL, buffer_length);
+  VALUE  destination_value                   = rb_str_new(NULL, buffer_length);
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = buffer_length;
 
   while (true) {
-    uint8_t* destination_data                         = (uint8_t*)RSTRING_PTR(destination) + destination_length;
+    uint8_t* destination                              = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
     size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
     BrotliDecoderResult result = BrotliDecoderDecompressStream(
       state_ptr,
       &source_length,
-      &source_data,
+      &source,
       &remaining_destination_buffer_length,
-      &destination_data,
+      &destination,
       NULL);
 
     if (result != BROTLI_DECODER_RESULT_SUCCESS &&
         result != BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT &&
         result != BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
-      rb_str_free(destination);
+      rb_str_free(destination_value);
       BrotliDecoderDestroyInstance(state_ptr);
       brs_ext_raise_error("UnexpectedError", "unexpected error");
     }
@@ -103,7 +103,7 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE 
     destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
 
     if (result == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
-      destination                         = rb_str_resize(destination, destination_length + buffer_length);
+      destination_value                   = rb_str_resize(destination_value, destination_length + buffer_length);
       remaining_destination_buffer_length = buffer_length;
     }
     else {
@@ -113,7 +113,7 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE 
 
   BrotliDecoderDestroyInstance(state_ptr);
 
-  return rb_str_resize(destination, destination_length);
+  return rb_str_resize(destination_value, destination_length);
 }
 
 void brs_ext_string_exports(VALUE root_module)

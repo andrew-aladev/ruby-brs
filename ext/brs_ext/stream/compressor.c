@@ -39,13 +39,13 @@ VALUE brs_ext_allocate_compressor(VALUE klass)
   return self;
 }
 
-#define GET_COMPRESSOR()                \
+#define GET_COMPRESSOR(self)            \
   brs_ext_compressor_t* compressor_ptr; \
   Data_Get_Struct(self, brs_ext_compressor_t, compressor_ptr);
 
 VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
 {
-  GET_COMPRESSOR();
+  GET_COMPRESSOR(self);
 
   BrotliEncoderState* state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
@@ -69,33 +69,32 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
   return Qnil;
 }
 
-#define DO_NOT_USE_AFTER_CLOSE()                                                         \
+#define DO_NOT_USE_AFTER_CLOSE(compressor_ptr)                                           \
   if (compressor_ptr->state_ptr == NULL || compressor_ptr->destination_buffer == NULL) { \
     brs_ext_raise_error("UsedAfterCloseError", "compressor used after closed");          \
   }
 
-#define GET_SOURCE_STRING()                        \
-  Check_Type(source, T_STRING);                    \
-                                                   \
-  const char* source_data   = RSTRING_PTR(source); \
-  size_t      source_length = RSTRING_LEN(source);
+#define GET_SOURCE_DATA(source_value)                                 \
+  Check_Type(source_value, T_STRING);                                 \
+                                                                      \
+  const char*    source                  = RSTRING_PTR(source_value); \
+  size_t         source_length           = RSTRING_LEN(source_value); \
+  const uint8_t* remaining_source        = (const uint8_t*)source;    \
+  size_t         remaining_source_length = source_length;
 
-VALUE brs_ext_compress(VALUE self, VALUE source)
+VALUE brs_ext_compress(VALUE self, VALUE source_value)
 {
-  GET_COMPRESSOR();
-  DO_NOT_USE_AFTER_CLOSE();
-  GET_SOURCE_STRING();
+  GET_COMPRESSOR(self);
+  DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
+  GET_SOURCE_DATA(source_value);
 
   BrotliEncoderState* state_ptr = compressor_ptr->state_ptr;
-
-  const uint8_t* remaining_source_data   = (const uint8_t*)source_data;
-  size_t         remaining_source_length = source_length;
 
   BROTLI_BOOL result = BrotliEncoderCompressStream(
     state_ptr,
     BROTLI_OPERATION_PROCESS,
     &remaining_source_length,
-    &remaining_source_data,
+    &remaining_source,
     &compressor_ptr->remaining_destination_buffer_length,
     &compressor_ptr->remaining_destination_buffer,
     NULL);
@@ -112,19 +111,19 @@ VALUE brs_ext_compress(VALUE self, VALUE source)
 
 VALUE brs_ext_flush_compressor(VALUE self)
 {
-  GET_COMPRESSOR();
-  DO_NOT_USE_AFTER_CLOSE();
+  GET_COMPRESSOR(self);
+  DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
   BrotliEncoderState* state_ptr = compressor_ptr->state_ptr;
 
-  const uint8_t* remaining_source_data   = NULL;
+  const uint8_t* remaining_source        = NULL;
   size_t         remaining_source_length = 0;
 
   BROTLI_BOOL result = BrotliEncoderCompressStream(
     state_ptr,
     BROTLI_OPERATION_FLUSH,
     &remaining_source_length,
-    &remaining_source_data,
+    &remaining_source,
     &compressor_ptr->remaining_destination_buffer_length,
     &compressor_ptr->remaining_destination_buffer,
     NULL);
@@ -138,19 +137,19 @@ VALUE brs_ext_flush_compressor(VALUE self)
 
 VALUE brs_ext_finish_compressor(VALUE self)
 {
-  GET_COMPRESSOR();
-  DO_NOT_USE_AFTER_CLOSE();
+  GET_COMPRESSOR(self);
+  DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
   BrotliEncoderState* state_ptr = compressor_ptr->state_ptr;
 
-  const uint8_t* remaining_source_data   = NULL;
+  const uint8_t* remaining_source        = NULL;
   size_t         remaining_source_length = 0;
 
   BROTLI_BOOL result = BrotliEncoderCompressStream(
     state_ptr,
     BROTLI_OPERATION_FINISH,
     &remaining_source_length,
-    &remaining_source_data,
+    &remaining_source,
     &compressor_ptr->remaining_destination_buffer_length,
     &compressor_ptr->remaining_destination_buffer,
     NULL);
@@ -164,28 +163,28 @@ VALUE brs_ext_finish_compressor(VALUE self)
 
 VALUE brs_ext_compressor_read_result(VALUE self)
 {
-  GET_COMPRESSOR();
-  DO_NOT_USE_AFTER_CLOSE();
+  GET_COMPRESSOR(self);
+  DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
   uint8_t* destination_buffer                  = compressor_ptr->destination_buffer;
   size_t   destination_buffer_length           = compressor_ptr->destination_buffer_length;
   size_t   remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
 
-  const char* result_data   = (const char*)destination_buffer;
+  const char* result        = (const char*)destination_buffer;
   size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
 
-  VALUE result = rb_str_new(result_data, result_length);
+  VALUE result_value = rb_str_new(result, result_length);
 
   compressor_ptr->remaining_destination_buffer        = destination_buffer;
   compressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
 
-  return result;
+  return result_value;
 }
 
 VALUE brs_ext_compressor_close(VALUE self)
 {
-  GET_COMPRESSOR();
-  DO_NOT_USE_AFTER_CLOSE();
+  GET_COMPRESSOR(self);
+  DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
   BrotliEncoderState* state_ptr = compressor_ptr->state_ptr;
   if (state_ptr != NULL) {

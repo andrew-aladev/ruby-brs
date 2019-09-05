@@ -39,13 +39,13 @@ VALUE brs_ext_allocate_decompressor(VALUE klass)
   return self;
 }
 
-#define GET_DECOMPRESSOR()                  \
+#define GET_DECOMPRESSOR(self)              \
   brs_ext_decompressor_t* decompressor_ptr; \
   Data_Get_Struct(self, brs_ext_decompressor_t, decompressor_ptr);
 
 VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
 {
-  GET_DECOMPRESSOR();
+  GET_DECOMPRESSOR(self);
 
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
@@ -69,30 +69,29 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
   return Qnil;
 }
 
-#define DO_NOT_USE_AFTER_CLOSE()                                                             \
+#define DO_NOT_USE_AFTER_CLOSE(decompressor_ptr)                                             \
   if (decompressor_ptr->state_ptr == NULL || decompressor_ptr->destination_buffer == NULL) { \
     brs_ext_raise_error("UsedAfterCloseError", "decompressor used after closed");            \
   }
 
-#define GET_SOURCE_STRING()                        \
-  Check_Type(source, T_STRING);                    \
-                                                   \
-  const char* source_data   = RSTRING_PTR(source); \
-  size_t      source_length = RSTRING_LEN(source);
-
-VALUE brs_ext_decompress(VALUE self, VALUE source)
-{
-  GET_DECOMPRESSOR();
-  DO_NOT_USE_AFTER_CLOSE();
-  GET_SOURCE_STRING();
-
-  const uint8_t* remaining_source_data   = (const uint8_t*)source_data;
+#define GET_SOURCE_DATA(source_value)                                 \
+  Check_Type(source_value, T_STRING);                                 \
+                                                                      \
+  const char*    source                  = RSTRING_PTR(source_value); \
+  size_t         source_length           = RSTRING_LEN(source_value); \
+  const uint8_t* remaining_source        = (const uint8_t*)source;    \
   size_t         remaining_source_length = source_length;
+
+VALUE brs_ext_decompress(VALUE self, VALUE source_value)
+{
+  GET_DECOMPRESSOR(self);
+  DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
+  GET_SOURCE_DATA(source_value);
 
   BrotliDecoderResult result = BrotliDecoderDecompressStream(
     decompressor_ptr->state_ptr,
     &remaining_source_length,
-    &remaining_source_data,
+    &remaining_source,
     &decompressor_ptr->remaining_destination_buffer_length,
     &decompressor_ptr->remaining_destination_buffer,
     NULL);
@@ -115,28 +114,28 @@ VALUE brs_ext_decompress(VALUE self, VALUE source)
 
 VALUE brs_ext_decompressor_read_result(VALUE self)
 {
-  GET_DECOMPRESSOR();
-  DO_NOT_USE_AFTER_CLOSE();
+  GET_DECOMPRESSOR(self);
+  DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
 
   uint8_t* destination_buffer                  = decompressor_ptr->destination_buffer;
   size_t   destination_buffer_length           = decompressor_ptr->destination_buffer_length;
   size_t   remaining_destination_buffer_length = decompressor_ptr->remaining_destination_buffer_length;
 
-  const char* result_data   = (const char*)destination_buffer;
+  const char* result        = (const char*)destination_buffer;
   size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
 
-  VALUE result = rb_str_new(result_data, result_length);
+  VALUE result_value = rb_str_new(result, result_length);
 
   decompressor_ptr->remaining_destination_buffer        = destination_buffer;
   decompressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
 
-  return result;
+  return result_value;
 }
 
 VALUE brs_ext_decompressor_close(VALUE self)
 {
-  GET_DECOMPRESSOR();
-  DO_NOT_USE_AFTER_CLOSE();
+  GET_DECOMPRESSOR(self);
+  DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
 
   BrotliDecoderState* state_ptr = decompressor_ptr->state_ptr;
   if (state_ptr != NULL) {
