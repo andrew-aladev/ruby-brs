@@ -96,7 +96,7 @@ VALUE brs_ext_decompress(VALUE self, VALUE source_value)
     &decompressor_ptr->remaining_destination_buffer,
     NULL);
 
-  VALUE bytes_written = INT2NUM(source_length - remaining_source_length);
+  VALUE bytes_written = UINT2NUM(source_length - remaining_source_length);
 
   VALUE needs_more_destination;
   if (result == BROTLI_DECODER_RESULT_SUCCESS || result == BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT) {

@@ -11,11 +11,37 @@
 #include "brs_ext/option.h"
 #include "brs_ext/string.h"
 
-#define GET_SOURCE_DATA(source_value)                                       \
-  Check_Type(source_value, T_STRING);                                       \
-                                                                            \
-  const uint8_t* source        = (const uint8_t*)RSTRING_PTR(source_value); \
-  size_t         source_length = RSTRING_LEN(source_value);
+#define GET_SOURCE_DATA(source_value)                                 \
+  Check_Type(source_value, T_STRING);                                 \
+                                                                      \
+  const char*    source                  = RSTRING_PTR(source_value); \
+  size_t         source_length           = RSTRING_LEN(source_value); \
+  const uint8_t* remaining_source        = (const uint8_t*)source;    \
+  size_t         remaining_source_length = source_length;
+
+// -----
+
+static inline VALUE create_buffer(VALUE length)
+{
+  return rb_str_new(NULL, NUM2UINT(length));
+}
+
+#define CREATE_BUFFER(buffer, length, exception) \
+  VALUE buffer = rb_protect(create_buffer, UINT2NUM(length), &exception);
+
+static inline VALUE resize_buffer(VALUE args)
+{
+  VALUE buffer = rb_ary_entry(args, 0);
+  VALUE length = rb_ary_entry(args, 1);
+  return rb_str_resize(buffer, NUM2UINT(length));
+}
+
+#define RESIZE_BUFFER(buffer, length, exception)                                        \
+  VALUE resize_buffer_args = rb_ary_new_from_args(2, buffer, UINT2NUM(length));         \
+  buffer                   = rb_protect(resize_buffer, resize_buffer_args, &exception); \
+  rb_ary_free(resize_buffer_args);
+
+// -----
 
 VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VALUE options)
 {
@@ -27,7 +53,14 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
   BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(state_ptr, options);
   GET_SOURCE_DATA(source_value);
 
-  VALUE  destination_value                   = rb_str_new(NULL, buffer_length);
+  int exception;
+
+  CREATE_BUFFER(destination_value, buffer_length, exception);
+  if (exception) {
+    BrotliEncoderDestroyInstance(state_ptr);
+    brs_ext_raise_error("AllocateError", "allocate error");
+  }
+
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = buffer_length;
 
@@ -38,8 +71,8 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
     BROTLI_BOOL result = BrotliEncoderCompressStream(
       state_ptr,
       BROTLI_OPERATION_FINISH,
-      &source_length,
-      &source,
+      &remaining_source_length,
+      &remaining_source,
       &remaining_destination_buffer_length,
       &destination,
       NULL);
@@ -53,7 +86,13 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
     destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
 
     if (BrotliEncoderHasMoreOutput(state_ptr) || !BrotliEncoderIsFinished(state_ptr)) {
-      destination_value                   = rb_str_resize(destination_value, destination_length + buffer_length);
+      RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
+      if (exception) {
+        rb_str_free(destination_value);
+        BrotliEncoderDestroyInstance(state_ptr);
+        brs_ext_raise_error("AllocateError", "allocate error");
+      }
+
       remaining_destination_buffer_length = buffer_length;
     }
     else {
@@ -63,7 +102,13 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
 
   BrotliEncoderDestroyInstance(state_ptr);
 
-  return rb_str_resize(destination_value, destination_length);
+  RESIZE_BUFFER(destination_value, destination_length, exception);
+  if (exception) {
+    rb_str_free(destination_value);
+    brs_ext_raise_error("AllocateError", "allocate error");
+  }
+
+  return destination_value;
 }
 
 VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VALUE options)
@@ -76,7 +121,14 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
   BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(state_ptr, options);
   GET_SOURCE_DATA(source_value);
 
-  VALUE  destination_value                   = rb_str_new(NULL, buffer_length);
+  int exception;
+
+  CREATE_BUFFER(destination_value, buffer_length, exception);
+  if (exception) {
+    BrotliDecoderDestroyInstance(state_ptr);
+    brs_ext_raise_error("AllocateError", "allocate error");
+  }
+
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = buffer_length;
 
@@ -86,8 +138,8 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
 
     BrotliDecoderResult result = BrotliDecoderDecompressStream(
       state_ptr,
-      &source_length,
-      &source,
+      &remaining_source_length,
+      &remaining_source,
       &remaining_destination_buffer_length,
       &destination,
       NULL);
@@ -103,7 +155,13 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
     destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
 
     if (result == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
-      destination_value                   = rb_str_resize(destination_value, destination_length + buffer_length);
+      RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
+      if (exception) {
+        rb_str_free(destination_value);
+        BrotliDecoderDestroyInstance(state_ptr);
+        brs_ext_raise_error("AllocateError", "allocate error");
+      }
+
       remaining_destination_buffer_length = buffer_length;
     }
     else {
@@ -113,7 +171,13 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
 
   BrotliDecoderDestroyInstance(state_ptr);
 
-  return rb_str_resize(destination_value, destination_length);
+  RESIZE_BUFFER(destination_value, destination_length, exception);
+  if (exception) {
+    rb_str_free(destination_value);
+    brs_ext_raise_error("AllocateError", "allocate error");
+  }
+
+  return destination_value;
 }
 
 void brs_ext_string_exports(VALUE root_module)

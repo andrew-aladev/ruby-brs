@@ -49,7 +49,7 @@ static inline unsigned long get_option_value(VALUE option, brs_ext_option_t type
   if (type == BRS_EXT_OPTION_TYPE_FIXNUM) {
     Check_Type(option, T_FIXNUM);
 
-    return rb_num2uint(option);
+    return NUM2UINT(option);
   }
 
   brs_ext_raise_error("ValidateError", "invalid option type");
@@ -106,12 +106,12 @@ void brs_ext_option_exports(VALUE root_module)
     ID2SYM(rb_intern("generic")));
   rb_define_const(option, "MODES", modes);
 
-  rb_define_const(option, "MIN_QUALITY", INT2FIX(BROTLI_MIN_QUALITY));
-  rb_define_const(option, "MAX_QUALITY", INT2FIX(BROTLI_MAX_QUALITY));
+  rb_define_const(option, "MIN_QUALITY", UINT2NUM(BROTLI_MIN_QUALITY));
+  rb_define_const(option, "MAX_QUALITY", UINT2NUM(BROTLI_MAX_QUALITY));
 
-  rb_define_const(option, "MIN_LGWIN", INT2FIX(BROTLI_MIN_WINDOW_BITS));
-  rb_define_const(option, "MAX_LGWIN", INT2FIX(BROTLI_MAX_WINDOW_BITS));
+  rb_define_const(option, "MIN_LGWIN", UINT2NUM(BROTLI_MIN_WINDOW_BITS));
+  rb_define_const(option, "MAX_LGWIN", UINT2NUM(BROTLI_MAX_WINDOW_BITS));
 
-  rb_define_const(option, "MIN_LGBLOCK", INT2FIX(BROTLI_MIN_INPUT_BLOCK_BITS));
-  rb_define_const(option, "MAX_LGBLOCK", INT2FIX(BROTLI_MAX_INPUT_BLOCK_BITS));
+  rb_define_const(option, "MIN_LGBLOCK", UINT2NUM(BROTLI_MIN_INPUT_BLOCK_BITS));
+  rb_define_const(option, "MAX_LGBLOCK", UINT2NUM(BROTLI_MAX_INPUT_BLOCK_BITS));
 }

@@ -103,7 +103,7 @@ VALUE brs_ext_compress(VALUE self, VALUE source_value)
     brs_ext_raise_error("UnexpectedError", "unexpected error");
   }
 
-  VALUE bytes_written          = INT2NUM(source_length - remaining_source_length);
+  VALUE bytes_written          = UINT2NUM(source_length - remaining_source_length);
   VALUE needs_more_destination = BrotliEncoderHasMoreOutput(state_ptr) ? Qtrue : Qfalse;
 
   return rb_ary_new_from_args(2, bytes_written, needs_more_destination);
