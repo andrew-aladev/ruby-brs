@@ -105,6 +105,7 @@ void brs_ext_option_exports(VALUE root_module)
     ID2SYM(rb_intern("font")),
     ID2SYM(rb_intern("generic")));
   rb_define_const(option, "MODES", modes);
+  RB_GC_GUARD(modes);
 
   rb_define_const(option, "MIN_QUALITY", UINT2NUM(BROTLI_MIN_QUALITY));
   rb_define_const(option, "MAX_QUALITY", UINT2NUM(BROTLI_MAX_QUALITY));

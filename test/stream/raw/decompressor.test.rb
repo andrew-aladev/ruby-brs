@@ -42,7 +42,7 @@ module BRS
               decompressor.read ""
             end
 
-            corrupted_compressed_text = String.compress("") + "1111"
+            corrupted_compressed_text = String.compress("1111").reverse
 
             assert_raises DecompressorCorruptedSourceError do
               decompressor.read corrupted_compressed_text, &NOOP_PROC
