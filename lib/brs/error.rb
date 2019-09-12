@@ -10,4 +10,10 @@ module BRS
 
   class NotEnoughDestinationError < BaseError; end
   class UsedAfterCloseError       < BaseError; end
+
+  class DecompressorCorruptedSourceError < BaseError; end
+
+  class AccessIOError < BaseError; end
+  class ReadIOError   < BaseError; end
+  class WriteIOError  < BaseError; end
 end

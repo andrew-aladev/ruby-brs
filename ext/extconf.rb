@@ -7,7 +7,6 @@ def require_header(name)
   abort "Can't find #{name} header" unless find_header name
 end
 
-require_header "brotli/types.h"
 require_header "brotli/encode.h"
 require_header "brotli/decode.h"
 
@@ -22,6 +21,7 @@ encoder_functions = %w[
   BrotliEncoderSetParameter
   BrotliEncoderCompressStream
   BrotliEncoderHasMoreOutput
+  BrotliEncoderIsFinished
   BrotliEncoderDestroyInstance
 ]
 .freeze
@@ -32,7 +32,7 @@ decoder_functions = %w[
   BrotliDecoderCreateInstance
   BrotliDecoderSetParameter
   BrotliDecoderDecompressStream
-  BrotliDecoderHasMoreOutput
+  BrotliDecoderGetErrorCode
   BrotliDecoderDestroyInstance
 ]
 .freeze

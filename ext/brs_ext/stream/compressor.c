@@ -132,7 +132,9 @@ VALUE brs_ext_flush_compressor(VALUE self)
     brs_ext_raise_error("UnexpectedError", "unexpected error");
   }
 
-  return BrotliEncoderHasMoreOutput(state_ptr) ? Qtrue : Qfalse;
+  VALUE needs_more_destination = BrotliEncoderHasMoreOutput(state_ptr) ? Qtrue : Qfalse;
+
+  return needs_more_destination;
 }
 
 VALUE brs_ext_finish_compressor(VALUE self)
@@ -158,7 +160,9 @@ VALUE brs_ext_finish_compressor(VALUE self)
     brs_ext_raise_error("UnexpectedError", "unexpected error");
   }
 
-  return (BrotliEncoderHasMoreOutput(state_ptr) || !BrotliEncoderIsFinished(state_ptr)) ? Qtrue : Qfalse;
+  VALUE needs_more_destination = (BrotliEncoderHasMoreOutput(state_ptr) || !BrotliEncoderIsFinished(state_ptr)) ? Qtrue : Qfalse;
+
+  return needs_more_destination;
 }
 
 VALUE brs_ext_compressor_read_result(VALUE self)

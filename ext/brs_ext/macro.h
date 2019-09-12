@@ -10,6 +10,4 @@
 #define BRS_EXT_UNUSED(x) x
 #endif
 
-#define BRS_EXT_UNUSED_VARIABLE(x) (void)(x)
-
 #endif // BRS_EXT_MACRO_H

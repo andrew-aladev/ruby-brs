@@ -42,6 +42,12 @@ module BRS
               decompressor.read ""
             end
 
+            corrupted_compressed_text = String.compress("") + "1111"
+
+            assert_raises DecompressorCorruptedSourceError do
+              decompressor.read corrupted_compressed_text, &NOOP_PROC
+            end
+
             decompressor.close(&NOOP_PROC)
 
             assert_raises UsedAfterCloseError do

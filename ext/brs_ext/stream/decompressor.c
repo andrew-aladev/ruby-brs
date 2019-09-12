@@ -106,7 +106,18 @@ VALUE brs_ext_decompress(VALUE self, VALUE source_value)
     needs_more_destination = Qtrue;
   }
   else {
-    brs_ext_raise_error("UnexpectedError", "unexpected error");
+    brs_ext_decompressor_error_t error = brs_ext_get_decompressor_error(
+      BrotliDecoderGetErrorCode(decompressor_ptr->state_ptr));
+
+    if (error == BRS_EXT_DECOMPRESSOR_CORRUPTED_SOURCE) {
+      brs_ext_raise_error("DecompressorCorruptedSourceError", "decompressor received corrupted source");
+    }
+    else if (error == BRS_EXT_DECOMPRESSOR_ALLOCATE_FAILED) {
+      brs_ext_raise_error("AllocateError", "allocate error");
+    }
+    else {
+      brs_ext_raise_error("UnexpectedError", "unexpected error");
+    }
   }
 
   return rb_ary_new_from_args(2, bytes_written, needs_more_destination);

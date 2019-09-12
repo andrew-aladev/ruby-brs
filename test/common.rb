@@ -18,7 +18,7 @@ module BRS
       ]
       .each { |path| FileUtils.touch path }
 
-      PORT = 54_002
+      PORT = 54_010
 
       ENCODINGS = %w[
         binary
@@ -46,6 +46,11 @@ module BRS
       TEXTS = generate_texts(
         "",
         ::SecureRandom.random_bytes(1 << 9) # 512 B
+      )
+      .freeze
+
+      LARGE_TEXTS = generate_texts(
+        ::SecureRandom.random_bytes(1 << 20) # 1 MB
       )
       .freeze
 
