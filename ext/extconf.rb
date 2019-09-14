@@ -46,6 +46,7 @@ sources = %w[
   stream/compressor
   stream/decompressor
   error
+  io
   main
   option
   string

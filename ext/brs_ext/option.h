@@ -16,7 +16,7 @@ enum {
   BRS_EXT_OPTION_TYPE_FIXNUM
 };
 
-typedef uint8_t brs_ext_option_t;
+typedef uint_fast8_t brs_ext_option_t;
 
 void brs_ext_set_compressor_option(BrotliEncoderState *state_ptr, BrotliEncoderParameter param, VALUE options, const char *name, brs_ext_option_t type);
 void brs_ext_set_decompressor_option(BrotliDecoderState *state_ptr, BrotliDecoderParameter param, VALUE options, const char *name, brs_ext_option_t type);

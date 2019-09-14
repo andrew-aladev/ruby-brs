@@ -14,7 +14,7 @@ enum {
   BRS_EXT_DECOMPRESSOR_UNEXPECTED_ERROR
 };
 
-typedef uint8_t brs_ext_decompressor_error_t;
+typedef uint_fast8_t brs_ext_decompressor_error_t;
 
 brs_ext_decompressor_error_t brs_ext_get_decompressor_error(BrotliDecoderErrorCode error_code);
 NORETURN(void brs_ext_raise_error(const char* name, const char* description));
