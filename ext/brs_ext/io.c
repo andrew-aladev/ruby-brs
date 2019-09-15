@@ -7,6 +7,7 @@
 #include "ruby.h"
 #include "ruby/io.h"
 
+#include "brs_ext/common.h"
 #include "brs_ext/error.h"
 #include "brs_ext/io.h"
 #include "brs_ext/macro.h"
@@ -15,39 +16,51 @@
 #define GET_FILE(target)                               \
   Check_Type(target, T_FILE);                          \
                                                        \
-  rb_io_t *target##_io;                                \
+  rb_io_t* target##_io;                                \
   GetOpenFile(target, target##_io);                    \
                                                        \
-  FILE *target##_file = rb_io_stdio_file(target##_io); \
+  FILE* target##_file = rb_io_stdio_file(target##_io); \
   if (target##_file == NULL) {                         \
     brs_ext_raise_error(BRS_EXT_ERROR_ACCESS_IO);      \
   }
 
-// -- compress --
+static inline brs_ext_result_t create_buffers(uint8_t** source_buffer_ptr, uint8_t** destination_buffer_ptr, size_t buffer_length)
+{
+  uint8_t* source_buffer = malloc(buffer_length);
+  if (source_buffer == NULL) {
+    return BRS_EXT_ERROR_ALLOCATE_FAILED;
+  }
+
+  uint8_t* destination_buffer = malloc(buffer_length);
+  if (destination_buffer == NULL) {
+    free(source_buffer);
+    return BRS_EXT_ERROR_ALLOCATE_FAILED;
+  }
+
+  *source_buffer_ptr      = source_buffer;
+  *destination_buffer_ptr = destination_buffer;
+
+  return 0;
+}
 
 VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
 {
   GET_FILE(source);
   GET_FILE(destination);
 
-  BrotliEncoderState *state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
+  BrotliEncoderState* state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(state_ptr, options);
 
-  uint8_t *source_buffer = malloc(buffer_length);
-  if (source_buffer == NULL) {
+  uint8_t*         source_buffer;
+  uint8_t*         destination_buffer;
+  brs_ext_result_t ext_result = create_buffers(&source_buffer, &destination_buffer, buffer_length);
+  if (ext_result != 0) {
     BrotliEncoderDestroyInstance(state_ptr);
-    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
-  }
-
-  uint8_t *destination_buffer = malloc(buffer_length);
-  if (destination_buffer == NULL) {
-    free(source_buffer);
-    BrotliEncoderDestroyInstance(state_ptr);
-    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
+    brs_ext_raise_error(ext_result);
   }
 
   ;
@@ -62,31 +75,24 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
   return Qnil;
 }
 
-// -- decompress --
-
 VALUE brs_ext_decompress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
 {
   GET_FILE(source);
   GET_FILE(destination);
 
-  BrotliDecoderState *state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
+  BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(state_ptr, options);
 
-  uint8_t *source_buffer = malloc(buffer_length);
-  if (source_buffer == NULL) {
+  uint8_t*         source_buffer;
+  uint8_t*         destination_buffer;
+  brs_ext_result_t ext_result = create_buffers(&source_buffer, &destination_buffer, buffer_length);
+  if (ext_result != 0) {
     BrotliDecoderDestroyInstance(state_ptr);
-    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
-  }
-
-  uint8_t *destination_buffer = malloc(buffer_length);
-  if (destination_buffer == NULL) {
-    free(source_buffer);
-    BrotliDecoderDestroyInstance(state_ptr);
-    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
+    brs_ext_raise_error(ext_result);
   }
 
   ;
