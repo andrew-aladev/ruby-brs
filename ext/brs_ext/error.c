@@ -8,7 +8,7 @@
 #include "brs_ext/common.h"
 #include "brs_ext/error.h"
 
-brs_ext_decompressor_error_t brs_ext_get_decompressor_error(BrotliDecoderErrorCode error_code)
+brs_ext_result_t brs_ext_get_decompressor_error(BrotliDecoderErrorCode error_code)
 {
   switch (error_code) {
     case BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_NIBBLE:
@@ -27,22 +27,47 @@ brs_ext_decompressor_error_t brs_ext_get_decompressor_error(BrotliDecoderErrorCo
     case BROTLI_DECODER_ERROR_FORMAT_PADDING_1:
     case BROTLI_DECODER_ERROR_FORMAT_PADDING_2:
     case BROTLI_DECODER_ERROR_FORMAT_DISTANCE:
-      return BRS_EXT_DECOMPRESSOR_CORRUPTED_SOURCE;
+      return BRS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE;
     case BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MODES:
     case BROTLI_DECODER_ERROR_ALLOC_TREE_GROUPS:
     case BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MAP:
     case BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_1:
     case BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_2:
     case BROTLI_DECODER_ERROR_ALLOC_BLOCK_TYPE_TREES:
-      return BRS_EXT_DECOMPRESSOR_ALLOCATE_FAILED;
+      return BRS_EXT_ERROR_ALLOCATE_FAILED;
     default:
-      return BRS_EXT_DECOMPRESSOR_UNEXPECTED_ERROR;
+      return BRS_EXT_ERROR_UNEXPECTED;
   }
 }
 
-void brs_ext_raise_error(const char* name, const char* description)
+static inline NORETURN(void raise(const char* name, const char* description))
 {
   VALUE module = rb_define_module(BRS_EXT_MODULE_NAME);
   VALUE error  = rb_const_get(module, rb_intern(name));
   rb_raise(error, "%s", description);
+}
+
+void brs_ext_raise_error(brs_ext_result_t result)
+{
+  switch (result) {
+    case BRS_EXT_ERROR_ALLOCATE_FAILED:
+      raise("AllocateError", "allocate error");
+    case BRS_EXT_ERROR_VALIDATE_FAILED:
+      raise("ValidateError", "validate error");
+
+    case BRS_EXT_ERROR_USED_AFTER_CLOSE:
+      raise("UsedAfterCloseError", "used after closed");
+    case BRS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE:
+      raise("DecompressorCorruptedSourceError", "decompressor received corrupted source");
+
+    case BRS_EXT_ERROR_ACCESS_IO:
+      raise("AccessIOError", "failed to access IO");
+    case BRS_EXT_ERROR_READ_IO:
+      raise("ReadIOError", "failed to read IO");
+    case BRS_EXT_ERROR_WRITE_IO:
+      raise("WriteIOError", "failed to write IO");
+    default:
+      // BRS_EXT_ERROR_UNEXPECTED
+      raise("UnexpectedError", "unexpected error");
+  }
 }

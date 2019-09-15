@@ -4,16 +4,16 @@
 module BRS
   class BaseError < ::StandardError; end
 
-  class ValidateError   < BaseError; end
-  class AllocateError   < BaseError; end
-  class UnexpectedError < BaseError; end
+  class AllocateError < BaseError; end
+  class ValidateError < BaseError; end
 
-  class NotEnoughDestinationError < BaseError; end
-  class UsedAfterCloseError       < BaseError; end
-
+  class UsedAfterCloseError              < BaseError; end
+  class NotEnoughDestinationError        < BaseError; end
   class DecompressorCorruptedSourceError < BaseError; end
 
   class AccessIOError < BaseError; end
   class ReadIOError   < BaseError; end
   class WriteIOError  < BaseError; end
+
+  class UnexpectedError < BaseError; end
 end

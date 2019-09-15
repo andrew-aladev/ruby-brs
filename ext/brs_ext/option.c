@@ -33,14 +33,14 @@ static inline unsigned long get_option_value(VALUE option, brs_ext_option_t type
       return BROTLI_MODE_GENERIC;
     }
     else {
-      brs_ext_raise_error("ValidateError", "invalid mode option");
+      brs_ext_raise_error(BRS_EXT_ERROR_VALIDATE_FAILED);
     }
   }
 
   if (type == BRS_EXT_OPTION_TYPE_BOOL) {
     int type = TYPE(option);
     if (type != T_TRUE && type != T_FALSE) {
-      brs_ext_raise_error("ValidateError", "invalid bool option");
+      brs_ext_raise_error(BRS_EXT_ERROR_VALIDATE_FAILED);
     }
 
     return type == T_TRUE ? 1 : 0;
@@ -52,7 +52,7 @@ static inline unsigned long get_option_value(VALUE option, brs_ext_option_t type
     return NUM2UINT(option);
   }
 
-  brs_ext_raise_error("ValidateError", "invalid option type");
+  brs_ext_raise_error(BRS_EXT_ERROR_VALIDATE_FAILED);
 }
 
 void brs_ext_set_compressor_option(BrotliEncoderState *state_ptr, BrotliEncoderParameter param, VALUE options, const char *name, brs_ext_option_t type)
@@ -64,7 +64,7 @@ void brs_ext_set_compressor_option(BrotliEncoderState *state_ptr, BrotliEncoderP
 
     BROTLI_BOOL result = BrotliEncoderSetParameter(state_ptr, param, value);
     if (!result) {
-      brs_ext_raise_error("ValidateError", "invalid param value");
+      brs_ext_raise_error(BRS_EXT_ERROR_VALIDATE_FAILED);
     }
   }
 }
@@ -78,7 +78,7 @@ void brs_ext_set_decompressor_option(BrotliDecoderState *state_ptr, BrotliDecode
 
     BROTLI_BOOL result = BrotliDecoderSetParameter(state_ptr, param, value);
     if (!result) {
-      brs_ext_raise_error("ValidateError", "invalid param value");
+      brs_ext_raise_error(BRS_EXT_ERROR_VALIDATE_FAILED);
     }
   }
 }

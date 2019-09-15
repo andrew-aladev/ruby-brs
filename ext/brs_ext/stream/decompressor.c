@@ -49,7 +49,7 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
 
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
-    brs_ext_raise_error("AllocateError", "allocate error");
+    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(state_ptr, options);
@@ -57,7 +57,7 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
   uint8_t* buffer = malloc(buffer_length);
   if (buffer == NULL) {
     BrotliDecoderDestroyInstance(state_ptr);
-    brs_ext_raise_error("AllocateError", "allocate error");
+    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   decompressor_ptr->state_ptr                           = state_ptr;
@@ -71,7 +71,7 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
 
 #define DO_NOT_USE_AFTER_CLOSE(decompressor_ptr)                                             \
   if (decompressor_ptr->state_ptr == NULL || decompressor_ptr->destination_buffer == NULL) { \
-    brs_ext_raise_error("UsedAfterCloseError", "decompressor used after closed");            \
+    brs_ext_raise_error(BRS_EXT_ERROR_USED_AFTER_CLOSE);                                     \
   }
 
 #define GET_SOURCE_DATA(source_value)                                 \
@@ -106,18 +106,8 @@ VALUE brs_ext_decompress(VALUE self, VALUE source_value)
     needs_more_destination = Qtrue;
   }
   else {
-    brs_ext_decompressor_error_t error = brs_ext_get_decompressor_error(
-      BrotliDecoderGetErrorCode(decompressor_ptr->state_ptr));
-
-    if (error == BRS_EXT_DECOMPRESSOR_CORRUPTED_SOURCE) {
-      brs_ext_raise_error("DecompressorCorruptedSourceError", "decompressor received corrupted source");
-    }
-    else if (error == BRS_EXT_DECOMPRESSOR_ALLOCATE_FAILED) {
-      brs_ext_raise_error("AllocateError", "allocate error");
-    }
-    else {
-      brs_ext_raise_error("UnexpectedError", "unexpected error");
-    }
+    BrotliDecoderErrorCode error_code = BrotliDecoderGetErrorCode(decompressor_ptr->state_ptr);
+    brs_ext_raise_error(brs_ext_get_decompressor_error(error_code));
   }
 
   return rb_ary_new_from_args(2, bytes_written, needs_more_destination);

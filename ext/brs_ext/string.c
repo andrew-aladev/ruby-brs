@@ -45,7 +45,7 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
 
   BrotliEncoderState* state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
-    brs_ext_raise_error("AllocateError", "allocate error");
+    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(state_ptr, options);
@@ -55,7 +55,7 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
   CREATE_BUFFER(destination_value, buffer_length, exception);
   if (exception != 0) {
     BrotliEncoderDestroyInstance(state_ptr);
-    brs_ext_raise_error("AllocateError", "allocate error");
+    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   size_t destination_length                  = 0;
@@ -76,7 +76,7 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
 
     if (!result) {
       BrotliEncoderDestroyInstance(state_ptr);
-      brs_ext_raise_error("UnexpectedError", "unexpected error");
+      brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
     }
 
     destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
@@ -85,7 +85,7 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
       RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
       if (exception != 0) {
         BrotliEncoderDestroyInstance(state_ptr);
-        brs_ext_raise_error("AllocateError", "allocate error");
+        brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
       }
 
       remaining_destination_buffer_length = buffer_length;
@@ -99,7 +99,7 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
 
   RESIZE_BUFFER(destination_value, destination_length, exception);
   if (exception != 0) {
-    brs_ext_raise_error("AllocateError", "allocate error");
+    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   return destination_value;
@@ -111,7 +111,7 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
 
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
-    brs_ext_raise_error("AllocateError", "allocate error");
+    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(state_ptr, options);
@@ -121,7 +121,7 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
   CREATE_BUFFER(destination_value, buffer_length, exception);
   if (exception != 0) {
     BrotliDecoderDestroyInstance(state_ptr);
-    brs_ext_raise_error("AllocateError", "allocate error");
+    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   size_t destination_length                  = 0;
@@ -142,20 +142,9 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
     if (result != BROTLI_DECODER_RESULT_SUCCESS &&
         result != BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT &&
         result != BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
-      brs_ext_decompressor_error_t error = brs_ext_get_decompressor_error(
-        BrotliDecoderGetErrorCode(state_ptr));
-
+      BrotliDecoderErrorCode error_code = BrotliDecoderGetErrorCode(state_ptr);
       BrotliDecoderDestroyInstance(state_ptr);
-
-      if (error == BRS_EXT_DECOMPRESSOR_CORRUPTED_SOURCE) {
-        brs_ext_raise_error("DecompressorCorruptedSourceError", "decompressor received corrupted source");
-      }
-      else if (error == BRS_EXT_DECOMPRESSOR_ALLOCATE_FAILED) {
-        brs_ext_raise_error("AllocateError", "allocate error");
-      }
-      else {
-        brs_ext_raise_error("UnexpectedError", "unexpected error");
-      }
+      brs_ext_raise_error(brs_ext_get_decompressor_error(error_code));
     }
 
     destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
@@ -164,7 +153,7 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
       RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
       if (exception != 0) {
         BrotliDecoderDestroyInstance(state_ptr);
-        brs_ext_raise_error("AllocateError", "allocate error");
+        brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
       }
 
       remaining_destination_buffer_length = buffer_length;
@@ -178,7 +167,7 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
 
   RESIZE_BUFFER(destination_value, destination_length, exception);
   if (exception != 0) {
-    brs_ext_raise_error("AllocateError", "allocate error");
+    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   return destination_value;

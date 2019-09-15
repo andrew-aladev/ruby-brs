@@ -49,7 +49,7 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
 
   BrotliEncoderState* state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
-    brs_ext_raise_error("AllocateError", "allocate error");
+    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(state_ptr, options);
@@ -57,7 +57,7 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
   uint8_t* buffer = malloc(buffer_length);
   if (buffer == NULL) {
     BrotliEncoderDestroyInstance(state_ptr);
-    brs_ext_raise_error("AllocateError", "allocate error");
+    brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   compressor_ptr->state_ptr                           = state_ptr;
@@ -71,7 +71,7 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
 
 #define DO_NOT_USE_AFTER_CLOSE(compressor_ptr)                                           \
   if (compressor_ptr->state_ptr == NULL || compressor_ptr->destination_buffer == NULL) { \
-    brs_ext_raise_error("UsedAfterCloseError", "compressor used after closed");          \
+    brs_ext_raise_error(BRS_EXT_ERROR_USED_AFTER_CLOSE);                                 \
   }
 
 #define GET_SOURCE_DATA(source_value)                                 \
@@ -100,7 +100,7 @@ VALUE brs_ext_compress(VALUE self, VALUE source_value)
     NULL);
 
   if (!result) {
-    brs_ext_raise_error("UnexpectedError", "unexpected error");
+    brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
   }
 
   VALUE bytes_written          = UINT2NUM(source_length - remaining_source_length);
@@ -129,7 +129,7 @@ VALUE brs_ext_flush_compressor(VALUE self)
     NULL);
 
   if (!result) {
-    brs_ext_raise_error("UnexpectedError", "unexpected error");
+    brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
   }
 
   VALUE needs_more_destination = BrotliEncoderHasMoreOutput(state_ptr) ? Qtrue : Qfalse;
@@ -157,7 +157,7 @@ VALUE brs_ext_finish_compressor(VALUE self)
     NULL);
 
   if (!result) {
-    brs_ext_raise_error("UnexpectedError", "unexpected error");
+    brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
   }
 
   VALUE needs_more_destination = (BrotliEncoderHasMoreOutput(state_ptr) || !BrotliEncoderIsFinished(state_ptr)) ? Qtrue : Qfalse;
