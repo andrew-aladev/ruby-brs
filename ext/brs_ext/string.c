@@ -139,9 +139,10 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
       &destination,
       NULL);
 
-    if (result != BROTLI_DECODER_RESULT_SUCCESS &&
-        result != BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT &&
-        result != BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
+    if (
+      result != BROTLI_DECODER_RESULT_SUCCESS &&
+      result != BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT &&
+      result != BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
       BrotliDecoderErrorCode error_code = BrotliDecoderGetErrorCode(state_ptr);
       BrotliDecoderDestroyInstance(state_ptr);
       brs_ext_raise_error(brs_ext_get_decompressor_error(error_code));
