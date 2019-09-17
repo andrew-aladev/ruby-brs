@@ -89,10 +89,10 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
       }
 
       remaining_destination_buffer_length = buffer_length;
+      continue;
     }
-    else {
-      break;
-    }
+
+    break;
   }
 
   BrotliEncoderDestroyInstance(state_ptr);
@@ -158,10 +158,10 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
       }
 
       remaining_destination_buffer_length = buffer_length;
+      continue;
     }
-    else {
-      break;
-    }
+
+    break;
   }
 
   BrotliDecoderDestroyInstance(state_ptr);

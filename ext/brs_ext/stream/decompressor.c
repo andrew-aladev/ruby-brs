@@ -96,19 +96,16 @@ VALUE brs_ext_decompress(VALUE self, VALUE source_value)
     &decompressor_ptr->remaining_destination_buffer,
     NULL);
 
-  VALUE bytes_written = UINT2NUM(source_length - remaining_source_length);
-
-  VALUE needs_more_destination;
-  if (result == BROTLI_DECODER_RESULT_SUCCESS || result == BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT) {
-    needs_more_destination = Qfalse;
-  }
-  else if (result == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
-    needs_more_destination = Qtrue;
-  }
-  else {
+  if (
+    result != BROTLI_DECODER_RESULT_SUCCESS &&
+    result != BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT &&
+    result != BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
     BrotliDecoderErrorCode error_code = BrotliDecoderGetErrorCode(decompressor_ptr->state_ptr);
     brs_ext_raise_error(brs_ext_get_decompressor_error(error_code));
   }
+
+  VALUE bytes_written          = UINT2NUM(source_length - remaining_source_length);
+  VALUE needs_more_destination = result == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT ? Qtrue : Qfalse;
 
   return rb_ary_new_from_args(2, bytes_written, needs_more_destination);
 }

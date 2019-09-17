@@ -43,6 +43,20 @@ static inline brs_ext_result_t create_buffers(uint8_t** source_buffer_ptr, uint8
   return 0;
 }
 
+// -- compress --
+
+static inline brs_ext_result_t compress_data(
+  BrotliEncoderState* state_ptr,
+  FILE* source_file, uint8_t* source_buffer,
+  FILE* destination_file, uint8_t* destination_buffer,
+  size_t buffer_length)
+{
+  uint8_t* source        = NULL;
+  size_t   source_length = 0;
+  uint8_t* destination   = destination_buffer;
+  // size_t   destination_length = buffer_length;
+}
+
 VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
 {
   GET_FILE(source);
@@ -55,24 +69,43 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
 
   BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(state_ptr, options);
 
-  uint8_t*         source_buffer;
-  uint8_t*         destination_buffer;
+  uint8_t* source_buffer;
+  uint8_t* destination_buffer;
+
   brs_ext_result_t ext_result = create_buffers(&source_buffer, &destination_buffer, buffer_length);
   if (ext_result != 0) {
     BrotliEncoderDestroyInstance(state_ptr);
     brs_ext_raise_error(ext_result);
   }
 
-  ;
+  ext_result = compress_data(state_ptr);
 
   free(source_buffer);
   free(destination_buffer);
   BrotliEncoderDestroyInstance(state_ptr);
 
+  if (ext_result != 0) {
+    brs_ext_raise_error(ext_result);
+  }
+
   // Ruby itself won't flush stdio file before closing fd, flush is required.
   fflush(destination_file);
 
   return Qnil;
+}
+
+// -- decompress --
+
+static inline brs_ext_result_t decompress_data(
+  BrotliDecoderState* state_ptr,
+  FILE* source_file, uint8_t* source_buffer,
+  FILE* destination_file, uint8_t* destination_buffer,
+  size_t buffer_length)
+{
+  uint8_t* source        = NULL;
+  size_t   source_length = 0;
+  uint8_t* destination   = destination_buffer;
+  // size_t   destination_length = buffer_length;
 }
 
 VALUE brs_ext_decompress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
@@ -87,19 +120,24 @@ VALUE brs_ext_decompress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE dest
 
   BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(state_ptr, options);
 
-  uint8_t*         source_buffer;
-  uint8_t*         destination_buffer;
+  uint8_t* source_buffer;
+  uint8_t* destination_buffer;
+
   brs_ext_result_t ext_result = create_buffers(&source_buffer, &destination_buffer, buffer_length);
   if (ext_result != 0) {
     BrotliDecoderDestroyInstance(state_ptr);
     brs_ext_raise_error(ext_result);
   }
 
-  ;
+  ext_result = decompress_data(state_ptr);
 
   free(source_buffer);
   free(destination_buffer);
   BrotliDecoderDestroyInstance(state_ptr);
+
+  if (ext_result != 0) {
+    brs_ext_raise_error(ext_result);
+  }
 
   // Ruby itself won't flush stdio file before closing fd, flush is required.
   fflush(destination_file);
