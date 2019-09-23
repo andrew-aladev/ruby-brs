@@ -93,10 +93,8 @@ VALUE brs_ext_compress(VALUE self, VALUE source_value)
   BROTLI_BOOL result = BrotliEncoderCompressStream(
     state_ptr,
     BROTLI_OPERATION_PROCESS,
-    &remaining_source_length,
-    &remaining_source,
-    &compressor_ptr->remaining_destination_buffer_length,
-    &compressor_ptr->remaining_destination_buffer,
+    &remaining_source_length, &remaining_source,
+    &compressor_ptr->remaining_destination_buffer_length, &compressor_ptr->remaining_destination_buffer,
     NULL);
 
   if (!result) {
@@ -122,10 +120,8 @@ VALUE brs_ext_flush_compressor(VALUE self)
   BROTLI_BOOL result = BrotliEncoderCompressStream(
     state_ptr,
     BROTLI_OPERATION_FLUSH,
-    &remaining_source_length,
-    &remaining_source,
-    &compressor_ptr->remaining_destination_buffer_length,
-    &compressor_ptr->remaining_destination_buffer,
+    &remaining_source_length, &remaining_source,
+    &compressor_ptr->remaining_destination_buffer_length, &compressor_ptr->remaining_destination_buffer,
     NULL);
 
   if (!result) {
@@ -150,10 +146,8 @@ VALUE brs_ext_finish_compressor(VALUE self)
   BROTLI_BOOL result = BrotliEncoderCompressStream(
     state_ptr,
     BROTLI_OPERATION_FINISH,
-    &remaining_source_length,
-    &remaining_source,
-    &compressor_ptr->remaining_destination_buffer_length,
-    &compressor_ptr->remaining_destination_buffer,
+    &remaining_source_length, &remaining_source,
+    &compressor_ptr->remaining_destination_buffer_length, &compressor_ptr->remaining_destination_buffer,
     NULL);
 
   if (!result) {

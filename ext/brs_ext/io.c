@@ -51,10 +51,7 @@ static inline brs_ext_result_t compress_data(
   FILE* destination_file, uint8_t* destination_buffer,
   size_t buffer_length)
 {
-  uint8_t* source        = NULL;
-  size_t   source_length = 0;
-  uint8_t* destination   = destination_buffer;
-  // size_t   destination_length = buffer_length;
+  return 0;
 }
 
 VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
@@ -78,7 +75,11 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
     brs_ext_raise_error(ext_result);
   }
 
-  ext_result = compress_data(state_ptr);
+  ext_result = compress_data(
+    state_ptr,
+    source_file, source_buffer,
+    destination_file, destination_buffer,
+    buffer_length);
 
   free(source_buffer);
   free(destination_buffer);
@@ -102,10 +103,7 @@ static inline brs_ext_result_t decompress_data(
   FILE* destination_file, uint8_t* destination_buffer,
   size_t buffer_length)
 {
-  uint8_t* source        = NULL;
-  size_t   source_length = 0;
-  uint8_t* destination   = destination_buffer;
-  // size_t   destination_length = buffer_length;
+  return 0;
 }
 
 VALUE brs_ext_decompress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
@@ -129,7 +127,11 @@ VALUE brs_ext_decompress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE dest
     brs_ext_raise_error(ext_result);
   }
 
-  ext_result = decompress_data(state_ptr);
+  ext_result = decompress_data(
+    state_ptr,
+    source_file, source_buffer,
+    destination_file, destination_buffer,
+    buffer_length);
 
   free(source_buffer);
   free(destination_buffer);

@@ -90,10 +90,8 @@ VALUE brs_ext_decompress(VALUE self, VALUE source_value)
 
   BrotliDecoderResult result = BrotliDecoderDecompressStream(
     decompressor_ptr->state_ptr,
-    &remaining_source_length,
-    &remaining_source,
-    &decompressor_ptr->remaining_destination_buffer_length,
-    &decompressor_ptr->remaining_destination_buffer,
+    &remaining_source_length, &remaining_source,
+    &decompressor_ptr->remaining_destination_buffer_length, &decompressor_ptr->remaining_destination_buffer,
     NULL);
 
   if (

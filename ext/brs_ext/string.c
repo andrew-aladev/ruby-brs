@@ -68,10 +68,8 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
     BROTLI_BOOL result = BrotliEncoderCompressStream(
       state_ptr,
       BROTLI_OPERATION_FINISH,
-      &remaining_source_length,
-      &remaining_source,
-      &remaining_destination_buffer_length,
-      &destination,
+      &remaining_source_length, &remaining_source,
+      &remaining_destination_buffer_length, &destination,
       NULL);
 
     if (!result) {
@@ -133,10 +131,8 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
 
     BrotliDecoderResult result = BrotliDecoderDecompressStream(
       state_ptr,
-      &remaining_source_length,
-      &remaining_source,
-      &remaining_destination_buffer_length,
-      &destination,
+      &remaining_source_length, &remaining_source,
+      &remaining_destination_buffer_length, &destination,
       NULL);
 
     if (
