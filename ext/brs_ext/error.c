@@ -1,12 +1,12 @@
 // Ruby bindings for brotli library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
+#include "brs_ext/error.h"
+
 #include <brotli/decode.h>
 
-#include "ruby.h"
-
 #include "brs_ext/common.h"
-#include "brs_ext/error.h"
+#include "ruby.h"
 
 brs_ext_result_t brs_ext_get_decompressor_error(BrotliDecoderErrorCode error_code)
 {
@@ -57,6 +57,8 @@ void brs_ext_raise_error(brs_ext_result_t result)
 
     case BRS_EXT_ERROR_USED_AFTER_CLOSE:
       raise("UsedAfterCloseError", "used after closed");
+    case BRS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER:
+      raise("NotEnoughDestinationBufferError", "not enough destination buffer");
     case BRS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE:
       raise("DecompressorCorruptedSourceError", "decompressor received corrupted source");
 

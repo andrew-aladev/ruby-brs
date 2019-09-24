@@ -1,13 +1,13 @@
 // Ruby bindings for brotli library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
+#include "brs_ext/option.h"
+
 #include <brotli/decode.h>
 #include <brotli/encode.h>
 
-#include "ruby.h"
-
 #include "brs_ext/error.h"
-#include "brs_ext/option.h"
+#include "ruby.h"
 
 #define DEFAULT_COMPRESSOR_BUFFER_LENGTH (1 << 16)   // 32 KB
 #define DEFAULT_DECOMPRESSOR_BUFFER_LENGTH (1 << 16) // 64 KB

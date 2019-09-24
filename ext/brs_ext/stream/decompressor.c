@@ -1,13 +1,13 @@
 // Ruby bindings for brotli library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
-#include <brotli/decode.h>
+#include "brs_ext/stream/decompressor.h"
 
-#include "ruby.h"
+#include <brotli/decode.h>
 
 #include "brs_ext/error.h"
 #include "brs_ext/option.h"
-#include "brs_ext/stream/decompressor.h"
+#include "ruby.h"
 
 static void free_decompressor(brs_ext_decompressor_t* decompressor_ptr)
 {

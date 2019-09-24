@@ -6,9 +6,8 @@
 
 #include <brotli/decode.h>
 
-#include "ruby.h"
-
 #include "brs_ext/common.h"
+#include "ruby.h"
 
 // Results for errors listed in "lib/brs/error" used in c extension.
 
@@ -17,6 +16,7 @@ enum {
   BRS_EXT_ERROR_VALIDATE_FAILED,
 
   BRS_EXT_ERROR_USED_AFTER_CLOSE,
+  BRS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER,
   BRS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE,
 
   BRS_EXT_ERROR_ACCESS_IO,

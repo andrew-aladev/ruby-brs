@@ -1,14 +1,13 @@
 // Ruby bindings for brotli library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
-#include "ruby.h"
-
 #include "brs_ext/common.h"
 #include "brs_ext/io.h"
 #include "brs_ext/option.h"
 #include "brs_ext/stream/compressor.h"
 #include "brs_ext/stream/decompressor.h"
 #include "brs_ext/string.h"
+#include "ruby.h"
 
 void Init_brs_ext()
 {

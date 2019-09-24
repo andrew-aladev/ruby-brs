@@ -1,15 +1,15 @@
 // Ruby bindings for brotli library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
+#include "brs_ext/string.h"
+
 #include <brotli/decode.h>
 #include <brotli/encode.h>
-
-#include "ruby.h"
 
 #include "brs_ext/error.h"
 #include "brs_ext/macro.h"
 #include "brs_ext/option.h"
-#include "brs_ext/string.h"
+#include "ruby.h"
 
 #define GET_SOURCE_DATA(source_value)                                 \
   Check_Type(source_value, T_STRING);                                 \
@@ -62,14 +62,14 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
   size_t remaining_destination_buffer_length = buffer_length;
 
   while (true) {
-    uint8_t* destination                              = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
+    uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
     size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
     BROTLI_BOOL result = BrotliEncoderCompressStream(
       state_ptr,
       BROTLI_OPERATION_FINISH,
       &remaining_source_length, &remaining_source,
-      &remaining_destination_buffer_length, &destination,
+      &remaining_destination_buffer_length, &remaining_destination_buffer,
       NULL);
 
     if (!result) {
@@ -80,6 +80,12 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
     destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
 
     if (BrotliEncoderHasMoreOutput(state_ptr) || !BrotliEncoderIsFinished(state_ptr)) {
+      if (remaining_destination_buffer_length == buffer_length) {
+        // We want to write more data at once, than buffer has.
+        BrotliEncoderDestroyInstance(state_ptr);
+        brs_ext_raise_error(BRS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER);
+      }
+
       RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
       if (exception != 0) {
         BrotliEncoderDestroyInstance(state_ptr);
@@ -126,13 +132,13 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
   size_t remaining_destination_buffer_length = buffer_length;
 
   while (true) {
-    uint8_t* destination                              = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
+    uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
     size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
     BrotliDecoderResult result = BrotliDecoderDecompressStream(
       state_ptr,
       &remaining_source_length, &remaining_source,
-      &remaining_destination_buffer_length, &destination,
+      &remaining_destination_buffer_length, &remaining_destination_buffer,
       NULL);
 
     if (
@@ -147,6 +153,12 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
     destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
 
     if (result == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
+      if (remaining_destination_buffer_length == buffer_length) {
+        // We want to write more data at once, than buffer has.
+        BrotliDecoderDestroyInstance(state_ptr);
+        brs_ext_raise_error(BRS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER);
+      }
+
       RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
       if (exception != 0) {
         BrotliDecoderDestroyInstance(state_ptr);

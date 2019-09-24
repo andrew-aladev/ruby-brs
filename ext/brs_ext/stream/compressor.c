@@ -1,13 +1,13 @@
 // Ruby bindings for brotli library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
-#include <brotli/encode.h>
+#include "brs_ext/stream/compressor.h"
 
-#include "ruby.h"
+#include <brotli/encode.h>
 
 #include "brs_ext/error.h"
 #include "brs_ext/option.h"
-#include "brs_ext/stream/compressor.h"
+#include "ruby.h"
 
 static void free_compressor(brs_ext_compressor_t* compressor_ptr)
 {

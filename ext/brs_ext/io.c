@@ -1,17 +1,17 @@
 // Ruby bindings for brotli library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
+#include "ruby/io.h"
+
 #include <brotli/decode.h>
 #include <brotli/encode.h>
-
-#include "ruby.h"
-#include "ruby/io.h"
 
 #include "brs_ext/common.h"
 #include "brs_ext/error.h"
 #include "brs_ext/io.h"
 #include "brs_ext/macro.h"
 #include "brs_ext/option.h"
+#include "ruby.h"
 
 #define GET_FILE(target)                               \
   Check_Type(target, T_FILE);                          \
