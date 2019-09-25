@@ -24,6 +24,8 @@
     brs_ext_raise_error(BRS_EXT_ERROR_ACCESS_IO);      \
   }
 
+// -- buffer --
+
 static inline brs_ext_result_t create_buffers(uint8_t** source_buffer_ptr, uint8_t** destination_buffer_ptr, size_t buffer_length)
 {
   uint8_t* source_buffer = malloc(buffer_length);
