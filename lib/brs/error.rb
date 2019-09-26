@@ -8,8 +8,9 @@ module BRS
   class ValidateError < BaseError; end
 
   class UsedAfterCloseError              < BaseError; end
-  class NotEnoughDestinationError        < BaseError; end
+  class NotEnoughSourceBufferError       < BaseError; end
   class NotEnoughDestinationBufferError  < BaseError; end
+  class NotEnoughDestinationError        < BaseError; end
   class DecompressorCorruptedSourceError < BaseError; end
 
   class AccessIOError < BaseError; end
