@@ -3,3 +3,4 @@ tmp
 *.o
 *.so
 *.gem
+.clang_complete

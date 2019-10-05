@@ -4,6 +4,10 @@
 #if !defined(BRS_EXT_COMMON_H)
 #define BRS_EXT_COMMON_H
 
+#include <stdint.h>
+
 #define BRS_EXT_MODULE_NAME "BRS"
+
+typedef uint_fast8_t brs_ext_result_t;
 
 #endif // BRS_EXT_COMMON_H

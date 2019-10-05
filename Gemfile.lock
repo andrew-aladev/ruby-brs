@@ -11,7 +11,11 @@ GEM
     minitar (0.9)
     minitest (5.12.2)
     parallel (1.17.0)
+<<<<<<< HEAD
     parser (2.6.5.0)
+=======
+    parser (2.6.4.1)
+>>>>>>> 3d46f8af555cce7078e12ac3041830d9873560d5
       ast (~> 2.4.0)
     rack (2.0.7)
     rainbow (3.0.0)
