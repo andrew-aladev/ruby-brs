@@ -46,13 +46,14 @@ VALUE brs_ext_allocate_decompressor(VALUE klass)
 VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
 {
   GET_DECOMPRESSOR(self);
+  Check_Type(options, T_HASH);
 
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(state_ptr, options);
+  BRS_EXT_SET_DECOMPRESSOR_OPTIONS(state_ptr, options);
 
   uint8_t* buffer = malloc(buffer_length);
   if (buffer == NULL) {

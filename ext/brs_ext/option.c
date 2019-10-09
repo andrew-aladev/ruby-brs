@@ -9,9 +9,6 @@
 #include "brs_ext/error.h"
 #include "ruby.h"
 
-#define DEFAULT_COMPRESSOR_BUFFER_LENGTH (1 << 16)   // 32 KB
-#define DEFAULT_DECOMPRESSOR_BUFFER_LENGTH (1 << 16) // 64 KB
-
 static inline VALUE get_option(VALUE options, const char* name)
 {
   return rb_funcall(options, rb_intern("[]"), 1, ID2SYM(rb_intern(name)));
@@ -55,7 +52,9 @@ static inline unsigned long get_option_value(VALUE option, brs_ext_option_t type
   brs_ext_raise_error(BRS_EXT_ERROR_VALIDATE_FAILED);
 }
 
-void brs_ext_set_compressor_option(BrotliEncoderState* state_ptr, BrotliEncoderParameter param, VALUE options, const char* name, brs_ext_option_t type)
+void brs_ext_set_compressor_option(
+  BrotliEncoderState*    state_ptr,
+  BrotliEncoderParameter param, VALUE options, const char* name, brs_ext_option_t type)
 {
   VALUE option = get_option(options, name);
 
@@ -69,7 +68,9 @@ void brs_ext_set_compressor_option(BrotliEncoderState* state_ptr, BrotliEncoderP
   }
 }
 
-void brs_ext_set_decompressor_option(BrotliDecoderState* state_ptr, BrotliDecoderParameter param, VALUE options, const char* name, brs_ext_option_t type)
+void brs_ext_set_decompressor_option(
+  BrotliDecoderState*    state_ptr,
+  BrotliDecoderParameter param, VALUE options, const char* name, brs_ext_option_t type)
 {
   VALUE option = get_option(options, name);
 
@@ -83,16 +84,11 @@ void brs_ext_set_decompressor_option(BrotliDecoderState* state_ptr, BrotliDecode
   }
 }
 
-size_t brs_ext_get_buffer_length(VALUE options, bool is_compressor)
+unsigned long brs_ext_get_fixnum_option(VALUE options, const char* name)
 {
-  VALUE option = get_option(options, "buffer_length");
+  VALUE option = get_option(options, name);
 
-  size_t buffer_length = get_option_value(option, BRS_EXT_OPTION_TYPE_FIXNUM);
-  if (buffer_length == 0) {
-    buffer_length = is_compressor ? DEFAULT_COMPRESSOR_BUFFER_LENGTH : DEFAULT_DECOMPRESSOR_BUFFER_LENGTH;
-  }
-
-  return buffer_length;
+  return get_option_value(option, BRS_EXT_OPTION_TYPE_FIXNUM);
 }
 
 void brs_ext_option_exports(VALUE root_module)

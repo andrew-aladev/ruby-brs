@@ -1,0 +1,21 @@
+language: ruby
+rvm:
+  - 2.6
+
+os:
+  - linux
+  - osx
+
+dist: xenial
+osx_image: xcode10.2
+
+addons:
+  apt:
+    packages:
+      - libbrotli-dev
+  homebrew:
+    packages:
+      - brotli
+
+script:
+  - scripts/ci_test.sh

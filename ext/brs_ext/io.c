@@ -60,13 +60,14 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
 {
   GET_FILE(source);
   GET_FILE(destination);
+  Check_Type(options, T_HASH);
 
   BrotliEncoderState* state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  BRS_EXT_PROCESS_COMPRESSOR_OPTIONS(state_ptr, options);
+  BRS_EXT_SET_COMPRESSOR_OPTIONS(state_ptr, options);
 
   uint8_t* source_buffer;
   uint8_t* destination_buffer;
@@ -112,13 +113,14 @@ VALUE brs_ext_decompress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE dest
 {
   GET_FILE(source);
   GET_FILE(destination);
+  Check_Type(options, T_HASH);
 
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  BRS_EXT_PROCESS_DECOMPRESSOR_OPTIONS(state_ptr, options);
+  BRS_EXT_SET_DECOMPRESSOR_OPTIONS(state_ptr, options);
 
   uint8_t* source_buffer;
   uint8_t* destination_buffer;
