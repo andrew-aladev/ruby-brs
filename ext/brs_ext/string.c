@@ -5,7 +5,11 @@
 
 #include <brotli/decode.h>
 #include <brotli/encode.h>
+#include <stdint.h>
+#include <stdlib.h>
 
+#include "brs_ext/buffer.h"
+#include "brs_ext/common.h"
 #include "brs_ext/error.h"
 #include "brs_ext/macro.h"
 #include "brs_ext/option.h"
@@ -127,10 +131,15 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
   }
 
   BRS_EXT_SET_COMPRESSOR_OPTIONS(state_ptr, options);
+  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
+
+  if (destination_buffer_length == 0) {
+    destination_buffer_length = BRS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_COMPRESSOR;
+  }
 
   int exception;
 
-  CREATE_BUFFER(destination_value, buffer_length, exception);
+  CREATE_BUFFER(destination_value, destination_buffer_length, exception);
   if (exception != 0) {
     BrotliEncoderDestroyInstance(state_ptr);
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
@@ -139,7 +148,7 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
   brs_ext_result_t ext_result = compress_data(
     state_ptr,
     remaining_source, remaining_source_length,
-    destination_value, buffer_length);
+    destination_value, destination_buffer_length);
 
   BrotliEncoderDestroyInstance(state_ptr);
 
@@ -218,10 +227,15 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
   }
 
   BRS_EXT_SET_DECOMPRESSOR_OPTIONS(state_ptr, options);
+  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
+
+  if (destination_buffer_length == 0) {
+    destination_buffer_length = BRS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_DECOMPRESSOR;
+  }
 
   int exception;
 
-  CREATE_BUFFER(destination_value, buffer_length, exception);
+  CREATE_BUFFER(destination_value, destination_buffer_length, exception);
   if (exception != 0) {
     BrotliDecoderDestroyInstance(state_ptr);
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
@@ -230,7 +244,7 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
   brs_ext_result_t ext_result = decompress_data(
     state_ptr,
     remaining_source, remaining_source_length,
-    destination_value, buffer_length);
+    destination_value, destination_buffer_length);
 
   BrotliDecoderDestroyInstance(state_ptr);
 

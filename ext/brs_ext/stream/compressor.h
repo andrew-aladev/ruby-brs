@@ -5,6 +5,8 @@
 #define BRS_EXT_STREAM_COMPRESSOR_H
 
 #include <brotli/encode.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include "ruby.h"
 

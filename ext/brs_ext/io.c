@@ -5,7 +5,10 @@
 
 #include <brotli/decode.h>
 #include <brotli/encode.h>
+#include <stdint.h>
+#include <stdlib.h>
 
+#include "brs_ext/buffer.h"
 #include "brs_ext/common.h"
 #include "brs_ext/error.h"
 #include "brs_ext/io.h"
@@ -26,14 +29,16 @@
 
 // -- buffer --
 
-static inline brs_ext_result_t create_buffers(uint8_t** source_buffer_ptr, uint8_t** destination_buffer_ptr, size_t buffer_length)
+static inline brs_ext_result_t create_buffers(
+  uint8_t** source_buffer_ptr, size_t source_buffer_length,
+  uint8_t** destination_buffer_ptr, size_t destination_buffer_length)
 {
-  uint8_t* source_buffer = malloc(buffer_length);
+  uint8_t* source_buffer = malloc(source_buffer_length);
   if (source_buffer == NULL) {
     return BRS_EXT_ERROR_ALLOCATE_FAILED;
   }
 
-  uint8_t* destination_buffer = malloc(buffer_length);
+  uint8_t* destination_buffer = malloc(destination_buffer_length);
   if (destination_buffer == NULL) {
     free(source_buffer);
     return BRS_EXT_ERROR_ALLOCATE_FAILED;
@@ -49,9 +54,8 @@ static inline brs_ext_result_t create_buffers(uint8_t** source_buffer_ptr, uint8
 
 static inline brs_ext_result_t compress_data(
   BrotliEncoderState* state_ptr,
-  FILE* source_file, uint8_t* source_buffer,
-  FILE* destination_file, uint8_t* destination_buffer,
-  size_t buffer_length)
+  FILE* source_file, uint8_t* source_buffer, size_t source_buffer_length,
+  FILE* destination_file, uint8_t* destination_buffer, size_t destination_buffer_length)
 {
   return 0;
 }
@@ -68,11 +72,23 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
   }
 
   BRS_EXT_SET_COMPRESSOR_OPTIONS(state_ptr, options);
+  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, source_buffer_length);
+  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
+
+  if (source_buffer_length == 0) {
+    source_buffer_length = BRS_DEFAULT_SOURCE_BUFFER_LENGTH_FOR_COMPRESSOR;
+  }
+  if (destination_buffer_length == 0) {
+    destination_buffer_length = BRS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_COMPRESSOR;
+  }
 
   uint8_t* source_buffer;
   uint8_t* destination_buffer;
 
-  brs_ext_result_t ext_result = create_buffers(&source_buffer, &destination_buffer, buffer_length);
+  brs_ext_result_t ext_result = create_buffers(
+    &source_buffer, source_buffer_length,
+    &destination_buffer, destination_buffer_length);
+
   if (ext_result != 0) {
     BrotliEncoderDestroyInstance(state_ptr);
     brs_ext_raise_error(ext_result);
@@ -80,9 +96,8 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
 
   ext_result = compress_data(
     state_ptr,
-    source_file, source_buffer,
-    destination_file, destination_buffer,
-    buffer_length);
+    source_file, source_buffer, source_buffer_length,
+    destination_file, destination_buffer, destination_buffer_length);
 
   free(source_buffer);
   free(destination_buffer);
@@ -102,9 +117,8 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
 
 static inline brs_ext_result_t decompress_data(
   BrotliDecoderState* state_ptr,
-  FILE* source_file, uint8_t* source_buffer,
-  FILE* destination_file, uint8_t* destination_buffer,
-  size_t buffer_length)
+  FILE* source_file, uint8_t* source_buffer, size_t source_buffer_length,
+  FILE* destination_file, uint8_t* destination_buffer, size_t destination_buffer_length)
 {
   return 0;
 }
@@ -121,11 +135,23 @@ VALUE brs_ext_decompress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE dest
   }
 
   BRS_EXT_SET_DECOMPRESSOR_OPTIONS(state_ptr, options);
+  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, source_buffer_length);
+  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
+
+  if (source_buffer_length == 0) {
+    source_buffer_length = BRS_DEFAULT_SOURCE_BUFFER_LENGTH_FOR_DECOMPRESSOR;
+  }
+  if (destination_buffer_length == 0) {
+    destination_buffer_length = BRS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_DECOMPRESSOR;
+  }
 
   uint8_t* source_buffer;
   uint8_t* destination_buffer;
 
-  brs_ext_result_t ext_result = create_buffers(&source_buffer, &destination_buffer, buffer_length);
+  brs_ext_result_t ext_result = create_buffers(
+    &source_buffer, source_buffer_length,
+    &destination_buffer, destination_buffer_length);
+
   if (ext_result != 0) {
     BrotliDecoderDestroyInstance(state_ptr);
     brs_ext_raise_error(ext_result);
@@ -133,9 +159,8 @@ VALUE brs_ext_decompress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE dest
 
   ext_result = decompress_data(
     state_ptr,
-    source_file, source_buffer,
-    destination_file, destination_buffer,
-    buffer_length);
+    source_file, source_buffer, source_buffer_length,
+    destination_file, destination_buffer, destination_buffer_length);
 
   free(source_buffer);
   free(destination_buffer);

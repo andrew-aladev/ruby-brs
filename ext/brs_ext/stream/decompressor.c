@@ -4,7 +4,10 @@
 #include "brs_ext/stream/decompressor.h"
 
 #include <brotli/decode.h>
+#include <stdint.h>
+#include <stdlib.h>
 
+#include "brs_ext/buffer.h"
 #include "brs_ext/error.h"
 #include "brs_ext/option.h"
 #include "ruby.h"
@@ -54,18 +57,23 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
   }
 
   BRS_EXT_SET_DECOMPRESSOR_OPTIONS(state_ptr, options);
+  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
 
-  uint8_t* buffer = malloc(buffer_length);
-  if (buffer == NULL) {
+  if (destination_buffer_length == 0) {
+    destination_buffer_length = BRS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_DECOMPRESSOR;
+  }
+
+  uint8_t* destination_buffer = malloc(destination_buffer_length);
+  if (destination_buffer == NULL) {
     BrotliDecoderDestroyInstance(state_ptr);
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   decompressor_ptr->state_ptr                           = state_ptr;
-  decompressor_ptr->destination_buffer                  = buffer;
-  decompressor_ptr->destination_buffer_length           = buffer_length;
-  decompressor_ptr->remaining_destination_buffer        = buffer;
-  decompressor_ptr->remaining_destination_buffer_length = buffer_length;
+  decompressor_ptr->destination_buffer                  = destination_buffer;
+  decompressor_ptr->destination_buffer_length           = destination_buffer_length;
+  decompressor_ptr->remaining_destination_buffer        = destination_buffer;
+  decompressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
 
   return Qnil;
 }

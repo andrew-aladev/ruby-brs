@@ -5,6 +5,8 @@
 #define BRS_EXT_STREAM_DECOMPRESSOR_H
 
 #include <brotli/decode.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include "ruby.h"
 
