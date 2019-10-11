@@ -11,8 +11,6 @@ module BRS
     class Reader < Abstract
       include ReaderHelpers
 
-      DEFAULT_IO_PORTION_BYTESIZE = 1 << 15 # 32 KB
-
       attr_accessor :lineno
 
       def initialize(source_io, options = {}, *args)
@@ -20,15 +18,20 @@ module BRS
 
         super source_io, *args
 
-        io_portion_bytesize = @options[:io_portion_bytesize]
-        @options.delete :io_portion_bytesize
-
-        Validation.validate_positive_integer io_portion_bytesize unless io_portion_bytesize.nil?
-        @io_portion_bytesize = io_portion_bytesize || DEFAULT_IO_PORTION_BYTESIZE
-
+        initialize_source_buffer_length
         reset_io_remainder
 
         @lineno = 0
+      end
+
+      protected def initialize_source_buffer_length
+        source_buffer_length = @options[:source_buffer_length]
+        Validation.validate_not_negative_integer source_buffer_length unless source_buffer_length.nil?
+
+        source_buffer_length = Buffer::DEFAULT_SOURCE_BUFFER_LENGTH_FOR_DECOMPRESSOR \
+          if source_buffer_length == 0 || source_buffer_length.nil?
+
+        @source_buffer_length = source_buffer_length
       end
 
       protected def create_raw_stream
@@ -69,7 +72,7 @@ module BRS
       end
 
       protected def read_more_from_buffer
-        io_data = @io.read @io_portion_bytesize
+        io_data = @io.read @source_buffer_length
         append_io_data_to_buffer io_data
       end
 
@@ -82,7 +85,7 @@ module BRS
       end
 
       protected def readpartial_from_buffer
-        io_data = @io.readpartial @io_portion_bytesize
+        io_data = @io.readpartial @source_buffer_length
         append_io_data_to_buffer io_data
       end
 
@@ -111,7 +114,7 @@ module BRS
       end
 
       protected def read_more_from_buffer_nonblock(*options)
-        io_data = @io.read_nonblock @io_portion_bytesize, *options
+        io_data = @io.read_nonblock @source_buffer_length, *options
         append_io_data_to_buffer io_data
       end
 

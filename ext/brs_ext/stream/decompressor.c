@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 #include "brs_ext/buffer.h"
+#include "brs_ext/common.h"
 #include "brs_ext/error.h"
 #include "brs_ext/option.h"
 #include "ruby.h"
@@ -50,14 +51,19 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
 {
   GET_DECOMPRESSOR(self);
   Check_Type(options, T_HASH);
+  BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
+  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
 
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  BRS_EXT_SET_DECOMPRESSOR_OPTIONS(state_ptr, options);
-  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
+  brs_ext_result_t ext_result = brs_ext_set_decompressor_options(state_ptr, &decompressor_options);
+  if (ext_result != 0) {
+    BrotliDecoderDestroyInstance(state_ptr);
+    brs_ext_raise_error(ext_result);
+  }
 
   if (destination_buffer_length == 0) {
     destination_buffer_length = BRS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_DECOMPRESSOR;

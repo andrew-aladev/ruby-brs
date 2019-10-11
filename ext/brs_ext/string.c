@@ -124,14 +124,19 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
 {
   GET_SOURCE_DATA(source_value);
   Check_Type(options, T_HASH);
+  BRS_EXT_GET_COMPRESSOR_OPTIONS(options);
+  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
 
   BrotliEncoderState* state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  BRS_EXT_SET_COMPRESSOR_OPTIONS(state_ptr, options);
-  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
+  brs_ext_result_t ext_result = brs_ext_set_compressor_options(state_ptr, &compressor_options);
+  if (ext_result != 0) {
+    BrotliEncoderDestroyInstance(state_ptr);
+    brs_ext_raise_error(ext_result);
+  }
 
   if (destination_buffer_length == 0) {
     destination_buffer_length = BRS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_COMPRESSOR;
@@ -145,7 +150,7 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  brs_ext_result_t ext_result = compress_data(
+  ext_result = compress_data(
     state_ptr,
     remaining_source, remaining_source_length,
     destination_value, destination_buffer_length);
@@ -220,14 +225,19 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
 {
   GET_SOURCE_DATA(source_value);
   Check_Type(options, T_HASH);
+  BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
+  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
 
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  BRS_EXT_SET_DECOMPRESSOR_OPTIONS(state_ptr, options);
-  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
+  brs_ext_result_t ext_result = brs_ext_set_decompressor_options(state_ptr, &decompressor_options);
+  if (ext_result != 0) {
+    BrotliDecoderDestroyInstance(state_ptr);
+    brs_ext_raise_error(ext_result);
+  }
 
   if (destination_buffer_length == 0) {
     destination_buffer_length = BRS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_DECOMPRESSOR;
@@ -241,7 +251,7 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  brs_ext_result_t ext_result = decompress_data(
+  ext_result = decompress_data(
     state_ptr,
     remaining_source, remaining_source_length,
     destination_value, destination_buffer_length);

@@ -33,8 +33,8 @@ module BRS
 
       buffer_length_names.each { |name| Validation.validate_not_negative_integer options[name] }
 
-      unless options.key? :mode
-        mode = options[:mode]
+      mode = options[:mode]
+      unless mode.nil?
         Validation.validate_symbol mode
         raise ValidateError, "invalid mode" unless MODES.include? mode
       end

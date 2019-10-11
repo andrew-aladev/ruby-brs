@@ -20,6 +20,16 @@ module BRS
         ENCODINGS         = Common::ENCODINGS
         TRANSCODE_OPTIONS = Common::TRANSCODE_OPTIONS
         TEXTS             = Common::TEXTS
+        LARGE_TEXTS       = Common::LARGE_TEXTS
+
+        BUFFER_LENGTH_NAMES   = %i[source_buffer_length destination_buffer_length].freeze
+        BUFFER_LENGTH_MAPPING = {
+          :source_buffer_length      => :destination_buffer_length,
+          :destination_buffer_length => :source_buffer_length
+        }
+        .freeze
+
+        COMPRESSOR_OPTION_COMBINATIONS = Option.get_compressor_option_combinations(BUFFER_LENGTH_NAMES).freeze
 
         LIMITS = [nil, 1].freeze
 
@@ -35,10 +45,10 @@ module BRS
 
         def test_byte
           TEXTS.each do |text|
-            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               write_archive text, compressor_options
 
-              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+              get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                 Target.open ARCHIVE_PATH, decompressor_options do |instance|
                   # getbyte
 
@@ -81,10 +91,10 @@ module BRS
 
         def test_char
           TEXTS.each do |text|
-            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               write_archive text, compressor_options
 
-              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+              get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                 Target.open ARCHIVE_PATH, decompressor_options do |instance|
                   # getc
 
@@ -120,10 +130,10 @@ module BRS
             (ENCODINGS - [external_encoding]).each do |internal_encoding|
               target_text = text.encode internal_encoding, TRANSCODE_OPTIONS
 
-              Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+              COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                 write_archive text, compressor_options
 
-                Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                   Target.open ARCHIVE_PATH, decompressor_options do |instance|
                     instance.set_encoding external_encoding, internal_encoding, TRANSCODE_OPTIONS
 
@@ -201,10 +211,10 @@ module BRS
                 text[0]
               end
 
-            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               write_archive text, compressor_options
 
-              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+              get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                 Target.open ARCHIVE_PATH, decompressor_options do |instance|
                   # lineno
 
@@ -292,10 +302,10 @@ module BRS
             (ENCODINGS - [external_encoding]).each do |internal_encoding|
               target_text = text.encode internal_encoding, TRANSCODE_OPTIONS
 
-              Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+              COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                 write_archive text, compressor_options
 
-                Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                   Target.open ARCHIVE_PATH, decompressor_options do |instance|
                     instance.set_encoding external_encoding, internal_encoding, TRANSCODE_OPTIONS
 
@@ -359,15 +369,27 @@ module BRS
 
         def test_open
           TEXTS.each do |text|
-            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               write_archive text, compressor_options
 
-              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+              get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                 decompressed_text = Target.open ARCHIVE_PATH, decompressor_options, &:read
                 decompressed_text.force_encoding text.encoding
+
                 assert_equal text, decompressed_text
               end
             end
+          end
+        end
+
+        def test_open_with_large_texts
+          LARGE_TEXTS.each do |text|
+            write_archive text, {}
+
+            decompressed_text = Target.open ARCHIVE_PATH, &:read
+            decompressed_text.force_encoding text.encoding
+
+            assert_equal text, decompressed_text
           end
         end
 
@@ -376,6 +398,10 @@ module BRS
         protected def write_archive(text, compressor_options)
           compressed_text = String.compress text, compressor_options
           ::File.write ARCHIVE_PATH, compressed_text
+        end
+
+        def get_compatible_decompressor_options(compressor_options, &block)
+          Option.get_compatible_decompressor_options(compressor_options, BUFFER_LENGTH_MAPPING, &block)
         end
 
         protected def target

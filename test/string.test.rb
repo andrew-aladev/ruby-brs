@@ -13,7 +13,15 @@ module BRS
     class String < Minitest::Unit::TestCase
       Target = BRS::String
 
-      TEXTS = Common::TEXTS
+      TEXTS       = Common::TEXTS
+      LARGE_TEXTS = Common::LARGE_TEXTS
+
+      BUFFER_LENGTH_NAMES   = %i[destination_buffer_length].freeze
+      BUFFER_LENGTH_MAPPING = { :destination_buffer_length => :destination_buffer_length }.freeze
+
+      INVALID_COMPRESSOR_OPTIONS     = Option.get_invalid_compressor_options(BUFFER_LENGTH_NAMES).freeze
+      INVALID_DECOMPRESSOR_OPTIONS   = Option.get_invalid_decompressor_options(BUFFER_LENGTH_NAMES).freeze
+      COMPRESSOR_OPTION_COMBINATIONS = Option.get_compressor_option_combinations(BUFFER_LENGTH_NAMES).freeze
 
       def test_invalid_arguments
         Validation::INVALID_STRINGS.each do |invalid_string|
@@ -26,13 +34,13 @@ module BRS
           end
         end
 
-        Option::INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
+        INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
           assert_raises ValidateError do
             Target.compress "", invalid_options
           end
         end
 
-        Option::INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
+        INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
           assert_raises ValidateError do
             Target.decompress "", invalid_options
           end
@@ -49,10 +57,10 @@ module BRS
 
       def test_texts
         TEXTS.each do |text|
-          Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+          COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
             compressed_text = Target.compress text, compressor_options
 
-            Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+            get_compatible_decompressor_options(compressor_options) do |decompressor_options|
               decompressed_text = Target.decompress compressed_text, decompressor_options
               decompressed_text.force_encoding text.encoding
 
@@ -60,6 +68,23 @@ module BRS
             end
           end
         end
+      end
+
+      def test_large_texts
+        LARGE_TEXTS.each do |text|
+          compressed_text = Target.compress text
+
+          decompressed_text = Target.decompress compressed_text
+          decompressed_text.force_encoding text.encoding
+
+          assert_equal text, decompressed_text
+        end
+      end
+
+      # -----
+
+      def get_compatible_decompressor_options(compressor_options, &block)
+        Option.get_compatible_decompressor_options(compressor_options, BUFFER_LENGTH_MAPPING, &block)
       end
     end
 

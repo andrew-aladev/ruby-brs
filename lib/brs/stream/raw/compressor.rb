@@ -12,8 +12,10 @@ module BRS
   module Stream
     module Raw
       class Compressor < Abstract
+        BUFFER_LENGTH_NAMES = %i[destination_buffer_length].freeze
+
         def initialize(options = {})
-          options       = Option.get_compressor_options options
+          options       = Option.get_compressor_options options, BUFFER_LENGTH_NAMES
           native_stream = NativeCompressor.new options
 
           super native_stream

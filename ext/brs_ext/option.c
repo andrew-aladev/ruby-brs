@@ -7,49 +7,44 @@
 #include <brotli/encode.h>
 #include <stdbool.h>
 
+#include "brs_ext/common.h"
 #include "brs_ext/error.h"
 #include "ruby.h"
 
-static inline VALUE get_option(VALUE options, const char* name)
+static inline VALUE get_raw_option_value(VALUE options, const char* name)
 {
   return rb_funcall(options, rb_intern("[]"), 1, ID2SYM(rb_intern(name)));
 }
 
-bool brs_ext_get_bool_option(VALUE options, const char* name)
+static inline bool get_bool_option_value(VALUE raw_value)
 {
-  VALUE value = get_option(options, name);
-
-  int type = TYPE(value);
-  if (type != T_TRUE && type != T_FALSE) {
+  int raw_type = TYPE(raw_value);
+  if (raw_type != T_TRUE && raw_type != T_FALSE) {
     brs_ext_raise_error(BRS_EXT_ERROR_VALIDATE_FAILED);
   }
 
-  return type == T_TRUE;
+  return raw_type == T_TRUE;
 }
 
-unsigned long brs_ext_get_fixnum_option(VALUE options, const char* name)
+static inline unsigned long get_fixnum_option_value(VALUE raw_value)
 {
-  VALUE value = get_option(options, name);
+  Check_Type(raw_value, T_FIXNUM);
 
-  Check_Type(value, T_FIXNUM);
-
-  return NUM2UINT(value);
+  return NUM2UINT(raw_value);
 }
 
-unsigned long brs_ext_get_mode_option(VALUE options, const char* name)
+static inline unsigned long get_mode_option_value(VALUE raw_value)
 {
-  VALUE value = get_option(options, name);
+  Check_Type(raw_value, T_SYMBOL);
 
-  Check_Type(value, T_SYMBOL);
-
-  ID id = SYM2ID(value);
-  if (id == rb_intern("text")) {
+  ID raw_id = SYM2ID(raw_value);
+  if (raw_id == rb_intern("text")) {
     return BROTLI_MODE_TEXT;
   }
-  else if (id == rb_intern("font")) {
+  else if (raw_id == rb_intern("font")) {
     return BROTLI_MODE_FONT;
   }
-  else if (id == rb_intern("generic")) {
+  else if (raw_id == rb_intern("generic")) {
     return BROTLI_MODE_GENERIC;
   }
   else {
@@ -57,51 +52,71 @@ unsigned long brs_ext_get_mode_option(VALUE options, const char* name)
   }
 }
 
-static inline unsigned long serialize_option(VALUE options, brs_ext_option_t type, const char* name)
+void brs_ext_get_option(VALUE options, brs_ext_option_t* option, brs_ext_option_type_t type, const char* name)
 {
+  VALUE raw_value = get_raw_option_value(options, name);
+
+  option->has_value = raw_value != Qnil;
+  if (!option->has_value) {
+    return;
+  }
+
+  brs_ext_option_value_t value;
+
   switch (type) {
     case BRS_EXT_OPTION_TYPE_BOOL:
-      return brs_ext_get_bool_option(options, name) ? 1 : 0;
+      value = get_bool_option_value(raw_value) ? 1 : 0;
+      break;
     case BRS_EXT_OPTION_TYPE_FIXNUM:
-      return brs_ext_get_fixnum_option(options, name);
+      value = get_fixnum_option_value(raw_value);
+      break;
     case BRS_EXT_OPTION_TYPE_MODE:
-      return brs_ext_get_mode_option(options, name);
+      value = get_mode_option_value(raw_value);
+      break;
     default:
       brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
   }
+
+  option->value = value;
 }
 
-static inline bool has_option(VALUE options, const char* name)
+unsigned long brs_ext_get_fixnum_option_value(VALUE options, const char* name)
 {
-  return rb_funcall(options, rb_intern("key?"), 1, ID2SYM(rb_intern(name))) == T_TRUE;
+  VALUE raw_value = get_raw_option_value(options, name);
+
+  return get_fixnum_option_value(raw_value);
 }
 
-void brs_ext_set_compressor_option(
-  BrotliEncoderState*    state_ptr,
-  BrotliEncoderParameter param, VALUE options, brs_ext_option_t type, const char* name)
-{
-  if (has_option(options, name)) {
-    unsigned long value = serialize_option(options, type, name);
-
-    BROTLI_BOOL result = BrotliEncoderSetParameter(state_ptr, param, value);
-    if (!result) {
-      brs_ext_raise_error(BRS_EXT_ERROR_VALIDATE_FAILED);
-    }
+#define SET_OPTION_VALUE(function, state_ptr, param, option)           \
+  if (option.has_value && !function(state_ptr, param, option.value)) { \
+    return BRS_EXT_ERROR_VALIDATE_FAILED;                              \
   }
+
+#define SET_ENCODER_PARAM(state_ptr, param, option) \
+  SET_OPTION_VALUE(BrotliEncoderSetParameter, state_ptr, param, option);
+
+brs_ext_result_t brs_ext_set_compressor_options(BrotliEncoderState* state_ptr, brs_ext_compressor_options_t* options)
+{
+  SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_MODE, options->mode);
+  SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_QUALITY, options->quality);
+  SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_LGWIN, options->lgwin);
+  SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_LGBLOCK, options->lgblock);
+  SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING, options->disable_literal_context_modeling);
+  SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_SIZE_HINT, options->size_hint);
+  SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_LARGE_WINDOW, options->large_window);
+
+  return 0;
 }
 
-void brs_ext_set_decompressor_option(
-  BrotliDecoderState*    state_ptr,
-  BrotliDecoderParameter param, VALUE options, brs_ext_option_t type, const char* name)
-{
-  if (has_option(options, name)) {
-    unsigned long value = serialize_option(options, type, name);
+#define SET_DECODER_PARAM(state_ptr, param, option) \
+  SET_OPTION_VALUE(BrotliDecoderSetParameter, state_ptr, param, option);
 
-    BROTLI_BOOL result = BrotliDecoderSetParameter(state_ptr, param, value);
-    if (!result) {
-      brs_ext_raise_error(BRS_EXT_ERROR_VALIDATE_FAILED);
-    }
-  }
+brs_ext_result_t brs_ext_set_decompressor_options(BrotliDecoderState* state_ptr, brs_ext_decompressor_options_t* options)
+{
+  SET_DECODER_PARAM(state_ptr, BROTLI_DECODER_PARAM_DISABLE_RING_BUFFER_REALLOCATION, options->disable_ring_buffer_reallocation);
+  SET_DECODER_PARAM(state_ptr, BROTLI_DECODER_PARAM_LARGE_WINDOW, options->large_window);
+
+  return 0;
 }
 
 void brs_ext_option_exports(VALUE root_module)

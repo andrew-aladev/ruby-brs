@@ -18,11 +18,17 @@ module BRS
 
         ARCHIVE_PATH    = Common::ARCHIVE_PATH
         TEXTS           = Common::TEXTS
+        LARGE_TEXTS     = Common::LARGE_TEXTS
         PORTION_LENGTHS = Common::PORTION_LENGTHS
+
+        BUFFER_LENGTH_NAMES   = %i[destination_buffer_length].freeze
+        BUFFER_LENGTH_MAPPING = { :destination_buffer_length => :destination_buffer_length }.freeze
+
+        COMPRESSOR_OPTION_COMBINATIONS = Option.get_compressor_option_combinations(BUFFER_LENGTH_NAMES).freeze
 
         def test_print
           TEXTS.each do |text|
-            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               Target.open ARCHIVE_PATH, compressor_options do |instance|
                 $LAST_READ_LINE = text
 
@@ -35,7 +41,7 @@ module BRS
 
               compressed_text = ::File.read ARCHIVE_PATH
 
-              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+              get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                 check_text text, compressed_text, decompressor_options
               end
             end
@@ -53,7 +59,7 @@ module BRS
               sources.each { |source| target_text << source + field_separator }
               target_text << record_separator
 
-              Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+              COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                 Target.open ARCHIVE_PATH, compressor_options do |instance|
                   $OUTPUT_FIELD_SEPARATOR  = field_separator
                   $OUTPUT_RECORD_SEPARATOR = record_separator
@@ -68,7 +74,7 @@ module BRS
 
                 compressed_text = ::File.read ARCHIVE_PATH
 
-                Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                   check_text target_text, compressed_text, decompressor_options
                 end
               end
@@ -81,14 +87,14 @@ module BRS
             PORTION_LENGTHS.each do |portion_length|
               sources = get_sources text, portion_length
 
-              Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+              COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                 Target.open ARCHIVE_PATH, compressor_options do |instance|
                   sources.each { |source| instance.printf "%s", source }
                 end
 
                 compressed_text = ::File.read ARCHIVE_PATH
 
-                Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                   check_text text, compressed_text, decompressor_options
                 end
               end
@@ -108,7 +114,7 @@ module BRS
 
         def test_putc
           TEXTS.each do |text|
-            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               Target.open ARCHIVE_PATH, compressor_options do |instance|
                 # Putc should process numbers and strings.
                 text.chars.map.with_index do |char, index|
@@ -122,7 +128,7 @@ module BRS
 
               compressed_text = ::File.read ARCHIVE_PATH
 
-              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+              get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                 check_text text, compressed_text, decompressor_options
               end
             end
@@ -143,7 +149,7 @@ module BRS
               target_text = "".encode text.encoding
               sources.each { |source| target_text << source + newline }
 
-              Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+              COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                 Target.open ARCHIVE_PATH, compressor_options do |instance|
                   # Puts should ignore additional newlines and process arrays.
                   args = sources.map.with_index do |source, index|
@@ -159,7 +165,7 @@ module BRS
 
                 compressed_text = ::File.read ARCHIVE_PATH
 
-                Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                   check_text target_text, compressed_text, decompressor_options
                 end
               end
@@ -182,15 +188,25 @@ module BRS
 
         def test_open
           TEXTS.each do |text|
-            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               Target.open(ARCHIVE_PATH, compressor_options) { |instance| instance.write text }
 
               compressed_text = ::File.read ARCHIVE_PATH
 
-              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+              get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                 check_text text, compressed_text, decompressor_options
               end
             end
+          end
+        end
+
+        def test_open_with_large_texts
+          LARGE_TEXTS.each do |text|
+            Target.open(ARCHIVE_PATH) { |instance| instance.write text }
+
+            compressed_text = ::File.read ARCHIVE_PATH
+
+            check_text text, compressed_text, {}
           end
         end
 
@@ -212,6 +228,10 @@ module BRS
           decompressed_text.force_encoding text.encoding
 
           assert_equal text, decompressed_text
+        end
+
+        def get_compatible_decompressor_options(compressor_options, &block)
+          Option.get_compatible_decompressor_options(compressor_options, BUFFER_LENGTH_MAPPING, &block)
         end
 
         protected def target
