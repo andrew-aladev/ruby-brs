@@ -56,7 +56,7 @@ module BRS
 
       PORTION_LENGTHS = [
         1,
-        256
+        128
       ]
       .freeze
     end

@@ -273,6 +273,7 @@ module BRS
 
                   decompressed_text = lines.join ""
                   decompressed_text.force_encoding text.encoding
+
                   assert_equal text, decompressed_text
 
                   # each_line
