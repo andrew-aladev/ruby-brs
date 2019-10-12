@@ -7,7 +7,7 @@ require_relative "lib/brs/version"
 
 GEMSPEC = Gem::Specification.new do |gem|
   gem.name     = "ruby-brs"
-  gem.summary  = "Ruby bindings for brs library."
+  gem.summary  = "Ruby bindings for brotli library."
   gem.homepage = "https://github.com/andrew-aladev/ruby-brs"
   gem.license  = "MIT"
   gem.authors  = File.read("AUTHORS").split("\n").reject(&:empty?)
