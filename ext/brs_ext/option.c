@@ -6,6 +6,7 @@
 #include <brotli/decode.h>
 #include <brotli/encode.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "brs_ext/common.h"
 #include "brs_ext/error.h"
@@ -33,7 +34,7 @@ static inline unsigned long get_fixnum_option_value(VALUE raw_value)
   return NUM2UINT(raw_value);
 }
 
-static inline unsigned int get_mode_option_value(VALUE raw_value)
+static inline uint_fast8_t get_mode_option_value(VALUE raw_value)
 {
   Check_Type(raw_value, T_SYMBOL);
 
@@ -68,10 +69,10 @@ void brs_ext_get_option(VALUE options, brs_ext_option_t* option, brs_ext_option_
       value = get_bool_option_value(raw_value) ? 1 : 0;
       break;
     case BRS_EXT_OPTION_TYPE_FIXNUM:
-      value = get_fixnum_option_value(raw_value);
+      value = (brs_ext_option_value_t)get_fixnum_option_value(raw_value);
       break;
     case BRS_EXT_OPTION_TYPE_MODE:
-      value = get_mode_option_value(raw_value);
+      value = (brs_ext_option_value_t)get_mode_option_value(raw_value);
       break;
     default:
       brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
