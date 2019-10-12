@@ -33,7 +33,7 @@ static inline unsigned long get_fixnum_option_value(VALUE raw_value)
   return NUM2UINT(raw_value);
 }
 
-static inline unsigned long get_mode_option_value(VALUE raw_value)
+static inline unsigned int get_mode_option_value(VALUE raw_value)
 {
   Check_Type(raw_value, T_SYMBOL);
 
