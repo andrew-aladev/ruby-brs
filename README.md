@@ -68,7 +68,7 @@ Each API supports several options:
 :destination_buffer_length
 ```
 
-There is internal buffer for compressed and decompressed data.
+There are internal buffers for compressed and decompressed data.
 For example you want to use 1 KB as source buffer length for compressor - please use 256 B as destination buffer length.
 You want to use 256 B as source buffer length for decompressor - please use 1 KB as destination buffer length.
 
@@ -80,56 +80,50 @@ Values: 0 - infinity, default value: 0.
 ```
 
 Values: [`:text`, `:font`, `:generic`], default value: `:generic`.
-Please read brotli docs for more info.
 
 ```
 :quality
 ```
 
 Values: 0 - 11, default value: 11.
-Please read brotli docs for more info.
 
 ```
 :lgwin
 ```
 
 Values: 10 - 24, default value: 22.
-Please read brotli docs for more info.
 
 ```
 :lgblock
 ```
 
 Values: 16 - 24, default value: none.
-Please read brotli docs for more info.
 
 ```
 :disable_literal_context_modeling
 ```
 
 Values: true/false, default value: false.
-Please read brotli docs for more info.
 
 ```
 :disable_ring_buffer_reallocation
 ```
 
 Values: true/false, default value: false.
-Please read brotli docs for more info.
 
 ```
 :size_hint
 ```
 
 Values: 0 - infinity, default value: 0.
-Please read brotli docs for more info.
 
 ```
 :large_window
 ```
 
 Values: true/false, default value: false.
-Please read brotli docs for more info.
+
+Please read brotli docs for more info about options.
 
 Possible compressor options:
 ```
@@ -157,7 +151,7 @@ data = BRS::String.compress "sample string", :quality => 5
 puts BRS::String.decompress(data, :disable_ring_buffer_reallocation => true)
 ```
 
-Default options are compatible with HTTP data processing (`Content-Encoding: br`):
+Default options are compatible with HTTP (`Content-Encoding: br`):
 
 ```ruby
 require "brs"
