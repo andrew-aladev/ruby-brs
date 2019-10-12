@@ -70,7 +70,7 @@ static inline brs_ext_result_t increase_destination_buffer(
 
 // -- compress --
 
-static inline brs_ext_result_t compress_data(
+static inline brs_ext_result_t compress(
   BrotliEncoderState* state_ptr,
   const uint8_t* remaining_source, size_t remaining_source_length,
   VALUE destination_value, size_t destination_buffer_length)
@@ -152,7 +152,7 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  ext_result = compress_data(
+  ext_result = compress(
     state_ptr,
     remaining_source, remaining_source_length,
     destination_value, destination_buffer_length);
@@ -168,7 +168,7 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
 
 // -- decompress --
 
-static inline brs_ext_result_t decompress_data(
+static inline brs_ext_result_t decompress(
   BrotliDecoderState* state_ptr,
   const uint8_t* remaining_source, size_t remaining_source_length,
   VALUE destination_value, size_t destination_buffer_length)
@@ -253,7 +253,7 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  ext_result = decompress_data(
+  ext_result = decompress(
     state_ptr,
     remaining_source, remaining_source_length,
     destination_value, destination_buffer_length);
