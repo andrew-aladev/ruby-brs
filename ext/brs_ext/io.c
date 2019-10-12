@@ -16,17 +16,6 @@
 #include "brs_ext/option.h"
 #include "ruby.h"
 
-#define GET_FILE(target)                               \
-  Check_Type(target, T_FILE);                          \
-                                                       \
-  rb_io_t* target##_io;                                \
-  GetOpenFile(target, target##_io);                    \
-                                                       \
-  FILE* target##_file = rb_io_stdio_file(target##_io); \
-  if (target##_file == NULL) {                         \
-    brs_ext_raise_error(BRS_EXT_ERROR_ACCESS_IO);      \
-  }
-
 // -- buffer --
 
 static inline brs_ext_result_t create_buffers(
@@ -49,6 +38,19 @@ static inline brs_ext_result_t create_buffers(
 
   return 0;
 }
+
+// -- utils --
+
+#define GET_FILE(target)                               \
+  Check_Type(target, T_FILE);                          \
+                                                       \
+  rb_io_t* target##_io;                                \
+  GetOpenFile(target, target##_io);                    \
+                                                       \
+  FILE* target##_file = rb_io_stdio_file(target##_io); \
+  if (target##_file == NULL) {                         \
+    brs_ext_raise_error(BRS_EXT_ERROR_ACCESS_IO);      \
+  }
 
 // -- compress --
 
