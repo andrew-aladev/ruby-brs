@@ -163,6 +163,177 @@ get "/" do
 end
 ```
 
+## String
+
+String maintains destination buffer only, so it accepts `destination_buffer_length` option only.
+
+```
+::compress(source, options = {})
+::decompress(source, options = {})
+```
+
+`source` is a source string.
+
+## File
+
+File maintains both source and destination buffers, it accepts both `source_buffer_length` and `destination_buffer_length` options.
+
+```
+::compress(source, destination, options = {})
+::decompress(source, destination, options = {})
+```
+
+`source` and `destination` are file pathes.
+
+## Stream::Writer
+
+Its behaviour is similar to builtin [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipWriter.html).
+
+Writer maintains destination buffer only, so it accepts `destination_buffer_length` option only.
+
+```
+::open(file_path, options = {}, :external_encoding => nil, :transcode_options => {}, &block)
+```
+
+Open file path and create stream writer associated with opened file.
+Data will be transcoded to `:external_encoding` using `:transcode_options` before compressing.
+
+```
+::new(destination_io, options = {}, :external_encoding => nil, :transcode_options => {})
+```
+
+Create stream writer associated with destination io.
+Data will be transcoded to `:external_encoding` using `:transcode_options` before compressing.
+
+```
+#set_encoding(external_encoding, nil, transcode_options)
+```
+
+Set another encodings, `nil` is just for compatibility with `IO`.
+
+```
+#io
+#to_io
+#stat
+#external_encoding
+#transcode_options
+#pos
+#tell
+```
+
+See [`IO`](https://ruby-doc.org/core-2.6.1/IO.html) docs.
+
+```
+#write(*objects)
+#flush
+#rewind
+#close
+#closed?
+```
+
+See [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipWriter.html) docs.
+
+```
+#write_nonblock(object, *options)
+#flush_nonblock(*options)
+#rewind_nonblock(*options)
+#close_nonblock(*options)
+```
+
+Special asynchronous methods missing in `Zlib::GzipWriter`.
+`rewind` wants to `close`, `close` wants to `write` something and `flush`, `flush` want to `write` something.
+So it is possible to have asynchronous variants for these synchronous methods.
+Behaviour is the same as `IO#write_nonblock` method.
+
+```
+#<<(object)
+#print(*objects)
+#printf(*args)
+#putc(object, encoding: ::Encoding::BINARY)
+#puts(*objects)
+```
+
+Typical helpers, see [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipWriter.html) docs.
+
+## Stream::Reader
+
+Its behaviour is similar to builtin [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipReader.html).
+
+Reader maintains both source and destination buffers, it accepts both `source_buffer_length` and `destination_buffer_length` options.
+
+```
+::open(file_path, options = {}, :external_encoding => nil, :internal_encoding => nil, :transcode_options => {}, &block)
+```
+
+Open file path and create stream reader associated with opened file.
+Data will be force encoded to `:external_encoding` and transcoded to `:internal_encoding` using `:transcode_options` after decompressing.
+
+```
+::new(source_io, options = {}, :external_encoding => nil, :internal_encoding => nil, :transcode_options => {})
+```
+
+Create stream reader associated with source io.
+Data will be force encoded to `:external_encoding` and transcoded to `:internal_encoding` using `:transcode_options` after decompressing.
+
+```
+#set_encoding(external_encoding, internal_encoding, transcode_options)
+```
+
+Set another encodings.
+
+```
+#io
+#to_io
+#stat
+#external_encoding
+#internal_encoding
+#transcode_options
+#pos
+#tell
+```
+
+See [`IO`](https://ruby-doc.org/core-2.6.1/IO.html) docs.
+
+```
+#read(bytes_to_read = nil, out_buffer = nil)
+#eof?
+#rewind
+#close
+#closed?
+```
+
+See [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipReader.html) docs.
+
+```
+#readpartial(bytes_to_read = nil, out_buffer = nil)
+#read_nonblock(bytes_to_read, out_buffer = nil, *options)
+```
+
+See [`IO`](https://ruby-doc.org/core-2.6.1/IO.html) docs.
+
+```
+#getbyte
+#each_byte(&block)
+#readbyte
+#ungetbyte(byte)
+
+#getc
+#readchar
+#each_char(&block)
+#ungetc(char)
+
+#lineno
+#lineno=
+#gets(separator = $OUTPUT_RECORD_SEPARATOR, limit = nil)
+#readline
+#readlines
+#each(&block)
+#each_line(&block)
+#ungetline(line)
+```
+
+Typical helpers, see [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipReader.html) docs.
+
 ## License
 
 MIT license, see LICENSE and AUTHORS.
