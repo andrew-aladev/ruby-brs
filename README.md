@@ -151,7 +151,7 @@ data = BRS::String.compress "sample string", :quality => 5
 puts BRS::String.decompress(data, :disable_ring_buffer_reallocation => true)
 ```
 
-Default options are compatible with HTTP (`Content-Encoding: br`):
+HTTP encoding (`Content-Encoding: br`) using default options:
 
 ```ruby
 require "brs"
