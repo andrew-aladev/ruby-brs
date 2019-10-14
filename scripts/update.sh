@@ -7,7 +7,7 @@ git fetch --all || true
 git remote | xargs -n1 -I {} git rebase "{}/master" || true
 
 cd ".."
-rm "Gemfile.lock"
+rm -f "Gemfile.lock"
 rvm use "."
 gem install bundler
 bundle update
