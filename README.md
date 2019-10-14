@@ -1,7 +1,9 @@
 # Ruby bindings for brotli library
 
-[![Travis build status](https://travis-ci.org/andrew-aladev/ruby-brs.svg?branch=master)](https://travis-ci.org/andrew-aladev/ruby-brs)
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/andrew-aladev/ruby-brs?branch=master&svg=true)](https://ci.appveyor.com/project/andrew-aladev/ruby-brs/branch/master)
+[![Travis test status](https://travis-ci.org/andrew-aladev/ruby-brs.svg?branch=master)](https://travis-ci.org/andrew-aladev/ruby-brs)
+[![AppVeyor test status](https://ci.appveyor.com/api/projects/status/github/andrew-aladev/ruby-brs?branch=master&svg=true)](https://ci.appveyor.com/project/andrew-aladev/ruby-brs/branch/master)
+[![Cirrus test status](https://api.cirrus-ci.com/github/andrew-aladev/ruby-brs.svg?branch=master)](https://cirrus-ci.com/github/andrew-aladev/ruby-brs)
+[![Circle test status](https://circleci.com/gh/andrew-aladev/ruby-brs/tree/master.svg?style=svg)](https://circleci.com/gh/andrew-aladev/ruby-brs/tree/master)
 
 See [brotli library](https://github.com/google/brotli).
 

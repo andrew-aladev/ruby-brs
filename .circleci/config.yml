@@ -1,0 +1,11 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: puchuu/test-ruby-brs_amd64-pc-linux-gnu:latest
+    branches:
+      only:
+        - master
+    steps:
+      - run: /home/entrypoint.sh
