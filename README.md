@@ -334,6 +334,11 @@ See [`IO`](https://ruby-doc.org/core-2.6.1/IO.html) docs.
 
 Typical helpers, see [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipReader.html) docs.
 
+## CI
+
+Travis and appveyor uses [scripts/ci_test.sh](scripts/ci_test.sh) directly.
+Cirrus and Circle uses prebuilt [scripts/test-images](scripts/test-images).
+
 ## License
 
 MIT license, see LICENSE and AUTHORS.
