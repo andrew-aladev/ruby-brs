@@ -15,12 +15,12 @@ GEMSPEC = Gem::Specification.new do |gem|
   gem.version  = BRS::VERSION
   gem.date     = Date.today.to_s
 
-  gem.add_development_dependency "minitar", "~> 0.8"
-  gem.add_development_dependency "minitest", "~> 5.11"
+  gem.add_development_dependency "minitar", "~> 0.9"
+  gem.add_development_dependency "minitest", "~> 5.12"
   gem.add_development_dependency "rake-compiler", "~> 1.0"
-  gem.add_development_dependency "rubocop", "~> 0.74"
-  gem.add_development_dependency "rubocop-performance", "~> 1.4"
-  gem.add_development_dependency "rubocop-rails", "~> 2.2"
+  gem.add_development_dependency "rubocop", "~> 0.75"
+  gem.add_development_dependency "rubocop-performance", "~> 1.5"
+  gem.add_development_dependency "rubocop-rails", "~> 2.3"
 
   gem.files = \
     `git ls-files -z --directory {ext,lib}`.split("\x0") + \

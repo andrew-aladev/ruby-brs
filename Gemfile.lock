@@ -37,12 +37,12 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  minitar (~> 0.8)
-  minitest (~> 5.11)
+  minitar (~> 0.9)
+  minitest (~> 5.12)
   rake-compiler (~> 1.0)
-  rubocop (~> 0.74)
-  rubocop-performance (~> 1.4)
-  rubocop-rails (~> 2.2)
+  rubocop (~> 0.75)
+  rubocop-performance (~> 1.5)
+  rubocop-rails (~> 2.3)
   ruby-brs!
 
 BUNDLED WITH
