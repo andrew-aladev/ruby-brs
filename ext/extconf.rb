@@ -3,46 +3,52 @@
 
 require "mkmf"
 
-def require_header(name)
+def require_header(name, types = [])
   abort "Can't find #{name} header" unless find_header name
-end
 
-require_header "brotli/encode.h"
-require_header "brotli/decode.h"
-
-def require_library(name, functions)
-  functions.each do |function|
-    abort "Can't find #{name} library and #{function} function" unless find_library name, function
+  types.each do |type|
+    abort "Can't find #{type} type in #{name} header" unless find_type type, nil, name
   end
 end
 
-encoder_functions = %w[
-  BrotliEncoderCreateInstance
-  BrotliEncoderSetParameter
-  BrotliEncoderCompressStream
-  BrotliEncoderHasMoreOutput
-  BrotliEncoderIsFinished
-  BrotliEncoderDestroyInstance
-]
-.freeze
+require_header "brotli/types.h", %w[BROTLI_BOOL]
+require_header "brotli/encode.h"
+require_header "brotli/decode.h", %w[BrotliDecoderResult BrotliDecoderErrorCode]
 
-require_library "brotlienc", encoder_functions
+def require_library(name, functions)
+  functions.each do |function|
+    abort "Can't find #{function} function in #{name} library" unless find_library name, function
+  end
+end
 
-decoder_functions = %w[
-  BrotliDecoderCreateInstance
-  BrotliDecoderSetParameter
-  BrotliDecoderDecompressStream
-  BrotliDecoderGetErrorCode
-  BrotliDecoderDestroyInstance
-]
-.freeze
+require_library(
+  "brotlienc",
+  %w[
+    BrotliEncoderCreateInstance
+    BrotliEncoderSetParameter
+    BrotliEncoderCompressStream
+    BrotliEncoderHasMoreOutput
+    BrotliEncoderIsFinished
+    BrotliEncoderDestroyInstance
+  ]
+)
 
-require_library "brotlidec", decoder_functions
+require_library(
+  "brotlidec",
+  %w[
+    BrotliDecoderCreateInstance
+    BrotliDecoderSetParameter
+    BrotliDecoderDecompressStream
+    BrotliDecoderGetErrorCode
+    BrotliDecoderDestroyInstance
+  ]
+)
 
 extension_name = "brs_ext".freeze
 dir_config extension_name
 
-sources = %w[
+# rubocop:disable Style/GlobalVars
+$srcs = %w[
   stream/compressor
   stream/decompressor
   buffer
@@ -52,12 +58,8 @@ sources = %w[
   option
   string
 ]
+.map { |name| "src/#{extension_name}/#{name}.c" }
 .freeze
-
-# rubocop:disable Style/GlobalVars
-$srcs = sources
-  .map { |name| "src/#{extension_name}/#{name}.c" }
-  .freeze
 
 $CFLAGS << " -Wno-declaration-after-statement"
 $VPATH << "$(srcdir)/#{extension_name}:$(srcdir)/#{extension_name}/stream"

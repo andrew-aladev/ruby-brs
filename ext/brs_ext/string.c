@@ -5,6 +5,7 @@
 
 #include <brotli/decode.h>
 #include <brotli/encode.h>
+#include <brotli/types.h>
 #include <stdint.h>
 #include <stdlib.h>
 
