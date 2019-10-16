@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruby-brs (1.0.1)
+    ruby-brs (1.0.2)
 
 GEM
   remote: https://rubygems.org/

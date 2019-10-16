@@ -20,7 +20,7 @@
 
 static inline VALUE create_buffer(VALUE length)
 {
-  return rb_str_new(NULL, NUM2UINT(length));
+  return rb_str_new(NULL, NUM2ULONG(length));
 }
 
 #define CREATE_BUFFER(buffer, length, exception) \
@@ -30,7 +30,7 @@ static inline VALUE resize_buffer(VALUE args)
 {
   VALUE buffer = rb_ary_entry(args, 0);
   VALUE length = rb_ary_entry(args, 1);
-  return rb_str_resize(buffer, NUM2UINT(length));
+  return rb_str_resize(buffer, NUM2ULONG(length));
 }
 
 #define RESIZE_BUFFER(buffer, length, exception)                                        \

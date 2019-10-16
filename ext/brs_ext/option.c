@@ -27,11 +27,11 @@ static inline bool get_bool_option_value(VALUE raw_value)
   return raw_type == T_TRUE;
 }
 
-static inline unsigned long get_fixnum_option_value(VALUE raw_value)
+static inline unsigned long get_ulong_option_value(VALUE raw_value)
 {
   Check_Type(raw_value, T_FIXNUM);
 
-  return NUM2UINT(raw_value);
+  return NUM2ULONG(raw_value);
 }
 
 static inline uint_fast8_t get_mode_option_value(VALUE raw_value)
@@ -68,8 +68,8 @@ void brs_ext_get_option(VALUE options, brs_ext_option_t* option, brs_ext_option_
     case BRS_EXT_OPTION_TYPE_BOOL:
       value = get_bool_option_value(raw_value) ? 1 : 0;
       break;
-    case BRS_EXT_OPTION_TYPE_FIXNUM:
-      value = (brs_ext_option_value_t)get_fixnum_option_value(raw_value);
+    case BRS_EXT_OPTION_TYPE_ULONG:
+      value = (brs_ext_option_value_t)get_ulong_option_value(raw_value);
       break;
     case BRS_EXT_OPTION_TYPE_MODE:
       value = (brs_ext_option_value_t)get_mode_option_value(raw_value);
@@ -81,11 +81,11 @@ void brs_ext_get_option(VALUE options, brs_ext_option_t* option, brs_ext_option_
   option->value = value;
 }
 
-unsigned long brs_ext_get_fixnum_option_value(VALUE options, const char* name)
+unsigned long brs_ext_get_ulong_option_value(VALUE options, const char* name)
 {
   VALUE raw_value = get_raw_option_value(options, name);
 
-  return get_fixnum_option_value(raw_value);
+  return get_ulong_option_value(raw_value);
 }
 
 #define SET_OPTION_VALUE(function, state_ptr, param, option)           \
