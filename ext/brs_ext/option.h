@@ -18,7 +18,7 @@
 
 enum {
   BRS_EXT_OPTION_TYPE_BOOL = 1,
-  BRS_EXT_OPTION_TYPE_ULONG,
+  BRS_EXT_OPTION_TYPE_UINT,
   BRS_EXT_OPTION_TYPE_MODE
 };
 
@@ -54,11 +54,11 @@ void brs_ext_get_option(VALUE options, brs_ext_option_t* option, brs_ext_option_
   brs_ext_compressor_options_t compressor_options;                                                             \
                                                                                                                \
   BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_MODE, mode);                             \
-  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_ULONG, quality);                         \
-  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_ULONG, lgwin);                           \
-  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_ULONG, lgblock);                         \
+  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, quality);                          \
+  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, lgwin);                            \
+  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, lgblock);                          \
   BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_BOOL, disable_literal_context_modeling); \
-  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_ULONG, size_hint);                       \
+  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, size_hint);                        \
   BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_BOOL, large_window);
 
 #define BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options)                                                                \
