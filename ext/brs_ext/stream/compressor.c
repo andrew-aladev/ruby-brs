@@ -222,9 +222,9 @@ VALUE brs_ext_compressor_close(VALUE self)
 
 void brs_ext_compressor_exports(VALUE root_module)
 {
-  VALUE stream = rb_define_module_under(root_module, "Stream");
+  VALUE module = rb_define_module_under(root_module, "Stream");
 
-  VALUE compressor = rb_define_class_under(stream, "NativeCompressor", rb_cObject);
+  VALUE compressor = rb_define_class_under(module, "NativeCompressor", rb_cObject);
   rb_define_alloc_func(compressor, brs_ext_allocate_compressor);
   rb_define_method(compressor, "initialize", brs_ext_initialize_compressor, 1);
   rb_define_method(compressor, "write", brs_ext_compress, 1);

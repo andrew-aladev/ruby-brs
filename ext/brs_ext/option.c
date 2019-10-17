@@ -123,22 +123,22 @@ brs_ext_result_t brs_ext_set_decompressor_options(BrotliDecoderState* state_ptr,
 
 void brs_ext_option_exports(VALUE root_module)
 {
-  VALUE option = rb_define_module_under(root_module, "Option");
+  VALUE module = rb_define_module_under(root_module, "Option");
 
   VALUE modes = rb_ary_new_from_args(
     3,
     ID2SYM(rb_intern("text")),
     ID2SYM(rb_intern("font")),
     ID2SYM(rb_intern("generic")));
-  rb_define_const(option, "MODES", modes);
+  rb_define_const(module, "MODES", modes);
   RB_GC_GUARD(modes);
 
-  rb_define_const(option, "MIN_QUALITY", UINT2NUM(BROTLI_MIN_QUALITY));
-  rb_define_const(option, "MAX_QUALITY", UINT2NUM(BROTLI_MAX_QUALITY));
+  rb_define_const(module, "MIN_QUALITY", UINT2NUM(BROTLI_MIN_QUALITY));
+  rb_define_const(module, "MAX_QUALITY", UINT2NUM(BROTLI_MAX_QUALITY));
 
-  rb_define_const(option, "MIN_LGWIN", UINT2NUM(BROTLI_MIN_WINDOW_BITS));
-  rb_define_const(option, "MAX_LGWIN", UINT2NUM(BROTLI_MAX_WINDOW_BITS));
+  rb_define_const(module, "MIN_LGWIN", UINT2NUM(BROTLI_MIN_WINDOW_BITS));
+  rb_define_const(module, "MAX_LGWIN", UINT2NUM(BROTLI_MAX_WINDOW_BITS));
 
-  rb_define_const(option, "MIN_LGBLOCK", UINT2NUM(BROTLI_MIN_INPUT_BLOCK_BITS));
-  rb_define_const(option, "MAX_LGBLOCK", UINT2NUM(BROTLI_MAX_INPUT_BLOCK_BITS));
+  rb_define_const(module, "MIN_LGBLOCK", UINT2NUM(BROTLI_MIN_INPUT_BLOCK_BITS));
+  rb_define_const(module, "MAX_LGBLOCK", UINT2NUM(BROTLI_MAX_INPUT_BLOCK_BITS));
 }
