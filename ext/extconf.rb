@@ -12,7 +12,7 @@ def require_header(name, types = [])
 end
 
 require_header "brotli/types.h", %w[BROTLI_BOOL]
-require_header "brotli/encode.h", ["BrotliEncoderState *"]
+require_header "brotli/encode.h", ["BrotliEncoderState *", "BrotliEncoderMode"]
 require_header "brotli/decode.h", ["BrotliDecoderState *", "BrotliDecoderResult", "BrotliDecoderErrorCode"]
 
 def require_library(name, functions)

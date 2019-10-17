@@ -6,7 +6,6 @@
 #include <brotli/decode.h>
 #include <brotli/encode.h>
 #include <stdbool.h>
-#include <stdint.h>
 
 #include "brs_ext/common.h"
 #include "brs_ext/error.h"
@@ -34,7 +33,7 @@ static inline unsigned int get_uint_option_value(VALUE raw_value)
   return NUM2UINT(raw_value);
 }
 
-static inline uint_fast8_t get_mode_option_value(VALUE raw_value)
+static inline BrotliEncoderMode get_mode_option_value(VALUE raw_value)
 {
   Check_Type(raw_value, T_SYMBOL);
 
