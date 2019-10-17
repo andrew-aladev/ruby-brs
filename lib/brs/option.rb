@@ -40,13 +40,22 @@ module BRS
       end
 
       quality = options[:quality]
-      Validation.validate_not_negative_integer quality unless quality.nil?
+      unless quality.nil?
+        Validation.validate_not_negative_integer quality
+        raise ValidateError, "invalid quality" if quality < MIN_QUALITY || quality > MAX_QUALITY
+      end
 
       lgwin = options[:lgwin]
-      Validation.validate_not_negative_integer lgwin unless lgwin.nil?
+      unless lgwin.nil?
+        Validation.validate_not_negative_integer lgwin
+        raise ValidateError, "invalid lgwin" if lgwin < MIN_LGWIN || lgwin > MAX_LGWIN
+      end
 
       lgblock = options[:lgblock]
-      Validation.validate_not_negative_integer lgblock unless lgblock.nil?
+      unless lgblock.nil?
+        Validation.validate_not_negative_integer lgblock
+        raise ValidateError, "invalid lgblock" if lgblock < MIN_LGBLOCK || lgblock > MAX_LGBLOCK
+      end
 
       disable_literal_context_modeling = options[:disable_literal_context_modeling]
       Validation.validate_bool disable_literal_context_modeling unless disable_literal_context_modeling.nil?
