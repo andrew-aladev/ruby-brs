@@ -20,11 +20,17 @@ module BRS
         [
           Validation::INVALID_HASHES,
           get_invalid_buffer_length_options(buffer_length_names),
-          (Validation::INVALID_SYMBOLS - [nil]).flat_map do |invalid_symbol|
-            [
-              { :mode => invalid_symbol },
-              { :mode => :invalid_mode }
-            ]
+          [
+            { :mode => :invalid_mode },
+            { :quality => BRS::Option::MIN_QUALITY - 1 },
+            { :quality => BRS::Option::MAX_QUALITY + 1 },
+            { :lgwin => BRS::Option::MIN_LGWIN - 1 },
+            { :lgwin => BRS::Option::MAX_LGWIN + 1 },
+            { :lgblock => BRS::Option::MIN_LGBLOCK - 1 },
+            { :lgblock => BRS::Option::MAX_LGBLOCK + 1 }
+          ],
+          (Validation::INVALID_SYMBOLS - [nil]).map do |invalid_symbol|
+            { :mode => invalid_symbol }
           end,
           (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).flat_map do |invalid_integer|
             [
@@ -93,13 +99,17 @@ module BRS
 
       # We can ignore "size_hint" option.
 
+      private_class_method def self.get_buffer_length_option_data(buffer_length_names)
+        buffer_length_names.map do |name|
+          BUFFER_LENGTHS.map do |buffer_length|
+            { name => buffer_length }
+          end
+        end
+      end
+
       private_class_method def self.get_compressor_option_data(buffer_length_names)
         [
-          buffer_length_names.map do |name|
-            BUFFER_LENGTHS.map do |buffer_length|
-              { name => buffer_length }
-            end
-          end,
+          get_buffer_length_option_data(buffer_length_names),
           [
             BRS::Option::MODES.map do |mode|
               { :mode => mode }
@@ -126,11 +136,7 @@ module BRS
 
       private_class_method def self.get_decompressor_option_data(buffer_length_names)
         [
-          buffer_length_names.map do |name|
-            BUFFER_LENGTHS.map do |buffer_length|
-              { name => buffer_length }
-            end
-          end,
+          get_buffer_length_option_data(buffer_length_names),
           [
             BOOLS.map do |disable_ring_buffer_reallocation|
               { :disable_ring_buffer_reallocation => disable_ring_buffer_reallocation }
@@ -158,7 +164,7 @@ module BRS
         end
       end
 
-      def self.get_compressor_option_combinations(buffer_length_names, &_block)
+      def self.get_compressor_option_combinations(buffer_length_names)
         get_option_combinations get_compressor_option_data(buffer_length_names)
       end
 

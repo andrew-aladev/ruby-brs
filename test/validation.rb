@@ -28,7 +28,6 @@ module BRS
       INVALID_SYMBOLS  = (TYPES - %i[a]).freeze
       INVALID_HASHES   = (TYPES - [{}]).freeze
       INVALID_IOS      = (TYPES - [::STDOUT]).freeze
-      INVALID_PROCS    = (TYPES - [NOOP_PROC]).freeze
       INVALID_CHARS    = (INVALID_NUMBERS & INVALID_STRINGS).freeze
 
       INVALID_POSITIVE_INTEGERS     = (INVALID_INTEGERS + [0, -1]).freeze
