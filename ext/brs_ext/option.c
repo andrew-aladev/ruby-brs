@@ -11,6 +11,8 @@
 #include "brs_ext/error.h"
 #include "ruby.h"
 
+// -- values --
+
 static inline VALUE get_raw_option_value(VALUE options, const char* name)
 {
   return rb_funcall(options, rb_intern("[]"), 1, ID2SYM(rb_intern(name)));
@@ -89,6 +91,8 @@ unsigned long brs_ext_get_ulong_option_value(VALUE options, const char* name)
   return NUM2ULONG(raw_value);
 }
 
+// -- set params --
+
 #define SET_OPTION_VALUE(function, state_ptr, param, option)           \
   if (option.has_value && !function(state_ptr, param, option.value)) { \
     return BRS_EXT_ERROR_VALIDATE_FAILED;                              \
@@ -121,6 +125,12 @@ brs_ext_result_t brs_ext_set_decompressor_options(BrotliDecoderState* state_ptr,
   return 0;
 }
 
+// -- exports --
+
+#define EXPORT_PARAM_BOUNDS(module, param, name)                      \
+  rb_define_const(module, "MIN_" name, UINT2NUM(BROTLI_MIN_##param)); \
+  rb_define_const(module, "MAX_" name, UINT2NUM(BROTLI_MAX_##param));
+
 void brs_ext_option_exports(VALUE root_module)
 {
   VALUE module = rb_define_module_under(root_module, "Option");
@@ -133,12 +143,7 @@ void brs_ext_option_exports(VALUE root_module)
   rb_define_const(module, "MODES", modes);
   RB_GC_GUARD(modes);
 
-  rb_define_const(module, "MIN_QUALITY", UINT2NUM(BROTLI_MIN_QUALITY));
-  rb_define_const(module, "MAX_QUALITY", UINT2NUM(BROTLI_MAX_QUALITY));
-
-  rb_define_const(module, "MIN_LGWIN", UINT2NUM(BROTLI_MIN_WINDOW_BITS));
-  rb_define_const(module, "MAX_LGWIN", UINT2NUM(BROTLI_MAX_WINDOW_BITS));
-
-  rb_define_const(module, "MIN_LGBLOCK", UINT2NUM(BROTLI_MIN_INPUT_BLOCK_BITS));
-  rb_define_const(module, "MAX_LGBLOCK", UINT2NUM(BROTLI_MAX_INPUT_BLOCK_BITS));
+  EXPORT_PARAM_BOUNDS(module, QUALITY, "QUALITY");
+  EXPORT_PARAM_BOUNDS(module, WINDOW_BITS, "LGWIN");
+  EXPORT_PARAM_BOUNDS(module, INPUT_BLOCK_BITS, "LGBLOCK");
 }

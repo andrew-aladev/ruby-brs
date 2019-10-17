@@ -29,6 +29,6 @@ enum {
 
 brs_ext_result_t brs_ext_get_decompressor_error(BrotliDecoderErrorCode error_code);
 
-NORETURN(void brs_ext_raise_error(brs_ext_result_t result));
+NORETURN(void brs_ext_raise_error(brs_ext_result_t ext_result));
 
 #endif // BRS_EXT_ERROR_H

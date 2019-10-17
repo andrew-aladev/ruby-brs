@@ -47,9 +47,9 @@ static inline NORETURN(void raise(const char* name, const char* description))
   rb_raise(error, "%s", description);
 }
 
-void brs_ext_raise_error(brs_ext_result_t result)
+void brs_ext_raise_error(brs_ext_result_t ext_result)
 {
-  switch (result) {
+  switch (ext_result) {
     case BRS_EXT_ERROR_ALLOCATE_FAILED:
       raise("AllocateError", "allocate error");
     case BRS_EXT_ERROR_VALIDATE_FAILED:
