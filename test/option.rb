@@ -24,7 +24,18 @@ module BRS
 
         get_invalid_buffer_length_options buffer_length_names, &block
 
+        (Validation::INVALID_SYMBOLS - [nil]).each do |invalid_symbol|
+          yield({ :mode => invalid_symbol })
+        end
+
         yield({ :mode => :invalid_mode })
+
+        (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
+          yield({ :quality   => invalid_integer })
+          yield({ :lgwin     => invalid_integer })
+          yield({ :lgblock   => invalid_integer })
+          yield({ :size_hint => invalid_integer })
+        end
 
         yield({ :quality => BRS::Option::MIN_QUALITY - 1 })
         yield({ :quality => BRS::Option::MAX_QUALITY + 1 })
@@ -34,17 +45,6 @@ module BRS
 
         yield({ :lgblock => BRS::Option::MIN_LGBLOCK - 1 })
         yield({ :lgblock => BRS::Option::MAX_LGBLOCK + 1 })
-
-        (Validation::INVALID_SYMBOLS - [nil]).each do |invalid_symbol|
-          yield({ :mode => invalid_symbol })
-        end
-
-        (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
-          yield({ :quality => invalid_integer })
-          yield({ :lgwin => invalid_integer })
-          yield({ :lgblock => invalid_integer })
-          yield({ :size_hint => invalid_integer })
-        end
 
         (Validation::INVALID_BOOLS - [nil]).each do |invalid_bool|
           yield({ :disable_literal_context_modeling => invalid_bool })
