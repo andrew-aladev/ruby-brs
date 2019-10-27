@@ -33,11 +33,8 @@ module BRS
         }
         .freeze
 
-        INVALID_DECOMPRESSOR_OPTIONS   = Option.get_invalid_decompressor_options(BUFFER_LENGTH_NAMES).freeze
-        COMPRESSOR_OPTION_COMBINATIONS = Option.get_compressor_option_combinations(BUFFER_LENGTH_NAMES).freeze
-
         def test_invalid_initialize
-          INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
+          get_invalid_decompressor_options do |invalid_options|
             assert_raises ValidateError do
               target.new ::STDIN, invalid_options
             end
@@ -78,7 +75,7 @@ module BRS
         def test_read
           TEXTS.each do |text|
             [true, false].map do |with_buffer|
-              COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+              get_compressor_options do |compressor_options|
                 prev_result = "".b
 
                 PORTION_LENGTHS.each do |portion_length|
@@ -159,7 +156,7 @@ module BRS
           TEXTS.each do |text|
             external_encoding = text.encoding
 
-            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            get_compressor_options do |compressor_options|
               PORTION_LENGTHS.each do |portion_length|
                 write_archive text, compressor_options
 
@@ -234,7 +231,7 @@ module BRS
 
         def test_rewind
           TEXTS.each do |text|
-            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            get_compressor_options do |compressor_options|
               write_archive text, compressor_options
 
               get_compatible_decompressor_options(compressor_options) do |decompressor_options|
@@ -271,7 +268,7 @@ module BRS
             TEXTS.each do |text|
               PORTION_LENGTHS.each do |portion_length|
                 [true, false].map do |with_buffer|
-                  COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+                  get_compressor_options do |compressor_options|
                     get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                       compressed_text = String.compress text, compressor_options
 
@@ -327,7 +324,7 @@ module BRS
           ::TCPServer.open PORT do |server|
             TEXTS.each do |text|
               PORTION_LENGTHS.each do |portion_length|
-                COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+                get_compressor_options do |compressor_options|
                   get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                     compressed_text = String.compress text, compressor_options
 
@@ -385,6 +382,14 @@ module BRS
         protected def write_archive(text, compressor_options)
           compressed_text = String.compress text, compressor_options
           ::File.write ARCHIVE_PATH, compressed_text
+        end
+
+        def get_invalid_decompressor_options(&block)
+          Option.get_invalid_decompressor_options(BUFFER_LENGTH_NAMES, &block)
+        end
+
+        def get_compressor_options(&block)
+          Option.get_compressor_options(BUFFER_LENGTH_NAMES, &block)
         end
 
         def get_compatible_decompressor_options(compressor_options, &block)

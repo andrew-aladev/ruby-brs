@@ -2,66 +2,67 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 require "brs/option"
+require "ocg"
 
 require_relative "validation"
 
 module BRS
   module Test
     module Option
-      private_class_method def self.get_invalid_buffer_length_options(buffer_length_names)
-        buffer_length_names.flat_map do |name|
-          (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).map do |invalid_integer|
-            { name => invalid_integer }
+      private_class_method def self.get_invalid_buffer_length_options(buffer_length_names, &_block)
+        buffer_length_names.each do |name|
+          (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
+            yield({ name => invalid_integer })
           end
         end
       end
 
-      def self.get_invalid_compressor_options(buffer_length_names)
-        [
-          Validation::INVALID_HASHES,
-          get_invalid_buffer_length_options(buffer_length_names),
-          [
-            { :mode => :invalid_mode },
-            { :quality => BRS::Option::MIN_QUALITY - 1 },
-            { :quality => BRS::Option::MAX_QUALITY + 1 },
-            { :lgwin => BRS::Option::MIN_LGWIN - 1 },
-            { :lgwin => BRS::Option::MAX_LGWIN + 1 },
-            { :lgblock => BRS::Option::MIN_LGBLOCK - 1 },
-            { :lgblock => BRS::Option::MAX_LGBLOCK + 1 }
-          ],
-          (Validation::INVALID_SYMBOLS - [nil]).map do |invalid_symbol|
-            { :mode => invalid_symbol }
-          end,
-          (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).flat_map do |invalid_integer|
-            [
-              { :quality => invalid_integer },
-              { :lgwin => invalid_integer },
-              { :lgblock => invalid_integer },
-              { :size_hint => invalid_integer }
-            ]
-          end,
-          (Validation::INVALID_BOOLS - [nil]).flat_map do |invalid_bool|
-            [
-              { :disable_literal_context_modeling => invalid_bool },
-              { :large_window => invalid_bool }
-            ]
-          end
-        ]
-        .flatten 1
+      def self.get_invalid_compressor_options(buffer_length_names, &block)
+        Validation::INVALID_HASHES.each do |invalid_hash|
+          yield invalid_hash
+        end
+
+        get_invalid_buffer_length_options buffer_length_names, &block
+
+        yield({ :mode => :invalid_mode })
+
+        yield({ :quality => BRS::Option::MIN_QUALITY - 1 })
+        yield({ :quality => BRS::Option::MAX_QUALITY + 1 })
+
+        yield({ :lgwin => BRS::Option::MIN_LGWIN - 1 })
+        yield({ :lgwin => BRS::Option::MAX_LGWIN + 1 })
+
+        yield({ :lgblock => BRS::Option::MIN_LGBLOCK - 1 })
+        yield({ :lgblock => BRS::Option::MAX_LGBLOCK + 1 })
+
+        (Validation::INVALID_SYMBOLS - [nil]).each do |invalid_symbol|
+          yield({ :mode => invalid_symbol })
+        end
+
+        (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
+          yield({ :quality => invalid_integer })
+          yield({ :lgwin => invalid_integer })
+          yield({ :lgblock => invalid_integer })
+          yield({ :size_hint => invalid_integer })
+        end
+
+        (Validation::INVALID_BOOLS - [nil]).each do |invalid_bool|
+          yield({ :disable_literal_context_modeling => invalid_bool })
+          yield({ :large_window => invalid_bool })
+        end
       end
 
-      def self.get_invalid_decompressor_options(buffer_length_names)
-        [
-          Validation::INVALID_HASHES,
-          get_invalid_buffer_length_options(buffer_length_names),
-          (Validation::INVALID_BOOLS - [nil]).flat_map do |invalid_bool|
-            [
-              { :disable_ring_buffer_reallocation => invalid_bool },
-              { :large_window => invalid_bool }
-            ]
-          end
-        ]
-        .flatten 1
+      def self.get_invalid_decompressor_options(buffer_length_names, &block)
+        Validation::INVALID_HASHES.each do |invalid_hash|
+          yield invalid_hash
+        end
+
+        get_invalid_buffer_length_options buffer_length_names, &block
+
+        (Validation::INVALID_BOOLS - [nil]).each do |invalid_bool|
+          yield({ :disable_ring_buffer_reallocation => invalid_bool })
+          yield({ :large_window => invalid_bool })
+        end
       end
 
       # -----
@@ -99,80 +100,46 @@ module BRS
 
       # We can ignore "size_hint" option.
 
-      private_class_method def self.get_buffer_length_option_data(buffer_length_names)
-        buffer_length_names.map do |name|
-          BUFFER_LENGTHS.map do |buffer_length|
-            { name => buffer_length }
-          end
-        end
+      private_class_method def self.get_buffer_length_option_generator(buffer_length_names)
+        OCG.new(
+          Hash[buffer_length_names.map { |name| [name, BUFFER_LENGTHS] }]
+        )
       end
 
-      private_class_method def self.get_compressor_option_data(buffer_length_names)
-        [
-          get_buffer_length_option_data(buffer_length_names),
-          [
-            BRS::Option::MODES.map do |mode|
-              { :mode => mode }
-            end,
-            QUALITIES.map do |quality|
-              { :quality => quality }
-            end,
-            LGWINS.map do |lgwin|
-              { :lgwin => lgwin }
-            end,
-            LGBLOCKS.map do |lgblock|
-              { :lgblock => lgblock }
-            end,
-            BOOLS.map do |disable_literal_context_modeling|
-              { :disable_literal_context_modeling => disable_literal_context_modeling }
-            end,
-            BOOLS.map do |large_window|
-              { :large_window => large_window }
-            end
-          ]
-        ]
-        .flatten 1
+      def self.get_compressor_options(buffer_length_names, &_block)
+        buffer_length_generator = get_buffer_length_option_generator buffer_length_names
+
+        main_generator = OCG.new(
+          :mode                             => BRS::Option::MODES,
+          :quality                          => QUALITIES,
+          :lgwin                            => LGWINS,
+          :lgblock                          => LGBLOCKS,
+          :disable_literal_context_modeling => BOOLS,
+          :large_window                     => BOOLS
+        )
+
+        complete_generator = buffer_length_generator.and main_generator
+
+        yield complete_generator.next until complete_generator.finished?
       end
 
-      private_class_method def self.get_decompressor_option_data(buffer_length_names)
-        [
-          get_buffer_length_option_data(buffer_length_names),
-          [
-            BOOLS.map do |disable_ring_buffer_reallocation|
-              { :disable_ring_buffer_reallocation => disable_ring_buffer_reallocation }
-            end,
-            BOOLS.map do |large_window|
-              { :large_window => large_window }
-            end
-          ]
-        ]
-        .flatten 1
-      end
+      private_class_method def self.get_decompressor_options(buffer_length_names, &_block)
+        buffer_length_generator = get_buffer_length_option_generator buffer_length_names
 
-      private_class_method def self.get_option_combinations(data)
-        combinations = data
-          .inject([]) do |result, array|
-            next array if result.empty?
+        main_generator = OCG.new(
+          :disable_ring_buffer_reallocation => BOOLS,
+          :large_window                     => BOOLS
+        )
 
-            result
-              .product(array)
-              .map(&:flatten)
-          end
+        complete_generator = buffer_length_generator.and main_generator
 
-        combinations.map do |options|
-          options.reduce({}, :merge)
-        end
-      end
-
-      def self.get_compressor_option_combinations(buffer_length_names)
-        get_option_combinations get_compressor_option_data(buffer_length_names)
+        yield complete_generator.next until complete_generator.finished?
       end
 
       def self.get_compatible_decompressor_options(compressor_options, buffer_length_name_mapping, &_block)
-        buffer_length_names              = buffer_length_name_mapping.values
-        decompressor_option_combinations = get_option_combinations get_decompressor_option_data(buffer_length_names)
+        buffer_length_names = buffer_length_name_mapping.values
 
-        decompressor_option_combinations.each do |decompressor_options|
+        get_decompressor_options(buffer_length_names) do |decompressor_options|
           same_buffer_length_values = buffer_length_name_mapping.all? do |compressor_name, decompressor_name|
             decompressor_options[decompressor_name] == compressor_options[compressor_name]
           end

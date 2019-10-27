@@ -25,11 +25,8 @@ module BRS
           BUFFER_LENGTH_NAMES   = %i[destination_buffer_length].freeze
           BUFFER_LENGTH_MAPPING = { :destination_buffer_length => :destination_buffer_length }.freeze
 
-          INVALID_COMPRESSOR_OPTIONS     = Option.get_invalid_compressor_options(BUFFER_LENGTH_NAMES).freeze
-          COMPRESSOR_OPTION_COMBINATIONS = Option.get_compressor_option_combinations(BUFFER_LENGTH_NAMES).freeze
-
           def test_invalid_initialize
-            INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
+            get_invalid_compressor_options do |invalid_options|
               assert_raises ValidateError do
                 Target.new invalid_options
               end
@@ -59,7 +56,7 @@ module BRS
           def test_texts
             TEXTS.each do |text|
               PORTION_LENGTHS.each do |portion_length|
-                COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+                get_compressor_options do |compressor_options|
                   compressed_buffer = ::StringIO.new
                   compressed_buffer.set_encoding ::Encoding::BINARY
 
@@ -137,6 +134,14 @@ module BRS
           end
 
           # -----
+
+          def get_invalid_compressor_options(&block)
+            Option.get_invalid_compressor_options(BUFFER_LENGTH_NAMES, &block)
+          end
+
+          def get_compressor_options(&block)
+            Option.get_compressor_options(BUFFER_LENGTH_NAMES, &block)
+          end
 
           def get_compatible_decompressor_options(compressor_options, &block)
             Option.get_compatible_decompressor_options(compressor_options, BUFFER_LENGTH_MAPPING, &block)

@@ -28,11 +28,8 @@ module BRS
         BUFFER_LENGTH_NAMES   = %i[destination_buffer_length].freeze
         BUFFER_LENGTH_MAPPING = { :destination_buffer_length => :destination_buffer_length }.freeze
 
-        INVALID_COMPRESSOR_OPTIONS     = Option.get_invalid_compressor_options(BUFFER_LENGTH_NAMES).freeze
-        COMPRESSOR_OPTION_COMBINATIONS = Option.get_compressor_option_combinations(BUFFER_LENGTH_NAMES).freeze
-
         def test_invalid_initialize
-          INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
+          get_invalid_compressor_options do |invalid_options|
             assert_raises ValidateError do
               target.new ::STDOUT, invalid_options
             end
@@ -48,7 +45,7 @@ module BRS
             PORTION_LENGTHS.each do |portion_length|
               sources = get_sources text, portion_length
 
-              COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+              get_compressor_options do |compressor_options|
                 ::File.open ARCHIVE_PATH, "wb" do |file|
                   instance = target.new file, compressor_options
 
@@ -83,7 +80,7 @@ module BRS
             (ENCODINGS - [text.encoding]).each do |external_encoding|
               target_text = text.encode external_encoding, TRANSCODE_OPTIONS
 
-              COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+              get_compressor_options do |compressor_options|
                 ::File.open ARCHIVE_PATH, "wb" do |file|
                   instance = target.new(
                     file,
@@ -117,7 +114,7 @@ module BRS
         end
 
         def test_rewind
-          COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+          get_compressor_options do |compressor_options|
             compressed_texts = []
 
             ::File.open ARCHIVE_PATH, "wb" do |file|
@@ -163,7 +160,7 @@ module BRS
               PORTION_LENGTHS.each do |portion_length|
                 sources = get_sources text, portion_length
 
-                COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+                get_compressor_options do |compressor_options|
                   get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                     compressed_text = "".b
 
@@ -244,7 +241,7 @@ module BRS
         end
 
         def test_rewind_nonblock
-          COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+          get_compressor_options do |compressor_options|
             compressed_texts = []
 
             ::File.open ARCHIVE_PATH, "wb" do |file|
@@ -309,6 +306,14 @@ module BRS
           decompressed_text.force_encoding text.encoding
 
           assert_equal text, decompressed_text
+        end
+
+        def get_invalid_compressor_options(&block)
+          Option.get_invalid_compressor_options(BUFFER_LENGTH_NAMES, &block)
+        end
+
+        def get_compressor_options(&block)
+          Option.get_compressor_options(BUFFER_LENGTH_NAMES, &block)
         end
 
         def get_compatible_decompressor_options(compressor_options, &block)
