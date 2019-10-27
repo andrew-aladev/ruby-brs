@@ -10,9 +10,11 @@ addons:
   apt:
     packages:
       - libbrotli-dev
+    update: true
   homebrew:
     packages:
       - brotli
+    update: true
 
 before_install:
   - gem install bundler
