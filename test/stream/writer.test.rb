@@ -309,15 +309,15 @@ module BRS
         end
 
         def get_invalid_compressor_options(&block)
-          Option.get_invalid_compressor_options(BUFFER_LENGTH_NAMES, &block)
+          Option.get_invalid_compressor_options BUFFER_LENGTH_NAMES, &block
         end
 
         def get_compressor_options(&block)
-          Option.get_compressor_options(BUFFER_LENGTH_NAMES, &block)
+          Option.get_compressor_options BUFFER_LENGTH_NAMES, &block
         end
 
         def get_compatible_decompressor_options(compressor_options, &block)
-          Option.get_compatible_decompressor_options(compressor_options, BUFFER_LENGTH_MAPPING, &block)
+          Option.get_compatible_decompressor_options compressor_options, BUFFER_LENGTH_MAPPING, &block
         end
       end
 
