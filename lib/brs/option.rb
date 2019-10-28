@@ -16,7 +16,6 @@ module BRS
       :lgwin                            => nil,
       :lgblock                          => nil,
       :disable_literal_context_modeling => nil,
-      :size_hint                        => nil,
       :large_window                     => nil
     }
     .freeze
@@ -61,9 +60,6 @@ module BRS
 
       disable_literal_context_modeling = options[:disable_literal_context_modeling]
       Validation.validate_bool disable_literal_context_modeling unless disable_literal_context_modeling.nil?
-
-      size_hint = options[:size_hint]
-      Validation.validate_not_negative_integer size_hint unless size_hint.nil?
 
       large_window = options[:large_window]
       Validation.validate_bool large_window unless large_window.nil?

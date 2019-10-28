@@ -118,6 +118,8 @@ Values: true/false, default value: false.
 ```
 
 Values: 0 - infinity, default value: 0.
+It is reasonable to provide size of input (if known) for streaming api.
+`String` and `File` will set `:size_hint` automaticaly.
 
 ```
 :large_window
@@ -200,12 +202,16 @@ Writer maintains destination buffer only, so it accepts `destination_buffer_leng
 Open file path and create stream writer associated with opened file.
 Data will be transcoded to `:external_encoding` using `:transcode_options` before compressing.
 
+It may be tricky to use both `:size_hint` and `:transcode_options`. You have to provide size of transcoded input.
+
 ```
 ::new(destination_io, options = {}, :external_encoding => nil, :transcode_options => {})
 ```
 
 Create stream writer associated with destination io.
 Data will be transcoded to `:external_encoding` using `:transcode_options` before compressing.
+
+It may be tricky to use both `:size_hint` and `:transcode_options`. You have to provide size of transcoded input.
 
 ```
 #set_encoding(external_encoding, nil, transcode_options)

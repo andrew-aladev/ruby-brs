@@ -17,6 +17,8 @@ module BRS
 
       options = Option.get_compressor_options options, BUFFER_LENGTH_NAMES
 
+      options[:size_hint] = ::File.size source
+
       open_files(source, destination) do |source_io, destination_io|
         BRS._native_compress_io source_io, destination_io, options
       end

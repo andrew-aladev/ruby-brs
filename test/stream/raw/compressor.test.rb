@@ -31,6 +31,12 @@ module BRS
                 Target.new invalid_options
               end
             end
+
+            (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
+              assert_raises ValidateError do
+                Target.new :size_hint => invalid_integer
+              end
+            end
           end
 
           def test_invalid_write
@@ -62,7 +68,7 @@ module BRS
 
                   writer = proc { |portion| compressed_buffer << portion }
 
-                  compressor = Target.new compressor_options
+                  compressor = Target.new compressor_options.merge(:size_hint => text.bytesize)
 
                   begin
                     source      = "".b

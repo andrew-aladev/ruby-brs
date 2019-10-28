@@ -15,7 +15,11 @@ module BRS
         BUFFER_LENGTH_NAMES = %i[destination_buffer_length].freeze
 
         def initialize(options = {})
-          options       = Option.get_compressor_options options, BUFFER_LENGTH_NAMES
+          options = Option.get_compressor_options options, BUFFER_LENGTH_NAMES
+
+          size_hint = options[:size_hint]
+          Validation.validate_not_negative_integer size_hint unless size_hint.nil?
+
           native_stream = NativeCompressor.new options
 
           super native_stream

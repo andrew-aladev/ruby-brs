@@ -35,6 +35,12 @@ module BRS
             end
           end
 
+          (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
+            assert_raises ValidateError do
+              target.new ::STDOUT, :size_hint => invalid_integer
+            end
+          end
+
           super
         end
 
@@ -47,7 +53,7 @@ module BRS
 
               get_compressor_options do |compressor_options|
                 ::File.open ARCHIVE_PATH, "wb" do |file|
-                  instance = target.new file, compressor_options
+                  instance = target.new file, compressor_options.merge(:size_hint => text.bytesize)
 
                   begin
                     sources.each_slice(2) do |current_sources|
@@ -84,7 +90,7 @@ module BRS
                 ::File.open ARCHIVE_PATH, "wb" do |file|
                   instance = target.new(
                     file,
-                    compressor_options,
+                    compressor_options.merge(:size_hint => target_text.bytesize),
                     :external_encoding => external_encoding,
                     :transcode_options => TRANSCODE_OPTIONS
                   )
