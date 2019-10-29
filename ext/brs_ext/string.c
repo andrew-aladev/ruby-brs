@@ -20,21 +20,21 @@
 
 static inline VALUE create_buffer(VALUE length)
 {
-  return rb_str_new(NULL, NUM2ULONG(length));
+  return rb_str_new(NULL, NUM2SIZET(length));
 }
 
 #define CREATE_BUFFER(buffer, length, exception) \
-  VALUE buffer = rb_protect(create_buffer, UINT2NUM(length), &exception);
+  VALUE buffer = rb_protect(create_buffer, SIZET2NUM(length), &exception);
 
 static inline VALUE resize_buffer(VALUE args)
 {
   VALUE buffer = rb_ary_entry(args, 0);
   VALUE length = rb_ary_entry(args, 1);
-  return rb_str_resize(buffer, NUM2ULONG(length));
+  return rb_str_resize(buffer, NUM2SIZET(length));
 }
 
 #define RESIZE_BUFFER(buffer, length, exception)                                        \
-  VALUE resize_buffer_args = rb_ary_new_from_args(2, buffer, UINT2NUM(length));         \
+  VALUE resize_buffer_args = rb_ary_new_from_args(2, buffer, SIZET2NUM(length));        \
   buffer                   = rb_protect(resize_buffer, resize_buffer_args, &exception); \
   RB_GC_GUARD(resize_buffer_args);
 

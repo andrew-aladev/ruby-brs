@@ -6,6 +6,7 @@
 #include <brotli/decode.h>
 #include <brotli/encode.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "brs_ext/common.h"
 #include "brs_ext/error.h"
@@ -82,13 +83,13 @@ void brs_ext_get_option(VALUE options, brs_ext_option_t* option, brs_ext_option_
   option->value = value;
 }
 
-unsigned long brs_ext_get_ulong_option_value(VALUE options, const char* name)
+size_t brs_ext_get_size_option_value(VALUE options, const char* name)
 {
   VALUE raw_value = get_raw_option_value(options, name);
 
   Check_Type(raw_value, T_FIXNUM);
 
-  return NUM2ULONG(raw_value);
+  return NUM2SIZET(raw_value);
 }
 
 // -- set params --
