@@ -76,6 +76,7 @@ static inline brs_ext_result_t compress(
   const uint8_t* remaining_source, size_t remaining_source_length,
   VALUE destination_value, size_t destination_buffer_length)
 {
+  BROTLI_BOOL      result;
   brs_ext_result_t ext_result;
 
   size_t destination_length                  = 0;
@@ -85,7 +86,7 @@ static inline brs_ext_result_t compress(
     uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
     size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
-    BROTLI_BOOL result = BrotliEncoderCompressStream(
+    result = BrotliEncoderCompressStream(
       state_ptr,
       BROTLI_OPERATION_FINISH,
       &remaining_source_length, &remaining_source,
@@ -174,7 +175,8 @@ static inline brs_ext_result_t decompress(
   const uint8_t* remaining_source, size_t remaining_source_length,
   VALUE destination_value, size_t destination_buffer_length)
 {
-  brs_ext_result_t ext_result;
+  BrotliDecoderResult result;
+  brs_ext_result_t    ext_result;
 
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = destination_buffer_length;
@@ -183,7 +185,7 @@ static inline brs_ext_result_t decompress(
     uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
     size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
-    BrotliDecoderResult result = BrotliDecoderDecompressStream(
+    result = BrotliDecoderDecompressStream(
       state_ptr,
       &remaining_source_length, &remaining_source,
       &remaining_destination_buffer_length, &remaining_destination_buffer,
