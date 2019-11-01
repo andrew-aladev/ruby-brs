@@ -61,23 +61,24 @@ static inline brs_ext_result_t increase_destination_buffer(
 
 // -- utils --
 
-#define GET_SOURCE_DATA(source_value)                                 \
-  Check_Type(source_value, T_STRING);                                 \
-                                                                      \
-  const char*    source                  = RSTRING_PTR(source_value); \
-  size_t         source_length           = RSTRING_LEN(source_value); \
-  const uint8_t* remaining_source        = (const uint8_t*)source;    \
-  size_t         remaining_source_length = source_length;
+#define GET_SOURCE_DATA(source_value)                    \
+  Check_Type(source_value, T_STRING);                    \
+                                                         \
+  const char* source        = RSTRING_PTR(source_value); \
+  size_t      source_length = RSTRING_LEN(source_value);
 
 // -- compress --
 
 static inline brs_ext_result_t compress(
   BrotliEncoderState* state_ptr,
-  const uint8_t* remaining_source, size_t remaining_source_length,
+  const char* source, size_t source_length,
   VALUE destination_value, size_t destination_buffer_length)
 {
   BROTLI_BOOL      result;
   brs_ext_result_t ext_result;
+
+  const uint8_t* remaining_source        = (const uint8_t*)source;
+  size_t         remaining_source_length = source_length;
 
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = destination_buffer_length;
@@ -156,7 +157,7 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
 
   ext_result = compress(
     state_ptr,
-    remaining_source, remaining_source_length,
+    source, source_length,
     destination_value, destination_buffer_length);
 
   BrotliEncoderDestroyInstance(state_ptr);
@@ -172,11 +173,14 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
 
 static inline brs_ext_result_t decompress(
   BrotliDecoderState* state_ptr,
-  const uint8_t* remaining_source, size_t remaining_source_length,
+  const char* source, size_t source_length,
   VALUE destination_value, size_t destination_buffer_length)
 {
   BrotliDecoderResult result;
   brs_ext_result_t    ext_result;
+
+  const uint8_t* remaining_source        = (const uint8_t*)source;
+  size_t         remaining_source_length = source_length;
 
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = destination_buffer_length;
@@ -258,7 +262,7 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
 
   ext_result = decompress(
     state_ptr,
-    remaining_source, remaining_source_length,
+    source, source_length,
     destination_value, destination_buffer_length);
 
   BrotliDecoderDestroyInstance(state_ptr);
