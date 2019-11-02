@@ -117,29 +117,43 @@ static inline brs_ext_result_t read_more_source(
   return 0;
 }
 
-#define BUFFERED_READ_SOURCE(function, ...)                 \
-  while (true) {                                            \
-    ext_result = function(__VA_ARGS__);                     \
-    if (ext_result != 0) {                                  \
-      return ext_result;                                    \
-    }                                                       \
-                                                            \
-    ext_result = read_more_source(                          \
-      source_file,                                          \
-      &source, &source_length,                              \
-      source_buffer, source_buffer_length);                 \
-                                                            \
-    if (ext_result == BRS_EXT_FILE_READ_FINISHED) {         \
-      if (source_length != 0) {                             \
-        /* Brotli won't provide any remainder by design. */ \
-        return BRS_EXT_ERROR_READ_IO;                       \
-      }                                                     \
-      break;                                                \
-    }                                                       \
-    else if (ext_result != 0) {                             \
-      return ext_result;                                    \
-    }                                                       \
-  }
+#define BUFFERED_READ_SOURCE(function, ...)                   \
+  do {                                                        \
+    bool is_function_called = false;                          \
+                                                              \
+    while (true) {                                            \
+      ext_result = read_more_source(                          \
+        source_file,                                          \
+        &source, &source_length,                              \
+        source_buffer, source_buffer_length);                 \
+                                                              \
+      if (ext_result == BRS_EXT_FILE_READ_FINISHED) {         \
+        if (source_length != 0) {                             \
+          /* Brotli won't provide any remainder by design. */ \
+          return BRS_EXT_ERROR_READ_IO;                       \
+        }                                                     \
+        break;                                                \
+      }                                                       \
+      else if (ext_result != 0) {                             \
+        return ext_result;                                    \
+      }                                                       \
+                                                              \
+      ext_result = function(__VA_ARGS__);                     \
+      if (ext_result != 0) {                                  \
+        return ext_result;                                    \
+      }                                                       \
+                                                              \
+      is_function_called = true;                              \
+    }                                                         \
+                                                              \
+    if (!is_function_called) {                                \
+      /* Function should be called at least once. */          \
+      ext_result = function(__VA_ARGS__);                     \
+      if (ext_result != 0) {                                  \
+        return ext_result;                                    \
+      }                                                       \
+    }                                                         \
+  } while (false);
 
 // Algorithm has written data into destination buffer.
 // We need to write this data into file.
