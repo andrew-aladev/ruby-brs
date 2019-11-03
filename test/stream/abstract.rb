@@ -133,8 +133,15 @@ module BRS
           refute instance.stat.pipe?
           refute instance.stat.socket?
 
-          assert instance.stat.readable?
           assert instance.stat.writable?
+
+          instance = target.new ::STDIN
+
+          refute instance.stat.file?
+          refute instance.stat.pipe?
+          refute instance.stat.socket?
+
+          assert instance.stat.readable?
         end
 
         # -----
