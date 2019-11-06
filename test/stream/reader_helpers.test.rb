@@ -12,7 +12,7 @@ require_relative "../validation"
 module BRS
   module Test
     module Stream
-      class ReaderHelpers < Minitest::Unit::TestCase
+      class ReaderHelpers < Minitest::Test
         Target = BRS::Stream::Reader
         String = BRS::String
 

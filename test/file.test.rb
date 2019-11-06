@@ -10,7 +10,7 @@ require_relative "validation"
 
 module BRS
   module Test
-    class File < Minitest::Unit::TestCase
+    class File < Minitest::Test
       Target = BRS::File
 
       SOURCE_PATH  = Common::SOURCE_PATH

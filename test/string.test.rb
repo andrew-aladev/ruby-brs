@@ -10,7 +10,7 @@ require_relative "validation"
 
 module BRS
   module Test
-    class String < Minitest::Unit::TestCase
+    class String < Minitest::Test
       Target = BRS::String
 
       TEXTS       = Common::TEXTS

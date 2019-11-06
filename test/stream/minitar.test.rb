@@ -11,7 +11,7 @@ require_relative "../minitest"
 module BRS
   module Test
     module Stream
-      class MinitarTest < Minitest::Unit::TestCase
+      class MinitarTest < Minitest::Test
         Reader = BRS::Stream::Reader
         Writer = BRS::Stream::Writer
 
