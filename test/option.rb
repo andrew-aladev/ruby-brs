@@ -115,7 +115,7 @@ module BRS
           :large_window                     => BOOLS
         )
 
-        complete_generator = buffer_length_generator.and main_generator
+        complete_generator = buffer_length_generator.mix main_generator
 
         yield complete_generator.next until complete_generator.finished?
       end
@@ -128,7 +128,7 @@ module BRS
           :large_window                     => BOOLS
         )
 
-        complete_generator = buffer_length_generator.and main_generator
+        complete_generator = buffer_length_generator.mix main_generator
 
         yield complete_generator.next until complete_generator.finished?
       end
