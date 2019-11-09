@@ -80,25 +80,25 @@ Values: 0 - infinity, default value: 0.
 :mode
 ```
 
-Values: [`:text`, `:font`, `:generic`], default value: `:generic`.
+Values: `BRS::Option::MODES`, default value: `:generic`.
 
 ```
 :quality
 ```
 
-Values: 0 - 11, default value: 11.
+Values: `BRS::Option::MIN_QUALITY` - `BRS::Option::MAX_QUALITY`, default value: `BRS::Option::MAX_QUALITY`.
 
 ```
 :lgwin
 ```
 
-Values: 10 - 24, default value: 22.
+Values: `BRS::Option::MIN_LGWIN` - `BRS::Option::MAX_LGWIN`, default value: `22`.
 
 ```
 :lgblock
 ```
 
-Values: 16 - 24, default value: none.
+Values: `BRS::Option::MIN_LGBLOCK` - `BRS::Option::MAX_LGBLOCK`, default value: none.
 
 ```
 :disable_literal_context_modeling
