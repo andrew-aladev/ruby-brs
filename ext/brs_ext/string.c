@@ -18,26 +18,6 @@
 
 // -- buffer --
 
-static inline VALUE create_buffer(VALUE length)
-{
-  return rb_str_new(NULL, NUM2SIZET(length));
-}
-
-#define CREATE_BUFFER(buffer, length, exception) \
-  VALUE buffer = rb_protect(create_buffer, SIZET2NUM(length), &exception);
-
-static inline VALUE resize_buffer(VALUE args)
-{
-  VALUE buffer = rb_ary_entry(args, 0);
-  VALUE length = rb_ary_entry(args, 1);
-  return rb_str_resize(buffer, NUM2SIZET(length));
-}
-
-#define RESIZE_BUFFER(buffer, length, exception)                                        \
-  VALUE resize_buffer_args = rb_ary_new_from_args(2, buffer, SIZET2NUM(length));        \
-  buffer                   = rb_protect(resize_buffer, resize_buffer_args, &exception); \
-  RB_GC_GUARD(resize_buffer_args);
-
 static inline brs_ext_result_t increase_destination_buffer(
   VALUE destination_value, size_t destination_length,
   size_t* remaining_destination_buffer_length_ptr, size_t destination_buffer_length)
@@ -49,7 +29,7 @@ static inline brs_ext_result_t increase_destination_buffer(
 
   int exception;
 
-  RESIZE_BUFFER(destination_value, destination_length + destination_buffer_length, exception);
+  BRS_EXT_RESIZE_STRING_BUFFER(destination_value, destination_length + destination_buffer_length, exception);
   if (exception != 0) {
     return BRS_EXT_ERROR_ALLOCATE_FAILED;
   }
@@ -117,7 +97,7 @@ static inline brs_ext_result_t compress(
 
   int exception;
 
-  RESIZE_BUFFER(destination_value, destination_length, exception);
+  BRS_EXT_RESIZE_STRING_BUFFER(destination_value, destination_length, exception);
   if (exception != 0) {
     return BRS_EXT_ERROR_ALLOCATE_FAILED;
   }
@@ -149,7 +129,7 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
 
   int exception;
 
-  CREATE_BUFFER(destination_value, destination_buffer_length, exception);
+  BRS_EXT_CREATE_STRING_BUFFER(destination_value, destination_buffer_length, exception);
   if (exception != 0) {
     BrotliEncoderDestroyInstance(state_ptr);
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
@@ -222,7 +202,7 @@ static inline brs_ext_result_t decompress(
 
   int exception;
 
-  RESIZE_BUFFER(destination_value, destination_length, exception);
+  BRS_EXT_RESIZE_STRING_BUFFER(destination_value, destination_length, exception);
   if (exception != 0) {
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
@@ -254,7 +234,7 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
 
   int exception;
 
-  CREATE_BUFFER(destination_value, destination_buffer_length, exception);
+  BRS_EXT_CREATE_STRING_BUFFER(destination_value, destination_buffer_length, exception);
   if (exception != 0) {
     BrotliDecoderDestroyInstance(state_ptr);
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
