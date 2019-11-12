@@ -9,6 +9,38 @@ require_relative "validation"
 module BRS
   module Test
     module Option
+      INVALID_MODES = (
+        Validation::INVALID_SYMBOLS - [nil] + %i[invalid_mode]
+      )
+      .freeze
+
+      INVALID_QUALITIES = (
+        Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil] +
+        [
+          BRS::Option::MIN_QUALITY - 1,
+          BRS::Option::MAX_QUALITY + 1
+        ]
+      )
+      .freeze
+
+      INVALID_LGWINS = (
+        Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil] +
+        [
+          BRS::Option::MIN_LGWIN - 1,
+          BRS::Option::MAX_LGWIN + 1
+        ]
+      )
+      .freeze
+
+      INVALID_LGBLOCKS = (
+        Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil] +
+        [
+          BRS::Option::MIN_LGBLOCK - 1,
+          BRS::Option::MAX_LGBLOCK + 1
+        ]
+      )
+      .freeze
+
       private_class_method def self.get_invalid_buffer_length_options(buffer_length_names, &_block)
         buffer_length_names.each do |name|
           (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
@@ -24,26 +56,21 @@ module BRS
 
         get_invalid_buffer_length_options buffer_length_names, &block
 
-        (Validation::INVALID_SYMBOLS - [nil]).each do |invalid_symbol|
-          yield({ :mode => invalid_symbol })
+        INVALID_MODES.each do |invalid_mode|
+          yield({ :mode => invalid_mode })
         end
 
-        yield({ :mode => :invalid_mode })
-
-        (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
-          yield({ :quality => invalid_integer })
-          yield({ :lgwin   => invalid_integer })
-          yield({ :lgblock => invalid_integer })
+        INVALID_QUALITIES.each do |invalid_quality|
+          yield({ :quality => invalid_quality })
         end
 
-        yield({ :quality => BRS::Option::MIN_QUALITY - 1 })
-        yield({ :quality => BRS::Option::MAX_QUALITY + 1 })
+        INVALID_LGWINS.each do |invalid_lgwin|
+          yield({ :lgwin => invalid_lgwin })
+        end
 
-        yield({ :lgwin => BRS::Option::MIN_LGWIN - 1 })
-        yield({ :lgwin => BRS::Option::MAX_LGWIN + 1 })
-
-        yield({ :lgblock => BRS::Option::MIN_LGBLOCK - 1 })
-        yield({ :lgblock => BRS::Option::MAX_LGBLOCK + 1 })
+        INVALID_LGBLOCKS.each do |invalid_lgblock|
+          yield({ :lgblock => invalid_lgblock })
+        end
 
         (Validation::INVALID_BOOLS - [nil]).each do |invalid_bool|
           yield({ :disable_literal_context_modeling => invalid_bool })
