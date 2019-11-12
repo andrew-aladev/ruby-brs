@@ -343,7 +343,7 @@ Typical helpers, see [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.1/libd
 
 ## CI
 
-Travis and Appveyor CI uses [scripts/toolchains.sh](scripts/toolchains.sh) directly.
+Travis and Appveyor CI uses [scripts/ci_test.sh](scripts/ci_test.sh) directly.
 Cirrus and Circle CI uses prebuilt [scripts/test-images](scripts/test-images).
 Cirrus CI uses amd64 image, Circle CI - i686.
 
