@@ -3,6 +3,7 @@
 
 require "brs/stream/reader"
 require "brs/string"
+require "English"
 
 require_relative "../common"
 require_relative "../minitest"
