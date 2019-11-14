@@ -1,6 +1,8 @@
 # Ruby bindings for brotli library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
+require_relative "helper"
+
 require "brs/file"
 
 require_relative "common"
