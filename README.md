@@ -1,8 +1,8 @@
 # Ruby bindings for brotli library
 
-| Travis | AppVeyor | Cirrus | Circle | Coveralls |
-| :---:  | :---:    | :---:  | :---:  | :---:     |
-| [![Travis test status](https://travis-ci.com/andrew-aladev/ruby-brs.svg?branch=master)](https://travis-ci.com/andrew-aladev/ruby-brs) | [![AppVeyor test status](https://ci.appveyor.com/api/projects/status/github/andrew-aladev/ruby-brs?branch=master&svg=true)](https://ci.appveyor.com/project/andrew-aladev/ruby-brs/branch/master) | [![Cirrus test status](https://api.cirrus-ci.com/github/andrew-aladev/ruby-brs.svg?branch=master)](https://cirrus-ci.com/github/andrew-aladev/ruby-brs) | [![Circle test status](https://circleci.com/gh/andrew-aladev/ruby-brs/tree/master.svg?style=shield)](https://circleci.com/gh/andrew-aladev/ruby-brs/tree/master) | [![Coverage Status](https://coveralls.io/repos/github/andrew-aladev/ruby-brs/badge.svg?branch=master)](https://coveralls.io/github/andrew-aladev/ruby-brs?branch=master) |
+| Travis | AppVeyor | Cirrus | Circle | Codecov |
+| :---:  | :---:    | :---:  | :---:  | :---:   |
+| [![Travis test status](https://travis-ci.com/andrew-aladev/ruby-brs.svg?branch=master)](https://travis-ci.com/andrew-aladev/ruby-brs) | [![AppVeyor test status](https://ci.appveyor.com/api/projects/status/github/andrew-aladev/ruby-brs?branch=master&svg=true)](https://ci.appveyor.com/project/andrew-aladev/ruby-brs/branch/master) | [![Cirrus test status](https://api.cirrus-ci.com/github/andrew-aladev/ruby-brs.svg?branch=master)](https://cirrus-ci.com/github/andrew-aladev/ruby-brs) | [![Circle test status](https://circleci.com/gh/andrew-aladev/ruby-brs/tree/master.svg?style=shield)](https://circleci.com/gh/andrew-aladev/ruby-brs/tree/master) | [![Codecov](https://codecov.io/gh/andrew-aladev/ruby-brs/branch/master/graph/badge.svg)](https://codecov.io/gh/andrew-aladev/ruby-brs) |
 
 See [brotli library](https://github.com/google/brotli).
 
