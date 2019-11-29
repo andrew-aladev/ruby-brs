@@ -59,7 +59,7 @@ module BRS
                   begin
                     byte = instance.readbyte
                     instance.ungetc byte
-                  rescue ::EOFError # rubocop:disable Lint/HandleExceptions
+                  rescue ::EOFError # rubocop:disable Lint/SuppressedException
                     # ok
                   end
 
@@ -105,7 +105,7 @@ module BRS
                   begin
                     char = instance.readchar
                     instance.ungetc char
-                  rescue ::EOFError # rubocop:disable Lint/HandleExceptions
+                  rescue ::EOFError # rubocop:disable Lint/SuppressedException
                     # ok
                   end
 
@@ -152,7 +152,7 @@ module BRS
                       assert_equal char.encoding, internal_encoding
 
                       instance.ungetc char
-                    rescue ::EOFError # rubocop:disable Lint/HandleExceptions
+                    rescue ::EOFError # rubocop:disable Lint/SuppressedException
                       # ok
                     end
 
@@ -261,7 +261,7 @@ module BRS
 
                     instance.ungetline line
                     assert_equal instance.lineno, 0
-                  rescue ::EOFError # rubocop:disable Lint/HandleExceptions
+                  rescue ::EOFError # rubocop:disable Lint/SuppressedException
                     # ok
                   end
 
@@ -331,7 +331,7 @@ module BRS
                       assert_equal line.encoding, internal_encoding
 
                       instance.ungetline line
-                    rescue ::EOFError # rubocop:disable Lint/HandleExceptions
+                    rescue ::EOFError # rubocop:disable Lint/SuppressedException
                       # ok
                     end
 
