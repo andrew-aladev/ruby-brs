@@ -21,8 +21,8 @@ cd ".."
 if command -v rvm > /dev/null 2>&1; then
   ruby_version=$(< ".ruby-version")
   ruby_major_version=$(echo "${ruby_version%.*}" | sed "s/\./\\\./g") # escaping for regex
-  ruby_version=$(rvm list | grep -o -e "$ruby_major_version\.[0-9]\+" | sort | tail -n 1)
-  echo "$ruby_version" > ".ruby-version"
+  ruby_version=$(rvm list | grep -o -e "${ruby_major_version}\.[0-9]\+" | sort | tail -n 1)
+  echo "${ruby_version}" > ".ruby-version"
 fi
 
 bash -cl "\
