@@ -127,14 +127,14 @@ module BRS
             external_encoding = text.encoding
 
             (ENCODINGS - [external_encoding]).each do |internal_encoding|
-              target_text = text.encode internal_encoding, TRANSCODE_OPTIONS
+              target_text = text.encode internal_encoding, **TRANSCODE_OPTIONS
 
               get_compressor_options do |compressor_options|
                 write_archive text, compressor_options
 
                 get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                   Target.open ARCHIVE_PATH, decompressor_options do |instance|
-                    instance.set_encoding external_encoding, internal_encoding, TRANSCODE_OPTIONS
+                    instance.set_encoding external_encoding, internal_encoding, **TRANSCODE_OPTIONS
 
                     # getc
 
@@ -227,20 +227,14 @@ module BRS
 
                   # gets
 
-                  $OUTPUT_RECORD_SEPARATOR = separator
+                  LIMITS.each do |limit|
+                    line = instance.gets limit
+                    next if line.nil?
 
-                  begin
-                    LIMITS.each do |limit|
-                      line = instance.gets limit
-                      next if line.nil?
+                    assert_equal instance.lineno, 1
 
-                      assert_equal instance.lineno, 1
-
-                      instance.ungetline line
-                      assert_equal instance.lineno, 0
-                    end
-                  ensure
-                    $OUTPUT_RECORD_SEPARATOR = nil
+                    instance.ungetline line
+                    assert_equal instance.lineno, 0
                   end
 
                   LIMITS.each do |limit|
@@ -300,7 +294,7 @@ module BRS
               end
 
             (ENCODINGS - [external_encoding]).each do |internal_encoding|
-              target_text = text.encode internal_encoding, TRANSCODE_OPTIONS
+              target_text = text.encode internal_encoding, **TRANSCODE_OPTIONS
 
               get_compressor_options do |compressor_options|
                 write_archive text, compressor_options
@@ -311,17 +305,11 @@ module BRS
 
                     # gets
 
-                    $OUTPUT_RECORD_SEPARATOR = separator
+                    line = instance.gets separator
 
-                    begin
-                      line = instance.gets
-
-                      unless line.nil?
-                        assert_equal line.encoding, internal_encoding
-                        instance.ungetline line
-                      end
-                    ensure
-                      $OUTPUT_RECORD_SEPARATOR = nil
+                    unless line.nil?
+                      assert_equal line.encoding, internal_encoding
+                      instance.ungetline line
                     end
 
                     # readline
