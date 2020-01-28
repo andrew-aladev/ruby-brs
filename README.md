@@ -343,9 +343,11 @@ Typical helpers, see [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.7.0/libd
 
 ## CI
 
-Travis and Appveyor CI uses [scripts/ci_test.sh](scripts/ci_test.sh) directly.
-Cirrus and Circle CI uses prebuilt [scripts/test-images](scripts/test-images).
-Cirrus CI uses amd64 image, Circle CI - i686.
+See universal test script [scripts/ci_test.sh](scripts/ci_test.sh) for CI.
+Please visit [scripts/test-images](scripts/test-images).
+You can run this test script using many native and cross images.
+
+Cirrus CI uses `x86_64-pc-linux-gnu` image, Circle CI - `x86_64-gentoo-linux-musl` image.
 
 ## License
 

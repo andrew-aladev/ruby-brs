@@ -2,7 +2,7 @@ image: Ubuntu
 
 environment:
   matrix:
-    - RUBY_VERSION: 26
+    - RUBY_VERSION: 27
 
 init:
   - sh: sudo apt-get install -y libbrotli-dev
