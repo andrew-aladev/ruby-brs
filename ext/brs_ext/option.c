@@ -5,10 +5,7 @@
 
 #include <brotli/decode.h>
 #include <brotli/encode.h>
-#include <stdbool.h>
-#include <stdlib.h>
 
-#include "brs_ext/common.h"
 #include "brs_ext/error.h"
 #include "ruby.h"
 

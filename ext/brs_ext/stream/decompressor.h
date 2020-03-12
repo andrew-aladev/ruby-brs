@@ -5,16 +5,16 @@
 #define BRS_EXT_STREAM_DECOMPRESSOR_H
 
 #include <brotli/decode.h>
-#include <stdint.h>
 #include <stdlib.h>
 
+#include "brs_ext/common.h"
 #include "ruby.h"
 
 typedef struct {
   BrotliDecoderState* state_ptr;
-  uint8_t*            destination_buffer;
+  brs_ext_symbol_t*   destination_buffer;
   size_t              destination_buffer_length;
-  uint8_t*            remaining_destination_buffer;
+  brs_ext_symbol_t*   remaining_destination_buffer;
   size_t              remaining_destination_buffer_length;
 } brs_ext_decompressor_t;
 

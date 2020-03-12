@@ -5,11 +5,8 @@
 
 #include <brotli/encode.h>
 #include <brotli/types.h>
-#include <stdint.h>
-#include <stdlib.h>
 
 #include "brs_ext/buffer.h"
-#include "brs_ext/common.h"
 #include "brs_ext/error.h"
 #include "brs_ext/option.h"
 #include "ruby.h"
@@ -21,7 +18,7 @@ static void free_compressor(brs_ext_compressor_t* compressor_ptr)
     BrotliEncoderDestroyInstance(state_ptr);
   }
 
-  uint8_t* destination_buffer = compressor_ptr->destination_buffer;
+  brs_ext_symbol_t* destination_buffer = compressor_ptr->destination_buffer;
   if (destination_buffer != NULL) {
     free(destination_buffer);
   }
@@ -70,7 +67,7 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
     destination_buffer_length = BRS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_COMPRESSOR;
   }
 
-  uint8_t* destination_buffer = malloc(destination_buffer_length);
+  brs_ext_symbol_t* destination_buffer = malloc(destination_buffer_length);
   if (destination_buffer == NULL) {
     BrotliEncoderDestroyInstance(state_ptr);
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
@@ -90,13 +87,13 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
     brs_ext_raise_error(BRS_EXT_ERROR_USED_AFTER_CLOSE);                                 \
   }
 
-#define GET_SOURCE_DATA(source_value)                                 \
-  Check_Type(source_value, T_STRING);                                 \
-                                                                      \
-  const char*    source                  = RSTRING_PTR(source_value); \
-  size_t         source_length           = RSTRING_LEN(source_value); \
-  const uint8_t* remaining_source        = (const uint8_t*)source;    \
-  size_t         remaining_source_length = source_length;
+#define GET_SOURCE_DATA(source_value)                                                \
+  Check_Type(source_value, T_STRING);                                                \
+                                                                                     \
+  const char*             source                  = RSTRING_PTR(source_value);       \
+  size_t                  source_length           = RSTRING_LEN(source_value);       \
+  const brs_ext_symbol_t* remaining_source        = (const brs_ext_symbol_t*)source; \
+  size_t                  remaining_source_length = source_length;
 
 VALUE brs_ext_compress(VALUE self, VALUE source_value)
 {
@@ -130,8 +127,8 @@ VALUE brs_ext_flush_compressor(VALUE self)
 
   BrotliEncoderState* state_ptr = compressor_ptr->state_ptr;
 
-  const uint8_t* remaining_source        = NULL;
-  size_t         remaining_source_length = 0;
+  const brs_ext_symbol_t* remaining_source        = NULL;
+  size_t                  remaining_source_length = 0;
 
   BROTLI_BOOL result = BrotliEncoderCompressStream(
     state_ptr,
@@ -156,8 +153,8 @@ VALUE brs_ext_finish_compressor(VALUE self)
 
   BrotliEncoderState* state_ptr = compressor_ptr->state_ptr;
 
-  const uint8_t* remaining_source        = NULL;
-  size_t         remaining_source_length = 0;
+  const brs_ext_symbol_t* remaining_source        = NULL;
+  size_t                  remaining_source_length = 0;
 
   BROTLI_BOOL result = BrotliEncoderCompressStream(
     state_ptr,
@@ -180,9 +177,9 @@ VALUE brs_ext_compressor_read_result(VALUE self)
   GET_COMPRESSOR(self);
   DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
-  uint8_t* destination_buffer                  = compressor_ptr->destination_buffer;
-  size_t   destination_buffer_length           = compressor_ptr->destination_buffer_length;
-  size_t   remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
+  brs_ext_symbol_t* destination_buffer                  = compressor_ptr->destination_buffer;
+  size_t            destination_buffer_length           = compressor_ptr->destination_buffer_length;
+  size_t            remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
 
   const char* result        = (const char*)destination_buffer;
   size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
@@ -207,7 +204,7 @@ VALUE brs_ext_compressor_close(VALUE self)
     compressor_ptr->state_ptr = NULL;
   }
 
-  uint8_t* destination_buffer = compressor_ptr->destination_buffer;
+  brs_ext_symbol_t* destination_buffer = compressor_ptr->destination_buffer;
   if (destination_buffer != NULL) {
     free(destination_buffer);
 

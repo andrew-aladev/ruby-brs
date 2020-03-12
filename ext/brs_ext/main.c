@@ -2,7 +2,6 @@
 // Copyright (c) 2019 AUTHORS, MIT License.
 
 #include "brs_ext/buffer.h"
-#include "brs_ext/common.h"
 #include "brs_ext/io.h"
 #include "brs_ext/option.h"
 #include "brs_ext/stream/compressor.h"

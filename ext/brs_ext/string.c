@@ -6,11 +6,9 @@
 #include <brotli/decode.h>
 #include <brotli/encode.h>
 #include <brotli/types.h>
-#include <stdint.h>
 #include <stdlib.h>
 
 #include "brs_ext/buffer.h"
-#include "brs_ext/common.h"
 #include "brs_ext/error.h"
 #include "brs_ext/macro.h"
 #include "brs_ext/option.h"
@@ -57,15 +55,15 @@ static inline brs_ext_result_t compress(
   BROTLI_BOOL      result;
   brs_ext_result_t ext_result;
 
-  const uint8_t* remaining_source        = (const uint8_t*)source;
-  size_t         remaining_source_length = source_length;
+  const brs_ext_symbol_t* remaining_source        = (const brs_ext_symbol_t*)source;
+  size_t                  remaining_source_length = source_length;
 
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = destination_buffer_length;
 
   while (true) {
-    uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
-    size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
+    brs_ext_symbol_t* remaining_destination_buffer             = (brs_ext_symbol_t*)RSTRING_PTR(destination_value) + destination_length;
+    size_t            prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
     result = BrotliEncoderCompressStream(
       state_ptr,
@@ -159,15 +157,15 @@ static inline brs_ext_result_t decompress(
   BrotliDecoderResult result;
   brs_ext_result_t    ext_result;
 
-  const uint8_t* remaining_source        = (const uint8_t*)source;
-  size_t         remaining_source_length = source_length;
+  const brs_ext_symbol_t* remaining_source        = (const brs_ext_symbol_t*)source;
+  size_t                  remaining_source_length = source_length;
 
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = destination_buffer_length;
 
   while (true) {
-    uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
-    size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
+    brs_ext_symbol_t* remaining_destination_buffer             = (brs_ext_symbol_t*)RSTRING_PTR(destination_value) + destination_length;
+    size_t            prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
     result = BrotliDecoderDecompressStream(
       state_ptr,

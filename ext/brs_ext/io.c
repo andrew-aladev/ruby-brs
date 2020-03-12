@@ -6,13 +6,11 @@
 #include <brotli/decode.h>
 #include <brotli/encode.h>
 #include <brotli/types.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "brs_ext/buffer.h"
-#include "brs_ext/common.h"
 #include "brs_ext/error.h"
 #include "brs_ext/io.h"
 #include "brs_ext/macro.h"
@@ -26,7 +24,7 @@ enum {
 
 // -- file --
 
-static inline brs_ext_result_t read_file(FILE* source_file, uint8_t* source_buffer, size_t* source_length_ptr, size_t source_buffer_length)
+static inline brs_ext_result_t read_file(FILE* source_file, brs_ext_symbol_t* source_buffer, size_t* source_length_ptr, size_t source_buffer_length)
 {
   size_t read_length = fread(source_buffer, 1, source_buffer_length, source_file);
   if (read_length == 0 && feof(source_file)) {
@@ -42,7 +40,7 @@ static inline brs_ext_result_t read_file(FILE* source_file, uint8_t* source_buff
   return 0;
 }
 
-static inline brs_ext_result_t write_file(FILE* destination_file, uint8_t* destination_buffer, size_t destination_length)
+static inline brs_ext_result_t write_file(FILE* destination_file, brs_ext_symbol_t* destination_buffer, size_t destination_length)
 {
   size_t written_length = fwrite(destination_buffer, 1, destination_length, destination_file);
   if (written_length != destination_length) {
@@ -55,15 +53,15 @@ static inline brs_ext_result_t write_file(FILE* destination_file, uint8_t* desti
 // -- buffer --
 
 static inline brs_ext_result_t create_buffers(
-  uint8_t** source_buffer_ptr, size_t source_buffer_length,
-  uint8_t** destination_buffer_ptr, size_t destination_buffer_length)
+  brs_ext_symbol_t** source_buffer_ptr, size_t source_buffer_length,
+  brs_ext_symbol_t** destination_buffer_ptr, size_t destination_buffer_length)
 {
-  uint8_t* source_buffer = malloc(source_buffer_length);
+  brs_ext_symbol_t* source_buffer = malloc(source_buffer_length);
   if (source_buffer == NULL) {
     return BRS_EXT_ERROR_ALLOCATE_FAILED;
   }
 
-  uint8_t* destination_buffer = malloc(destination_buffer_length);
+  brs_ext_symbol_t* destination_buffer = malloc(destination_buffer_length);
   if (destination_buffer == NULL) {
     free(source_buffer);
     return BRS_EXT_ERROR_ALLOCATE_FAILED;
@@ -82,12 +80,12 @@ static inline brs_ext_result_t create_buffers(
 // Algorithm can use same buffer again.
 
 static inline brs_ext_result_t read_more_source(
-  FILE*           source_file,
-  const uint8_t** source_ptr, size_t* source_length_ptr,
-  uint8_t* source_buffer, size_t source_buffer_length)
+  FILE*                    source_file,
+  const brs_ext_symbol_t** source_ptr, size_t* source_length_ptr,
+  brs_ext_symbol_t* source_buffer, size_t source_buffer_length)
 {
-  const uint8_t* source        = *source_ptr;
-  size_t         source_length = *source_length_ptr;
+  const brs_ext_symbol_t* source        = *source_ptr;
+  size_t                  source_length = *source_length_ptr;
 
   if (source != source_buffer) {
     if (source_length != 0) {
@@ -104,8 +102,8 @@ static inline brs_ext_result_t read_more_source(
     return BRS_EXT_ERROR_NOT_ENOUGH_SOURCE_BUFFER;
   }
 
-  uint8_t* remaining_source_buffer = source_buffer + source_length;
-  size_t   new_source_length;
+  brs_ext_symbol_t* remaining_source_buffer = source_buffer + source_length;
+  size_t            new_source_length;
 
   brs_ext_result_t ext_result = read_file(source_file, remaining_source_buffer, &new_source_length, remaining_source_buffer_length);
   if (ext_result != 0) {
@@ -160,8 +158,8 @@ static inline brs_ext_result_t read_more_source(
 // Than algorithm can use same buffer again.
 
 static inline brs_ext_result_t flush_destination_buffer(
-  FILE*    destination_file,
-  uint8_t* destination_buffer, size_t* destination_length_ptr, size_t destination_buffer_length)
+  FILE*             destination_file,
+  brs_ext_symbol_t* destination_buffer, size_t* destination_length_ptr, size_t destination_buffer_length)
 {
   if (*destination_length_ptr == 0) {
     // We want to write more data at once, than buffer has.
@@ -178,7 +176,7 @@ static inline brs_ext_result_t flush_destination_buffer(
   return 0;
 }
 
-static inline brs_ext_result_t write_remaining_destination(FILE* destination_file, uint8_t* destination_buffer, size_t destination_length)
+static inline brs_ext_result_t write_remaining_destination(FILE* destination_file, brs_ext_symbol_t* destination_buffer, size_t destination_length)
 {
   if (destination_length == 0) {
     return 0;
@@ -203,17 +201,17 @@ static inline brs_ext_result_t write_remaining_destination(FILE* destination_fil
 // -- compress --
 
 static inline brs_ext_result_t buffered_compress(
-  BrotliEncoderState* state_ptr,
-  const uint8_t** source_ptr, size_t* source_length_ptr,
-  FILE* destination_file, uint8_t* destination_buffer, size_t* destination_length_ptr, size_t destination_buffer_length)
+  BrotliEncoderState*      state_ptr,
+  const brs_ext_symbol_t** source_ptr, size_t* source_length_ptr,
+  FILE* destination_file, brs_ext_symbol_t* destination_buffer, size_t* destination_length_ptr, size_t destination_buffer_length)
 {
   BROTLI_BOOL      result;
   brs_ext_result_t ext_result;
 
   while (true) {
-    uint8_t* remaining_destination_buffer             = destination_buffer + *destination_length_ptr;
-    size_t   remaining_destination_buffer_length      = destination_buffer_length - *destination_length_ptr;
-    size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
+    brs_ext_symbol_t* remaining_destination_buffer             = destination_buffer + *destination_length_ptr;
+    size_t            remaining_destination_buffer_length      = destination_buffer_length - *destination_length_ptr;
+    size_t            prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
     result = BrotliEncoderCompressStream(
       state_ptr,
@@ -248,18 +246,18 @@ static inline brs_ext_result_t buffered_compress(
 
 static inline brs_ext_result_t buffered_compressor_finish(
   BrotliEncoderState* state_ptr,
-  FILE* destination_file, uint8_t* destination_buffer, size_t* destination_length_ptr, size_t destination_buffer_length)
+  FILE* destination_file, brs_ext_symbol_t* destination_buffer, size_t* destination_length_ptr, size_t destination_buffer_length)
 {
   BROTLI_BOOL      result;
   brs_ext_result_t ext_result;
 
-  const uint8_t* source        = NULL;
-  size_t         source_length = 0;
+  const brs_ext_symbol_t* source        = NULL;
+  size_t                  source_length = 0;
 
   while (true) {
-    uint8_t* remaining_destination_buffer             = destination_buffer + *destination_length_ptr;
-    size_t   remaining_destination_buffer_length      = destination_buffer_length - *destination_length_ptr;
-    size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
+    brs_ext_symbol_t* remaining_destination_buffer             = destination_buffer + *destination_length_ptr;
+    size_t            remaining_destination_buffer_length      = destination_buffer_length - *destination_length_ptr;
+    size_t            prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
     result = BrotliEncoderCompressStream(
       state_ptr,
@@ -294,14 +292,14 @@ static inline brs_ext_result_t buffered_compressor_finish(
 
 static inline brs_ext_result_t compress(
   BrotliEncoderState* state_ptr,
-  FILE* source_file, uint8_t* source_buffer, size_t source_buffer_length,
-  FILE* destination_file, uint8_t* destination_buffer, size_t destination_buffer_length)
+  FILE* source_file, brs_ext_symbol_t* source_buffer, size_t source_buffer_length,
+  FILE* destination_file, brs_ext_symbol_t* destination_buffer, size_t destination_buffer_length)
 {
   brs_ext_result_t ext_result;
 
-  const uint8_t* source             = source_buffer;
-  size_t         source_length      = 0;
-  size_t         destination_length = 0;
+  const brs_ext_symbol_t* source             = source_buffer;
+  size_t                  source_length      = 0;
+  size_t                  destination_length = 0;
 
   BUFFERED_READ_SOURCE(
     buffered_compress,
@@ -347,8 +345,8 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
     destination_buffer_length = BRS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_COMPRESSOR;
   }
 
-  uint8_t* source_buffer;
-  uint8_t* destination_buffer;
+  brs_ext_symbol_t* source_buffer;
+  brs_ext_symbol_t* destination_buffer;
 
   ext_result = create_buffers(
     &source_buffer, source_buffer_length,
@@ -381,17 +379,17 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
 // -- decompress --
 
 static inline brs_ext_result_t buffered_decompress(
-  BrotliDecoderState* state_ptr,
-  const uint8_t** source_ptr, size_t* source_length_ptr,
-  FILE* destination_file, uint8_t* destination_buffer, size_t* destination_length_ptr, size_t destination_buffer_length)
+  BrotliDecoderState*      state_ptr,
+  const brs_ext_symbol_t** source_ptr, size_t* source_length_ptr,
+  FILE* destination_file, brs_ext_symbol_t* destination_buffer, size_t* destination_length_ptr, size_t destination_buffer_length)
 {
   BrotliDecoderResult result;
   brs_ext_result_t    ext_result;
 
   while (true) {
-    uint8_t* remaining_destination_buffer             = destination_buffer + *destination_length_ptr;
-    size_t   remaining_destination_buffer_length      = destination_buffer_length - *destination_length_ptr;
-    size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
+    brs_ext_symbol_t* remaining_destination_buffer             = destination_buffer + *destination_length_ptr;
+    size_t            remaining_destination_buffer_length      = destination_buffer_length - *destination_length_ptr;
+    size_t            prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
     result = BrotliDecoderDecompressStream(
       state_ptr,
@@ -429,14 +427,14 @@ static inline brs_ext_result_t buffered_decompress(
 
 static inline brs_ext_result_t decompress(
   BrotliDecoderState* state_ptr,
-  FILE* source_file, uint8_t* source_buffer, size_t source_buffer_length,
-  FILE* destination_file, uint8_t* destination_buffer, size_t destination_buffer_length)
+  FILE* source_file, brs_ext_symbol_t* source_buffer, size_t source_buffer_length,
+  FILE* destination_file, brs_ext_symbol_t* destination_buffer, size_t destination_buffer_length)
 {
   brs_ext_result_t ext_result;
 
-  const uint8_t* source             = source_buffer;
-  size_t         source_length      = 0;
-  size_t         destination_length = 0;
+  const brs_ext_symbol_t* source             = source_buffer;
+  size_t                  source_length      = 0;
+  size_t                  destination_length = 0;
 
   BUFFERED_READ_SOURCE(
     buffered_decompress,
@@ -474,8 +472,8 @@ VALUE brs_ext_decompress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE dest
     destination_buffer_length = BRS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_DECOMPRESSOR;
   }
 
-  uint8_t* source_buffer;
-  uint8_t* destination_buffer;
+  brs_ext_symbol_t* source_buffer;
+  brs_ext_symbol_t* destination_buffer;
 
   ext_result = create_buffers(
     &source_buffer, source_buffer_length,

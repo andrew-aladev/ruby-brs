@@ -7,7 +7,6 @@
 #include <brotli/decode.h>
 #include <brotli/encode.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdlib.h>
 
 #include "brs_ext/common.h"
@@ -22,8 +21,8 @@ enum {
   BRS_EXT_OPTION_TYPE_MODE
 };
 
-typedef uint_fast8_t brs_ext_option_type_t;
-typedef uint32_t     brs_ext_option_value_t;
+typedef brs_ext_symbol_fast_t brs_ext_option_type_t;
+typedef uint32_t              brs_ext_option_value_t;
 
 typedef struct {
   bool                   has_value;

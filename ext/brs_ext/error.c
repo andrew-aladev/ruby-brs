@@ -5,7 +5,6 @@
 
 #include <brotli/decode.h>
 
-#include "brs_ext/common.h"
 #include "ruby.h"
 
 brs_ext_result_t brs_ext_get_decompressor_error(BrotliDecoderErrorCode error_code)
