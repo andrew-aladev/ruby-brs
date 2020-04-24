@@ -7,7 +7,10 @@ cd "$DIR"
 # This script is for CI machines only, it provides junk and changes some config files.
 # Please do not use it on your machine.
 
-./mount_tmp.sh "16"
+TMP_PATH="$(pwd)/../tmp"
+TMP_SIZE="16"
+
+./mount_tmp.sh "$TMP_PATH" "$TMP_SIZE"
 
 cd ".."
 
