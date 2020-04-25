@@ -10,7 +10,7 @@ cd "$DIR"
 TMP_PATH="$(pwd)/../tmp"
 TMP_SIZE="16"
 
-./mount_tmp.sh "$TMP_PATH" "$TMP_SIZE"
+./temp/mount.sh "$TMP_PATH" "$TMP_SIZE"
 
 cd ".."
 
