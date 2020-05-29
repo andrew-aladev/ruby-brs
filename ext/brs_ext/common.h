@@ -10,7 +10,7 @@
 
 typedef uint_fast8_t brs_ext_result_t;
 
-typedef uint8_t      brs_ext_symbol_t;
-typedef uint_fast8_t brs_ext_symbol_fast_t;
+typedef uint8_t      brs_ext_byte_t;
+typedef uint_fast8_t brs_ext_byte_fast_t;
 
 #endif // BRS_EXT_COMMON_H

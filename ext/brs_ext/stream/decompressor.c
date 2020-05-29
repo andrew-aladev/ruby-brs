@@ -17,7 +17,7 @@ static void free_decompressor(brs_ext_decompressor_t* decompressor_ptr)
     BrotliDecoderDestroyInstance(state_ptr);
   }
 
-  brs_ext_symbol_t* destination_buffer = decompressor_ptr->destination_buffer;
+  brs_ext_byte_t* destination_buffer = decompressor_ptr->destination_buffer;
   if (destination_buffer != NULL) {
     free(destination_buffer);
   }
@@ -66,7 +66,7 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
     destination_buffer_length = BRS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_DECOMPRESSOR;
   }
 
-  brs_ext_symbol_t* destination_buffer = malloc(destination_buffer_length);
+  brs_ext_byte_t* destination_buffer = malloc(destination_buffer_length);
   if (destination_buffer == NULL) {
     BrotliDecoderDestroyInstance(state_ptr);
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
@@ -86,13 +86,13 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
     brs_ext_raise_error(BRS_EXT_ERROR_USED_AFTER_CLOSE);                                     \
   }
 
-#define GET_SOURCE_DATA(source_value)                                                \
-  Check_Type(source_value, T_STRING);                                                \
-                                                                                     \
-  const char*             source                  = RSTRING_PTR(source_value);       \
-  size_t                  source_length           = RSTRING_LEN(source_value);       \
-  const brs_ext_symbol_t* remaining_source        = (const brs_ext_symbol_t*)source; \
-  size_t                  remaining_source_length = source_length;
+#define GET_SOURCE_DATA(source_value)                                            \
+  Check_Type(source_value, T_STRING);                                            \
+                                                                                 \
+  const char*           source                  = RSTRING_PTR(source_value);     \
+  size_t                source_length           = RSTRING_LEN(source_value);     \
+  const brs_ext_byte_t* remaining_source        = (const brs_ext_byte_t*)source; \
+  size_t                remaining_source_length = source_length;
 
 VALUE brs_ext_decompress(VALUE self, VALUE source_value)
 {
@@ -125,9 +125,9 @@ VALUE brs_ext_decompressor_read_result(VALUE self)
   GET_DECOMPRESSOR(self);
   DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
 
-  brs_ext_symbol_t* destination_buffer                  = decompressor_ptr->destination_buffer;
-  size_t            destination_buffer_length           = decompressor_ptr->destination_buffer_length;
-  size_t            remaining_destination_buffer_length = decompressor_ptr->remaining_destination_buffer_length;
+  brs_ext_byte_t* destination_buffer                  = decompressor_ptr->destination_buffer;
+  size_t          destination_buffer_length           = decompressor_ptr->destination_buffer_length;
+  size_t          remaining_destination_buffer_length = decompressor_ptr->remaining_destination_buffer_length;
 
   const char* result        = (const char*)destination_buffer;
   size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
@@ -152,7 +152,7 @@ VALUE brs_ext_decompressor_close(VALUE self)
     decompressor_ptr->state_ptr = NULL;
   }
 
-  brs_ext_symbol_t* destination_buffer = decompressor_ptr->destination_buffer;
+  brs_ext_byte_t* destination_buffer = decompressor_ptr->destination_buffer;
   if (destination_buffer != NULL) {
     free(destination_buffer);
 

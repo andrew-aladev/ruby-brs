@@ -12,9 +12,9 @@
 
 typedef struct {
   BrotliDecoderState* state_ptr;
-  brs_ext_symbol_t*   destination_buffer;
+  brs_ext_byte_t*     destination_buffer;
   size_t              destination_buffer_length;
-  brs_ext_symbol_t*   remaining_destination_buffer;
+  brs_ext_byte_t*     remaining_destination_buffer;
   size_t              remaining_destination_buffer_length;
 } brs_ext_decompressor_t;
 

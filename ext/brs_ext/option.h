@@ -21,8 +21,8 @@ enum {
   BRS_EXT_OPTION_TYPE_MODE
 };
 
-typedef brs_ext_symbol_fast_t brs_ext_option_type_t;
-typedef uint32_t              brs_ext_option_value_t;
+typedef brs_ext_byte_fast_t brs_ext_option_type_t;
+typedef uint32_t            brs_ext_option_value_t;
 
 typedef struct {
   bool                   has_value;
