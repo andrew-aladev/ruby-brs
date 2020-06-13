@@ -1,6 +1,8 @@
 # Ruby bindings for brotli library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
+require "stringio"
+
 module BRS
   module Test
     module Validation
@@ -17,6 +19,7 @@ module BRS
         {},
         [],
         ::STDOUT,
+        ::StringIO,
         NOOP_PROC
       ]
       .freeze
@@ -27,7 +30,7 @@ module BRS
       INVALID_STRINGS  = (TYPES - %w[1 a]).freeze
       INVALID_SYMBOLS  = (TYPES - %i[a]).freeze
       INVALID_HASHES   = (TYPES - [{}]).freeze
-      INVALID_IOS      = (TYPES - [::STDOUT]).freeze
+      INVALID_IOS      = (TYPES - [::STDOUT, ::StringIO]).freeze
       INVALID_CHARS    = (INVALID_NUMBERS & INVALID_STRINGS).freeze
 
       INVALID_POSITIVE_INTEGERS     = (INVALID_INTEGERS + [0, -1]).freeze

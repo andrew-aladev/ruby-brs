@@ -4,6 +4,7 @@
 require "brs/stream/writer"
 require "brs/string"
 require "English"
+require "stringio"
 
 require_relative "../common"
 require_relative "../minitest"
@@ -95,7 +96,7 @@ module BRS
         end
 
         def test_invalid_putc
-          instance = target.new ::STDOUT
+          instance = target.new ::StringIO.new
 
           Validation::INVALID_CHARS.each do |invalid_char|
             assert_raises ValidateError do
