@@ -12,7 +12,8 @@ rake gem
 
 # Packing source.
 
-NAME="ruby-brs"
+VERSION=$(grep "VERSION" "lib/brs/version.rb" | sed "s/.*VERSION\s*=\s*['\"]\([0-9.]*\).*/\1/g")
+NAME="ruby-brs-${VERSION}"
 
 COMPRESSION_LEVEL="-9"
 TAR_COMMANDS=(
