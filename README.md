@@ -36,6 +36,27 @@ BRS::File.decompress "file.txt.br", "file.txt"
 
 BRS::Stream::Writer.open("file.txt.br") { |writer| writer << "sample string" }
 puts BRS::Stream::Reader.open("file.txt.br") { |reader| reader.read }
+
+writer = BRS::Stream::Writer.new output_socket
+begin
+  bytes_written = writer.write_nonblock "sample string"
+  # handle "bytes_written"
+rescue IO::WaitWritable
+  # handle wait
+ensure
+  writer.close
+end
+
+reader = BRS::Stream::Reader.new input_socket
+begin
+  puts reader.read_nonblock(512)
+rescue IO::WaitReadable
+  # handle wait
+rescue ::EOFError
+  # handle eof
+ensure
+  reader.close
+end
 ```
 
 You can create and read `tar.br` archives with `minitar` for example.
