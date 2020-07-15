@@ -19,6 +19,8 @@ module BRS
 
         def flush(&writer)
           write_result(&writer)
+
+          nil
         end
 
         protected def flush_destination_buffer(&writer)
@@ -44,6 +46,8 @@ module BRS
 
           @native_stream.close
           @is_closed = true
+
+          nil
         end
 
         def closed?

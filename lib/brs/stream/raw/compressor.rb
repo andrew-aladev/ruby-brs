@@ -73,8 +73,6 @@ module BRS
           end
 
           super
-
-          nil
         end
 
         def close(&writer)
@@ -94,8 +92,6 @@ module BRS
           end
 
           super
-
-          nil
         end
       end
     end
