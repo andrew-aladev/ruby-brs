@@ -51,7 +51,7 @@ module BRS
 
       def self.get_invalid_compressor_options(buffer_length_names, &block)
         Validation::INVALID_HASHES.each do |invalid_hash|
-          yield invalid_hash
+          block.call invalid_hash
         end
 
         get_invalid_buffer_length_options buffer_length_names, &block
@@ -80,7 +80,7 @@ module BRS
 
       def self.get_invalid_decompressor_options(buffer_length_names, &block)
         Validation::INVALID_HASHES.each do |invalid_hash|
-          yield invalid_hash
+          block.call invalid_hash
         end
 
         get_invalid_buffer_length_options buffer_length_names, &block
