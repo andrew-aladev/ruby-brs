@@ -2,8 +2,8 @@ language: ruby
 rvm:
   - 2.7
 
-dist: bionic
-osx_image: xcode11.5
+dist: focal
+osx_image: xcode11.6
 
 jobs:
   include:
