@@ -83,70 +83,27 @@ end
 
 ## Options
 
-Each API supports several options:
-
-```
-:source_buffer_length
-:destination_buffer_length
-```
+| Option                             | Values                          | Default                    | Description |
+|------------------------------------|---------------------------------|----------------------------|-------------|
+| `source_buffer_length`             | 0 - infinity                    | 0 (auto selection)         | internal buffer length for source data |
+| `destination_buffer_length`        | 0 - infinity                    | 0 (auto selection)         | internal buffer length for description data |
+| `mode`                             | `BRS::Option::MODES`            | `:generic`                 | compressor mode |
+| `quality`                          | min: `BRS::Option::MIN_QUALITY` | `BRS::Option::MAX_QUALITY` | compression level |
+|                                    | max: `BRS::Option::MAX_QUALITY` |                            |                   |
+| `lgwin`                            | min: `BRS::Option::MIN_LGWIN`   | 22                         | compressor window size |
+|                                    | max: `BRS::Option::MAX_LGWIN`   |                            |                        |
+| `lgblock`                          | min: `BRS::Option::MIN_LGBLOCK` | none                       | compressor input block size |
+|                                    | min: `BRS::Option::MAX_LGBLOCK` |                            |                             |
+| `disable_literal_context_modeling` | true/false                      | false                      | disables literal context modeling format for compressor |
+| `disable_ring_buffer_reallocation` | true/false                      | false                      | disables ring buffer reallocation for decompressor |
+| `size_hint`                        | 0 - infinity                    | 0                          | size of input (if known) for streaming api |
+| `large_window`                     | true/false                      | false                      | enables large window |
 
 There are internal buffers for compressed and decompressed data.
-For example you want to use 1 KB as source buffer length for compressor - please use 256 B as destination buffer length.
-You want to use 256 B as source buffer length for decompressor - please use 1 KB as destination buffer length.
+For example you want to use 1 KB as `source_buffer_length` for compressor - please use 256 B as `destination_buffer_length`.
+You want to use 256 B as `source_buffer_length` for decompressor - please use 1 KB as `destination_buffer_length`.
 
-Values: 0 - infinity, default value: 0.
-0 means automatic buffer length selection.
-
-```
-:mode
-```
-
-Values: `BRS::Option::MODES`, default value: `:generic`.
-
-```
-:quality
-```
-
-Values: `BRS::Option::MIN_QUALITY` - `BRS::Option::MAX_QUALITY`, default value: `BRS::Option::MAX_QUALITY`.
-
-```
-:lgwin
-```
-
-Values: `BRS::Option::MIN_LGWIN` - `BRS::Option::MAX_LGWIN`, default value: `22`.
-
-```
-:lgblock
-```
-
-Values: `BRS::Option::MIN_LGBLOCK` - `BRS::Option::MAX_LGBLOCK`, default value: none.
-
-```
-:disable_literal_context_modeling
-```
-
-Values: true/false, default value: false.
-
-```
-:disable_ring_buffer_reallocation
-```
-
-Values: true/false, default value: false.
-
-```
-:size_hint
-```
-
-Values: 0 - infinity, default value: 0.
-It is reasonable to provide size of input (if known) for streaming api.
 `String` and `File` will set `:size_hint` automaticaly.
-
-```
-:large_window
-```
-
-Values: true/false, default value: false.
-
 Please read brotli docs for more info about options.
 
 Possible compressor options:
