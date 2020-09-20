@@ -83,31 +83,35 @@ end
 
 ## Options
 
-| Option                             | Values                          | Default                    | Description |
-|------------------------------------|---------------------------------|----------------------------|-------------|
-| `source_buffer_length`             | 0 - infinity                    | 0 (auto selection)         | internal buffer length for source data |
-| `destination_buffer_length`        | 0 - infinity                    | 0 (auto selection)         | internal buffer length for description data |
-| `mode`                             | `BRS::Option::MODES`            | `:generic`                 | compressor mode |
-| `quality`                          | min: `BRS::Option::MIN_QUALITY` | `BRS::Option::MAX_QUALITY` | compression level |
-|                                    | max: `BRS::Option::MAX_QUALITY` |                            |                   |
-| `lgwin`                            | min: `BRS::Option::MIN_LGWIN`   | 22                         | compressor window size |
-|                                    | max: `BRS::Option::MAX_LGWIN`   |                            |                        |
-| `lgblock`                          | min: `BRS::Option::MIN_LGBLOCK` | none                       | compressor input block size |
-|                                    | min: `BRS::Option::MAX_LGBLOCK` |                            |                             |
-| `disable_literal_context_modeling` | true/false                      | false                      | disables literal context modeling format for compressor |
-| `disable_ring_buffer_reallocation` | true/false                      | false                      | disables ring buffer reallocation for decompressor |
-| `size_hint`                        | 0 - infinity                    | 0                          | size of input (if known) for streaming api |
-| `large_window`                     | true/false                      | false                      | enables large window |
+| Option                             | Values                          | Default            | Description |
+|------------------------------------|---------------------------------|--------------------|-------------|
+| `source_buffer_length`             | 0 - infinity                    | 0 (auto selection) | internal buffer length for source data |
+| `destination_buffer_length`        | 0 - infinity                    | 0 (auto selection) | internal buffer length for description data |
+| `mode`                             | `:text`, `:font`, `:generic`    | `:generic`         | compressor mode |
+| `quality`                          | 0 - 11                          | 11                 | compression level |
+| `lgwin`                            | 10 - 24                         | 22                 | compressor window size |
+| `lgblock`                          | 16 - 24                         | none               | compressor input block size |
+| `disable_literal_context_modeling` | true/false                      | false              | disables literal context modeling format for compressor |
+| `disable_ring_buffer_reallocation` | true/false                      | false              | disables ring buffer reallocation for decompressor |
+| `size_hint`                        | 0 - infinity                    | 0                  | size of input (if known) for compressor |
+| `large_window`                     | true/false                      | false              | enables large window |
 
 There are internal buffers for compressed and decompressed data.
 For example you want to use 1 KB as `source_buffer_length` for compressor - please use 256 B as `destination_buffer_length`.
 You want to use 256 B as `source_buffer_length` for decompressor - please use 1 KB as `destination_buffer_length`.
+
+Please use `BRS::Option::MODES` as `mode` values.
+Please use `BRS::Option::MIN_QUALITY` and `BRS::Option::MAX_QUALITY` values as `quality` limits.
+Please use `BRS::Option::MIN_LGWIN` and `BRS::Option::MAX_LGWIN` values as `lgwin` limits.
+Please use `BRS::Option::MIN_LGBLOCK` and `BRS::Option::MAX_LGBLOCK` values as `lgblock` limits.
 
 `String` and `File` will set `:size_hint` automaticaly.
 Please read brotli docs for more info about options.
 
 Possible compressor options:
 ```
+:source_buffer_length
+:destination_buffer_length
 :mode
 :quality
 :lgwin
@@ -119,6 +123,8 @@ Possible compressor options:
 
 Possible decompressor options:
 ```
+:source_buffer_length
+:destination_buffer_length
 :disable_ring_buffer_reallocation
 :large_window
 ```
