@@ -100,13 +100,16 @@ There are internal buffers for compressed and decompressed data.
 For example you want to use 1 KB as `source_buffer_length` for compressor - please use 256 B as `destination_buffer_length`.
 You want to use 256 B as `source_buffer_length` for decompressor - please use 1 KB as `destination_buffer_length`.
 
-Please use `BRS::Option::MODES` as `mode` values.
-Please use `BRS::Option::MIN_QUALITY` and `BRS::Option::MAX_QUALITY` values as `quality` limits.
-Please use `BRS::Option::MIN_LGWIN` and `BRS::Option::MAX_LGWIN` values as `lgwin` limits.
-Please use `BRS::Option::MIN_LGBLOCK` and `BRS::Option::MAX_LGBLOCK` values as `lgblock` limits.
-
 `String` and `File` will set `:size_hint` automaticaly.
-Please read brotli docs for more info about options.
+
+You can also read brotli docs for more info about options.
+
+| Option    | Related constants |
+|-----------|-------------------|
+| `mode`    | `BRS::Option::MODES` |
+| `quality` | `BRS::Option::MIN_QUALITY`, `BRS::Option::MAX_QUALITY` |
+| `lgwin`   | `BRS::Option::MIN_LGWIN`, `BRS::Option::MAX_LGWIN` |
+| `lgblock` | `BRS::Option::MIN_LGBLOCK`, `BRS::Option::MAX_LGBLOCK` |
 
 Possible compressor options:
 ```
