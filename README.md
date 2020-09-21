@@ -106,7 +106,7 @@ You can also read brotli docs for more info about options.
 
 | Option    | Related constants |
 |-----------|-------------------|
-| `mode`    | `BRS::Option::MODES` = [`:text`, `:font`, `:generic`] |
+| `mode`    | `BRS::Option::MODES = %i[text font generic]` |
 | `quality` | `BRS::Option::MIN_QUALITY = 0`, `BRS::Option::MAX_QUALITY = 11` |
 | `lgwin`   | `BRS::Option::MIN_LGWIN = 10`, `BRS::Option::MAX_LGWIN = 24` |
 | `lgblock` | `BRS::Option::MIN_LGBLOCK = 16`, `BRS::Option::MAX_LGBLOCK = 24` |
