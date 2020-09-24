@@ -1,9 +1,11 @@
 # Ruby bindings for brotli library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
-require "date"
+lib_path = File.expand_path "lib", __dir__
+$LOAD_PATH.unshift lib_path unless $LOAD_PATH.include? lib_path
 
-require_relative "lib/brs/version"
+require "date"
+require "brs/version"
 
 GEMSPEC = Gem::Specification.new do |gem|
   gem.name     = "ruby-brs"
