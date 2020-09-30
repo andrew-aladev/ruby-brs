@@ -19,7 +19,6 @@ addons:
   homebrew:
     packages:
       - brotli
-    update: true
 
 before_install:
   - gem install bundler
