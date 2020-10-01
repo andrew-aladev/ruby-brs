@@ -18,7 +18,8 @@ module BRS
       ]
       .each { |path| FileUtils.touch path }
 
-      PORT = 54_020
+      # Port will be changed each 20 seconds.
+      PORT = 52_000 + (Time.now.to_i / 20) % 1000
 
       ENCODINGS = %w[
         binary
