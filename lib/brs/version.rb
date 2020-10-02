@@ -2,5 +2,5 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 module BRS
-  VERSION = "1.1.4".freeze
+  VERSION = "1.1.5".freeze
 end
