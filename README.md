@@ -85,18 +85,18 @@ end
 
 ## Options
 
-| Option                             | Values       | Default      | Description |
-|------------------------------------|--------------|--------------|-------------|
-| `source_buffer_length`             | `0 - inf`    | `0 (auto)`   | internal buffer length for source data |
-| `destination_buffer_length`        | `0 - inf`    | `0 (auto)`   | internal buffer length for description data |
-| `mode`                             | `MODES`      | `:generic`   | compressor mode |
-| `quality`                          | `0 - 11`     | `11`         | compression level |
-| `lgwin`                            | `10 - 24`    | `22`         | compressor window size |
-| `lgblock`                          | `16 - 24`    | `nil (auto)` | compressor input block size |
-| `disable_literal_context_modeling` | `true/false` | `false`      | disables literal context modeling format |
-| `disable_ring_buffer_reallocation` | `true/false` | `false`      | disables ring buffer reallocation |
-| `size_hint`                        | `0 - inf`    | `0 (auto)`   | size of input (if known) |
-| `large_window`                     | `true/false` | `false`      | enables large window |
+| Option                             | Values     | Default    | Description |
+|------------------------------------|------------|------------|-------------|
+| `source_buffer_length`             | 0 - inf    | 0 (auto)   | internal buffer length for source data |
+| `destination_buffer_length`        | 0 - inf    | 0 (auto)   | internal buffer length for description data |
+| `mode`                             | `MODES`    | `:generic` | compressor mode |
+| `quality`                          | 0 - 11     | 11         | compression level |
+| `lgwin`                            | 10 - 24    | 22         | compressor window size |
+| `lgblock`                          | 16 - 24    | nil (auto) | compressor input block size |
+| `disable_literal_context_modeling` | true/false | false      | disables literal context modeling format |
+| `disable_ring_buffer_reallocation` | true/false | false      | disables ring buffer reallocation |
+| `size_hint`                        | 0 - inf    | 0 (auto)   | size of input (if known) |
+| `large_window`                     | true/false | false      | enables large window |
 
 There are internal buffers for compressed and decompressed data.
 For example you want to use 1 KB as `source_buffer_length` for compressor - please use 256 B as `destination_buffer_length`.
@@ -108,10 +108,10 @@ You can also read brotli docs for more info about options.
 
 | Option    | Related constants |
 |-----------|-------------------|
-| `mode`    | `BRS::Option::MODES = %i[text font generic]` |
-| `quality` | `BRS::Option::MIN_QUALITY = 0`, `BRS::Option::MAX_QUALITY = 11` |
-| `lgwin`   | `BRS::Option::MIN_LGWIN = 10`, `BRS::Option::MAX_LGWIN = 24` |
-| `lgblock` | `BRS::Option::MIN_LGBLOCK = 16`, `BRS::Option::MAX_LGBLOCK = 24` |
+| `mode`    | `BRS::Option::MODES` = `%i[text font generic]` |
+| `quality` | `BRS::Option::MIN_QUALITY` = 0, `BRS::Option::MAX_QUALITY` = 11 |
+| `lgwin`   | `BRS::Option::MIN_LGWIN` = 10, `BRS::Option::MAX_LGWIN` = 24 |
+| `lgblock` | `BRS::Option::MIN_LGBLOCK` = 16, `BRS::Option::MAX_LGBLOCK` = 24 |
 
 Possible compressor options:
 ```
