@@ -86,12 +86,12 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
     brs_ext_raise_error(BRS_EXT_ERROR_USED_AFTER_CLOSE);                                     \
   }
 
-#define GET_SOURCE_DATA(source_value)                                            \
-  Check_Type(source_value, T_STRING);                                            \
-                                                                                 \
-  const char*           source                  = RSTRING_PTR(source_value);     \
-  size_t                source_length           = RSTRING_LEN(source_value);     \
-  const brs_ext_byte_t* remaining_source        = (const brs_ext_byte_t*)source; \
+#define GET_SOURCE_DATA(source_value)                                             \
+  Check_Type(source_value, T_STRING);                                             \
+                                                                                  \
+  const char*           source                  = RSTRING_PTR(source_value);      \
+  size_t                source_length           = RSTRING_LEN(source_value);      \
+  const brs_ext_byte_t* remaining_source        = (const brs_ext_byte_t*) source; \
   size_t                remaining_source_length = source_length;
 
 VALUE brs_ext_decompress(VALUE self, VALUE source_value)
@@ -102,13 +102,14 @@ VALUE brs_ext_decompress(VALUE self, VALUE source_value)
 
   BrotliDecoderResult result = BrotliDecoderDecompressStream(
     decompressor_ptr->state_ptr,
-    &remaining_source_length, &remaining_source,
-    &decompressor_ptr->remaining_destination_buffer_length, &decompressor_ptr->remaining_destination_buffer,
+    &remaining_source_length,
+    &remaining_source,
+    &decompressor_ptr->remaining_destination_buffer_length,
+    &decompressor_ptr->remaining_destination_buffer,
     NULL);
 
   if (
-    result != BROTLI_DECODER_RESULT_SUCCESS &&
-    result != BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT &&
+    result != BROTLI_DECODER_RESULT_SUCCESS && result != BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT &&
     result != BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
     BrotliDecoderErrorCode error_code = BrotliDecoderGetErrorCode(decompressor_ptr->state_ptr);
     brs_ext_raise_error(brs_ext_get_decompressor_error(error_code));
@@ -129,7 +130,7 @@ VALUE brs_ext_decompressor_read_result(VALUE self)
   size_t          destination_buffer_length           = decompressor_ptr->destination_buffer_length;
   size_t          remaining_destination_buffer_length = decompressor_ptr->remaining_destination_buffer_length;
 
-  const char* result        = (const char*)destination_buffer;
+  const char* result        = (const char*) destination_buffer;
   size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
 
   VALUE result_value = rb_str_new(result, result_length);

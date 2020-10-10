@@ -1,7 +1,7 @@
 // Ruby bindings for brotli library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
-#include "ruby/io.h"
+#include "brs_ext/io.h"
 
 #include <brotli/decode.h>
 #include <brotli/encode.h>
@@ -12,19 +12,21 @@
 
 #include "brs_ext/buffer.h"
 #include "brs_ext/error.h"
-#include "brs_ext/io.h"
 #include "brs_ext/macro.h"
 #include "brs_ext/option.h"
 #include "ruby.h"
+#include "ruby/io.h"
 
 // Additional possible results:
-enum {
+enum
+{
   BRS_EXT_FILE_READ_FINISHED = 128
 };
 
 // -- file --
 
-static inline brs_ext_result_t read_file(FILE* source_file, brs_ext_byte_t* source_buffer, size_t* source_length_ptr, size_t source_buffer_length)
+static inline brs_ext_result_t
+  read_file(FILE* source_file, brs_ext_byte_t* source_buffer, size_t* source_length_ptr, size_t source_buffer_length)
 {
   size_t read_length = fread(source_buffer, 1, source_buffer_length, source_file);
   if (read_length == 0 && feof(source_file)) {
@@ -40,7 +42,8 @@ static inline brs_ext_result_t read_file(FILE* source_file, brs_ext_byte_t* sour
   return 0;
 }
 
-static inline brs_ext_result_t write_file(FILE* destination_file, brs_ext_byte_t* destination_buffer, size_t destination_length)
+static inline brs_ext_result_t
+  write_file(FILE* destination_file, brs_ext_byte_t* destination_buffer, size_t destination_length)
 {
   size_t written_length = fwrite(destination_buffer, 1, destination_length, destination_file);
   if (written_length != destination_length) {
@@ -53,8 +56,10 @@ static inline brs_ext_result_t write_file(FILE* destination_file, brs_ext_byte_t
 // -- buffer --
 
 static inline brs_ext_result_t create_buffers(
-  brs_ext_byte_t** source_buffer_ptr, size_t source_buffer_length,
-  brs_ext_byte_t** destination_buffer_ptr, size_t destination_buffer_length)
+  brs_ext_byte_t** source_buffer_ptr,
+  size_t           source_buffer_length,
+  brs_ext_byte_t** destination_buffer_ptr,
+  size_t           destination_buffer_length)
 {
   brs_ext_byte_t* source_buffer = malloc(source_buffer_length);
   if (source_buffer == NULL) {
@@ -81,8 +86,10 @@ static inline brs_ext_result_t create_buffers(
 
 static inline brs_ext_result_t read_more_source(
   FILE*                  source_file,
-  const brs_ext_byte_t** source_ptr, size_t* source_length_ptr,
-  brs_ext_byte_t* source_buffer, size_t source_buffer_length)
+  const brs_ext_byte_t** source_ptr,
+  size_t*                source_length_ptr,
+  brs_ext_byte_t*        source_buffer,
+  size_t                 source_buffer_length)
 {
   const brs_ext_byte_t* source        = *source_ptr;
   size_t                source_length = *source_length_ptr;
@@ -105,7 +112,9 @@ static inline brs_ext_result_t read_more_source(
   brs_ext_byte_t* remaining_source_buffer = source_buffer + source_length;
   size_t          new_source_length;
 
-  brs_ext_result_t ext_result = read_file(source_file, remaining_source_buffer, &new_source_length, remaining_source_buffer_length);
+  brs_ext_result_t ext_result =
+    read_file(source_file, remaining_source_buffer, &new_source_length, remaining_source_buffer_length);
+
   if (ext_result != 0) {
     return ext_result;
   }
@@ -115,42 +124,37 @@ static inline brs_ext_result_t read_more_source(
   return 0;
 }
 
-#define BUFFERED_READ_SOURCE(function, ...)                   \
-  do {                                                        \
-    bool is_function_called = false;                          \
-                                                              \
-    while (true) {                                            \
-      ext_result = read_more_source(                          \
-        source_file,                                          \
-        &source, &source_length,                              \
-        source_buffer, source_buffer_length);                 \
-                                                              \
-      if (ext_result == BRS_EXT_FILE_READ_FINISHED) {         \
-        if (source_length != 0) {                             \
-          /* Brotli won't provide any remainder by design. */ \
-          return BRS_EXT_ERROR_READ_IO;                       \
-        }                                                     \
-        break;                                                \
-      }                                                       \
-      else if (ext_result != 0) {                             \
-        return ext_result;                                    \
-      }                                                       \
-                                                              \
-      ext_result = function(__VA_ARGS__);                     \
-      if (ext_result != 0) {                                  \
-        return ext_result;                                    \
-      }                                                       \
-                                                              \
-      is_function_called = true;                              \
-    }                                                         \
-                                                              \
-    if (!is_function_called) {                                \
-      /* Function should be called at least once. */          \
-      ext_result = function(__VA_ARGS__);                     \
-      if (ext_result != 0) {                                  \
-        return ext_result;                                    \
-      }                                                       \
-    }                                                         \
+#define BUFFERED_READ_SOURCE(function, ...)                                                                     \
+  do {                                                                                                          \
+    bool is_function_called = false;                                                                            \
+                                                                                                                \
+    while (true) {                                                                                              \
+      ext_result = read_more_source(source_file, &source, &source_length, source_buffer, source_buffer_length); \
+      if (ext_result == BRS_EXT_FILE_READ_FINISHED) {                                                           \
+        if (source_length != 0) {                                                                               \
+          /* Brotli won't provide any remainder by design. */                                                   \
+          return BRS_EXT_ERROR_READ_IO;                                                                         \
+        }                                                                                                       \
+        break;                                                                                                  \
+      } else if (ext_result != 0) {                                                                             \
+        return ext_result;                                                                                      \
+      }                                                                                                         \
+                                                                                                                \
+      ext_result = function(__VA_ARGS__);                                                                       \
+      if (ext_result != 0) {                                                                                    \
+        return ext_result;                                                                                      \
+      }                                                                                                         \
+                                                                                                                \
+      is_function_called = true;                                                                                \
+    }                                                                                                           \
+                                                                                                                \
+    if (!is_function_called) {                                                                                  \
+      /* Function should be called at least once. */                                                            \
+      ext_result = function(__VA_ARGS__);                                                                       \
+      if (ext_result != 0) {                                                                                    \
+        return ext_result;                                                                                      \
+      }                                                                                                         \
+    }                                                                                                           \
   } while (false);
 
 // Algorithm has written data into destination buffer.
@@ -159,7 +163,9 @@ static inline brs_ext_result_t read_more_source(
 
 static inline brs_ext_result_t flush_destination_buffer(
   FILE*           destination_file,
-  brs_ext_byte_t* destination_buffer, size_t* destination_length_ptr, size_t destination_buffer_length)
+  brs_ext_byte_t* destination_buffer,
+  size_t*         destination_length_ptr,
+  size_t          destination_buffer_length)
 {
   if (*destination_length_ptr == 0) {
     // We want to write more data at once, than buffer has.
@@ -176,7 +182,8 @@ static inline brs_ext_result_t flush_destination_buffer(
   return 0;
 }
 
-static inline brs_ext_result_t write_remaining_destination(FILE* destination_file, brs_ext_byte_t* destination_buffer, size_t destination_length)
+static inline brs_ext_result_t
+  write_remaining_destination(FILE* destination_file, brs_ext_byte_t* destination_buffer, size_t destination_length)
 {
   if (destination_length == 0) {
     return 0;
@@ -202,8 +209,12 @@ static inline brs_ext_result_t write_remaining_destination(FILE* destination_fil
 
 static inline brs_ext_result_t buffered_compress(
   BrotliEncoderState*    state_ptr,
-  const brs_ext_byte_t** source_ptr, size_t* source_length_ptr,
-  FILE* destination_file, brs_ext_byte_t* destination_buffer, size_t* destination_length_ptr, size_t destination_buffer_length)
+  const brs_ext_byte_t** source_ptr,
+  size_t*                source_length_ptr,
+  FILE*                  destination_file,
+  brs_ext_byte_t*        destination_buffer,
+  size_t*                destination_length_ptr,
+  size_t                 destination_buffer_length)
 {
   BROTLI_BOOL      result;
   brs_ext_result_t ext_result;
@@ -216,8 +227,10 @@ static inline brs_ext_result_t buffered_compress(
     result = BrotliEncoderCompressStream(
       state_ptr,
       BROTLI_OPERATION_PROCESS,
-      source_length_ptr, source_ptr,
-      &remaining_destination_buffer_length, &remaining_destination_buffer,
+      source_length_ptr,
+      source_ptr,
+      &remaining_destination_buffer_length,
+      &remaining_destination_buffer,
       NULL);
 
     if (!result) {
@@ -228,8 +241,7 @@ static inline brs_ext_result_t buffered_compress(
 
     if (BrotliEncoderHasMoreOutput(state_ptr)) {
       ext_result = flush_destination_buffer(
-        destination_file,
-        destination_buffer, destination_length_ptr, destination_buffer_length);
+        destination_file, destination_buffer, destination_length_ptr, destination_buffer_length);
 
       if (ext_result != 0) {
         return ext_result;
@@ -246,7 +258,10 @@ static inline brs_ext_result_t buffered_compress(
 
 static inline brs_ext_result_t buffered_compressor_finish(
   BrotliEncoderState* state_ptr,
-  FILE* destination_file, brs_ext_byte_t* destination_buffer, size_t* destination_length_ptr, size_t destination_buffer_length)
+  FILE*               destination_file,
+  brs_ext_byte_t*     destination_buffer,
+  size_t*             destination_length_ptr,
+  size_t              destination_buffer_length)
 {
   BROTLI_BOOL      result;
   brs_ext_result_t ext_result;
@@ -262,8 +277,10 @@ static inline brs_ext_result_t buffered_compressor_finish(
     result = BrotliEncoderCompressStream(
       state_ptr,
       BROTLI_OPERATION_FINISH,
-      &source_length, &source,
-      &remaining_destination_buffer_length, &remaining_destination_buffer,
+      &source_length,
+      &source,
+      &remaining_destination_buffer_length,
+      &remaining_destination_buffer,
       NULL);
 
     if (!result) {
@@ -274,8 +291,7 @@ static inline brs_ext_result_t buffered_compressor_finish(
 
     if (BrotliEncoderHasMoreOutput(state_ptr) || !BrotliEncoderIsFinished(state_ptr)) {
       ext_result = flush_destination_buffer(
-        destination_file,
-        destination_buffer, destination_length_ptr, destination_buffer_length);
+        destination_file, destination_buffer, destination_length_ptr, destination_buffer_length);
 
       if (ext_result != 0) {
         return ext_result;
@@ -292,8 +308,12 @@ static inline brs_ext_result_t buffered_compressor_finish(
 
 static inline brs_ext_result_t compress(
   BrotliEncoderState* state_ptr,
-  FILE* source_file, brs_ext_byte_t* source_buffer, size_t source_buffer_length,
-  FILE* destination_file, brs_ext_byte_t* destination_buffer, size_t destination_buffer_length)
+  FILE*               source_file,
+  brs_ext_byte_t*     source_buffer,
+  size_t              source_buffer_length,
+  FILE*               destination_file,
+  brs_ext_byte_t*     destination_buffer,
+  size_t              destination_buffer_length)
 {
   brs_ext_result_t ext_result;
 
@@ -304,12 +324,15 @@ static inline brs_ext_result_t compress(
   BUFFERED_READ_SOURCE(
     buffered_compress,
     state_ptr,
-    &source, &source_length,
-    destination_file, destination_buffer, &destination_length, destination_buffer_length);
+    &source,
+    &source_length,
+    destination_file,
+    destination_buffer,
+    &destination_length,
+    destination_buffer_length);
 
   ext_result = buffered_compressor_finish(
-    state_ptr,
-    destination_file, destination_buffer, &destination_length, destination_buffer_length);
+    state_ptr, destination_file, destination_buffer, &destination_length, destination_buffer_length);
 
   if (ext_result != 0) {
     return ext_result;
@@ -348,10 +371,7 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
   brs_ext_byte_t* source_buffer;
   brs_ext_byte_t* destination_buffer;
 
-  ext_result = create_buffers(
-    &source_buffer, source_buffer_length,
-    &destination_buffer, destination_buffer_length);
-
+  ext_result = create_buffers(&source_buffer, source_buffer_length, &destination_buffer, destination_buffer_length);
   if (ext_result != 0) {
     BrotliEncoderDestroyInstance(state_ptr);
     brs_ext_raise_error(ext_result);
@@ -359,8 +379,12 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
 
   ext_result = compress(
     state_ptr,
-    source_file, source_buffer, source_buffer_length,
-    destination_file, destination_buffer, destination_buffer_length);
+    source_file,
+    source_buffer,
+    source_buffer_length,
+    destination_file,
+    destination_buffer,
+    destination_buffer_length);
 
   free(source_buffer);
   free(destination_buffer);
@@ -380,8 +404,12 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
 
 static inline brs_ext_result_t buffered_decompress(
   BrotliDecoderState*    state_ptr,
-  const brs_ext_byte_t** source_ptr, size_t* source_length_ptr,
-  FILE* destination_file, brs_ext_byte_t* destination_buffer, size_t* destination_length_ptr, size_t destination_buffer_length)
+  const brs_ext_byte_t** source_ptr,
+  size_t*                source_length_ptr,
+  FILE*                  destination_file,
+  brs_ext_byte_t*        destination_buffer,
+  size_t*                destination_length_ptr,
+  size_t                 destination_buffer_length)
 {
   BrotliDecoderResult result;
   brs_ext_result_t    ext_result;
@@ -393,13 +421,14 @@ static inline brs_ext_result_t buffered_decompress(
 
     result = BrotliDecoderDecompressStream(
       state_ptr,
-      source_length_ptr, source_ptr,
-      &remaining_destination_buffer_length, &remaining_destination_buffer,
+      source_length_ptr,
+      source_ptr,
+      &remaining_destination_buffer_length,
+      &remaining_destination_buffer,
       NULL);
 
     if (
-      result != BROTLI_DECODER_RESULT_SUCCESS &&
-      result != BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT &&
+      result != BROTLI_DECODER_RESULT_SUCCESS && result != BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT &&
       result != BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
       BrotliDecoderErrorCode error_code = BrotliDecoderGetErrorCode(state_ptr);
       return brs_ext_get_decompressor_error(error_code);
@@ -409,8 +438,7 @@ static inline brs_ext_result_t buffered_decompress(
 
     if (result == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
       ext_result = flush_destination_buffer(
-        destination_file,
-        destination_buffer, destination_length_ptr, destination_buffer_length);
+        destination_file, destination_buffer, destination_length_ptr, destination_buffer_length);
 
       if (ext_result != 0) {
         return ext_result;
@@ -427,8 +455,12 @@ static inline brs_ext_result_t buffered_decompress(
 
 static inline brs_ext_result_t decompress(
   BrotliDecoderState* state_ptr,
-  FILE* source_file, brs_ext_byte_t* source_buffer, size_t source_buffer_length,
-  FILE* destination_file, brs_ext_byte_t* destination_buffer, size_t destination_buffer_length)
+  FILE*               source_file,
+  brs_ext_byte_t*     source_buffer,
+  size_t              source_buffer_length,
+  FILE*               destination_file,
+  brs_ext_byte_t*     destination_buffer,
+  size_t              destination_buffer_length)
 {
   brs_ext_result_t ext_result;
 
@@ -439,8 +471,12 @@ static inline brs_ext_result_t decompress(
   BUFFERED_READ_SOURCE(
     buffered_decompress,
     state_ptr,
-    &source, &source_length,
-    destination_file, destination_buffer, &destination_length, destination_buffer_length);
+    &source,
+    &source_length,
+    destination_file,
+    destination_buffer,
+    &destination_length,
+    destination_buffer_length);
 
   return write_remaining_destination(destination_file, destination_buffer, destination_length);
 }
@@ -475,10 +511,7 @@ VALUE brs_ext_decompress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE dest
   brs_ext_byte_t* source_buffer;
   brs_ext_byte_t* destination_buffer;
 
-  ext_result = create_buffers(
-    &source_buffer, source_buffer_length,
-    &destination_buffer, destination_buffer_length);
-
+  ext_result = create_buffers(&source_buffer, source_buffer_length, &destination_buffer, destination_buffer_length);
   if (ext_result != 0) {
     BrotliDecoderDestroyInstance(state_ptr);
     brs_ext_raise_error(ext_result);
@@ -486,8 +519,12 @@ VALUE brs_ext_decompress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE dest
 
   ext_result = decompress(
     state_ptr,
-    source_file, source_buffer, source_buffer_length,
-    destination_file, destination_buffer, destination_buffer_length);
+    source_file,
+    source_buffer,
+    source_buffer_length,
+    destination_file,
+    destination_buffer,
+    destination_buffer_length);
 
   free(source_buffer);
   free(destination_buffer);

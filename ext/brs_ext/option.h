@@ -15,7 +15,8 @@
 // Default option values depends on brotli library.
 // We will set only user defined values.
 
-enum {
+enum
+{
   BRS_EXT_OPTION_TYPE_BOOL = 1,
   BRS_EXT_OPTION_TYPE_UINT,
   BRS_EXT_OPTION_TYPE_MODE
@@ -24,12 +25,14 @@ enum {
 typedef brs_ext_byte_fast_t brs_ext_option_type_t;
 typedef uint32_t            brs_ext_option_value_t;
 
-typedef struct {
+typedef struct
+{
   bool                   has_value;
   brs_ext_option_value_t value;
 } brs_ext_option_t;
 
-typedef struct {
+typedef struct
+{
   brs_ext_option_t mode;
   brs_ext_option_t quality;
   brs_ext_option_t lgwin;
@@ -39,7 +42,8 @@ typedef struct {
   brs_ext_option_t large_window;
 } brs_ext_compressor_options_t;
 
-typedef struct {
+typedef struct
+{
   brs_ext_option_t disable_ring_buffer_reallocation;
   brs_ext_option_t large_window;
 } brs_ext_decompressor_options_t;
@@ -68,11 +72,12 @@ void brs_ext_get_option(VALUE options, brs_ext_option_t* option, brs_ext_option_
 
 size_t brs_ext_get_size_option_value(VALUE options, const char* name);
 
-#define BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, name) \
-  size_t name = brs_ext_get_size_option_value(options, #name);
+#define BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, name) size_t name = brs_ext_get_size_option_value(options, #name);
 
 brs_ext_result_t brs_ext_set_compressor_options(BrotliEncoderState* state_ptr, brs_ext_compressor_options_t* options);
-brs_ext_result_t brs_ext_set_decompressor_options(BrotliDecoderState* state_ptr, brs_ext_decompressor_options_t* options);
+brs_ext_result_t brs_ext_set_decompressor_options(
+  BrotliDecoderState*             state_ptr,
+  brs_ext_decompressor_options_t* options);
 
 void brs_ext_option_exports(VALUE root_module);
 

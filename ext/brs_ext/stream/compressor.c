@@ -87,12 +87,12 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
     brs_ext_raise_error(BRS_EXT_ERROR_USED_AFTER_CLOSE);                                 \
   }
 
-#define GET_SOURCE_DATA(source_value)                                            \
-  Check_Type(source_value, T_STRING);                                            \
-                                                                                 \
-  const char*           source                  = RSTRING_PTR(source_value);     \
-  size_t                source_length           = RSTRING_LEN(source_value);     \
-  const brs_ext_byte_t* remaining_source        = (const brs_ext_byte_t*)source; \
+#define GET_SOURCE_DATA(source_value)                                             \
+  Check_Type(source_value, T_STRING);                                             \
+                                                                                  \
+  const char*           source                  = RSTRING_PTR(source_value);      \
+  size_t                source_length           = RSTRING_LEN(source_value);      \
+  const brs_ext_byte_t* remaining_source        = (const brs_ext_byte_t*) source; \
   size_t                remaining_source_length = source_length;
 
 VALUE brs_ext_compress(VALUE self, VALUE source_value)
@@ -106,8 +106,10 @@ VALUE brs_ext_compress(VALUE self, VALUE source_value)
   BROTLI_BOOL result = BrotliEncoderCompressStream(
     state_ptr,
     BROTLI_OPERATION_PROCESS,
-    &remaining_source_length, &remaining_source,
-    &compressor_ptr->remaining_destination_buffer_length, &compressor_ptr->remaining_destination_buffer,
+    &remaining_source_length,
+    &remaining_source,
+    &compressor_ptr->remaining_destination_buffer_length,
+    &compressor_ptr->remaining_destination_buffer,
     NULL);
 
   if (!result) {
@@ -133,17 +135,17 @@ VALUE brs_ext_flush_compressor(VALUE self)
   BROTLI_BOOL result = BrotliEncoderCompressStream(
     state_ptr,
     BROTLI_OPERATION_FLUSH,
-    &remaining_source_length, &remaining_source,
-    &compressor_ptr->remaining_destination_buffer_length, &compressor_ptr->remaining_destination_buffer,
+    &remaining_source_length,
+    &remaining_source,
+    &compressor_ptr->remaining_destination_buffer_length,
+    &compressor_ptr->remaining_destination_buffer,
     NULL);
 
   if (!result) {
     brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
   }
 
-  VALUE needs_more_destination = BrotliEncoderHasMoreOutput(state_ptr) ? Qtrue : Qfalse;
-
-  return needs_more_destination;
+  return BrotliEncoderHasMoreOutput(state_ptr) ? Qtrue : Qfalse;
 }
 
 VALUE brs_ext_finish_compressor(VALUE self)
@@ -159,17 +161,17 @@ VALUE brs_ext_finish_compressor(VALUE self)
   BROTLI_BOOL result = BrotliEncoderCompressStream(
     state_ptr,
     BROTLI_OPERATION_FINISH,
-    &remaining_source_length, &remaining_source,
-    &compressor_ptr->remaining_destination_buffer_length, &compressor_ptr->remaining_destination_buffer,
+    &remaining_source_length,
+    &remaining_source,
+    &compressor_ptr->remaining_destination_buffer_length,
+    &compressor_ptr->remaining_destination_buffer,
     NULL);
 
   if (!result) {
     brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
   }
 
-  VALUE needs_more_destination = (BrotliEncoderHasMoreOutput(state_ptr) || !BrotliEncoderIsFinished(state_ptr)) ? Qtrue : Qfalse;
-
-  return needs_more_destination;
+  return (BrotliEncoderHasMoreOutput(state_ptr) || !BrotliEncoderIsFinished(state_ptr)) ? Qtrue : Qfalse;
 }
 
 VALUE brs_ext_compressor_read_result(VALUE self)
@@ -181,7 +183,7 @@ VALUE brs_ext_compressor_read_result(VALUE self)
   size_t          destination_buffer_length           = compressor_ptr->destination_buffer_length;
   size_t          remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
 
-  const char* result        = (const char*)destination_buffer;
+  const char* result        = (const char*) destination_buffer;
   size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
 
   VALUE result_value = rb_str_new(result, result_length);

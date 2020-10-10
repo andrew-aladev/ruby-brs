@@ -40,14 +40,11 @@ static inline BrotliEncoderMode get_mode_option_value(VALUE raw_value)
   ID raw_id = SYM2ID(raw_value);
   if (raw_id == rb_intern("text")) {
     return BROTLI_MODE_TEXT;
-  }
-  else if (raw_id == rb_intern("font")) {
+  } else if (raw_id == rb_intern("font")) {
     return BROTLI_MODE_FONT;
-  }
-  else if (raw_id == rb_intern("generic")) {
+  } else if (raw_id == rb_intern("generic")) {
     return BROTLI_MODE_GENERIC;
-  }
-  else {
+  } else {
     brs_ext_raise_error(BRS_EXT_ERROR_VALIDATE_FAILED);
   }
 }
@@ -68,10 +65,10 @@ void brs_ext_get_option(VALUE options, brs_ext_option_t* option, brs_ext_option_
       value = get_bool_option_value(raw_value) ? 1 : 0;
       break;
     case BRS_EXT_OPTION_TYPE_UINT:
-      value = (brs_ext_option_value_t)get_uint_option_value(raw_value);
+      value = (brs_ext_option_value_t) get_uint_option_value(raw_value);
       break;
     case BRS_EXT_OPTION_TYPE_MODE:
-      value = (brs_ext_option_value_t)get_mode_option_value(raw_value);
+      value = (brs_ext_option_value_t) get_mode_option_value(raw_value);
       break;
     default:
       brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
@@ -105,7 +102,8 @@ brs_ext_result_t brs_ext_set_compressor_options(BrotliEncoderState* state_ptr, b
   SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_QUALITY, options->quality);
   SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_LGWIN, options->lgwin);
   SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_LGBLOCK, options->lgblock);
-  SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING, options->disable_literal_context_modeling);
+  SET_ENCODER_PARAM(
+    state_ptr, BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING, options->disable_literal_context_modeling);
   SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_SIZE_HINT, options->size_hint);
   SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_LARGE_WINDOW, options->large_window);
 
@@ -115,9 +113,12 @@ brs_ext_result_t brs_ext_set_compressor_options(BrotliEncoderState* state_ptr, b
 #define SET_DECODER_PARAM(state_ptr, param, option) \
   SET_OPTION_VALUE(BrotliDecoderSetParameter, state_ptr, param, option);
 
-brs_ext_result_t brs_ext_set_decompressor_options(BrotliDecoderState* state_ptr, brs_ext_decompressor_options_t* options)
+brs_ext_result_t brs_ext_set_decompressor_options(
+  BrotliDecoderState*             state_ptr,
+  brs_ext_decompressor_options_t* options)
 {
-  SET_DECODER_PARAM(state_ptr, BROTLI_DECODER_PARAM_DISABLE_RING_BUFFER_REALLOCATION, options->disable_ring_buffer_reallocation);
+  SET_DECODER_PARAM(
+    state_ptr, BROTLI_DECODER_PARAM_DISABLE_RING_BUFFER_REALLOCATION, options->disable_ring_buffer_reallocation);
   SET_DECODER_PARAM(state_ptr, BROTLI_DECODER_PARAM_LARGE_WINDOW, options->large_window);
 
   return 0;
@@ -133,11 +134,8 @@ void brs_ext_option_exports(VALUE root_module)
 {
   VALUE module = rb_define_module_under(root_module, "Option");
 
-  VALUE modes = rb_ary_new_from_args(
-    3,
-    ID2SYM(rb_intern("text")),
-    ID2SYM(rb_intern("font")),
-    ID2SYM(rb_intern("generic")));
+  VALUE modes =
+    rb_ary_new_from_args(3, ID2SYM(rb_intern("text")), ID2SYM(rb_intern("font")), ID2SYM(rb_intern("generic")));
   rb_define_const(module, "MODES", modes);
   RB_GC_GUARD(modes);
 
