@@ -75,6 +75,7 @@ size_t brs_ext_get_size_option_value(VALUE options, const char* name);
 #define BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, name) size_t name = brs_ext_get_size_option_value(options, #name);
 
 brs_ext_result_t brs_ext_set_compressor_options(BrotliEncoderState* state_ptr, brs_ext_compressor_options_t* options);
+
 brs_ext_result_t brs_ext_set_decompressor_options(
   BrotliDecoderState*             state_ptr,
   brs_ext_decompressor_options_t* options);

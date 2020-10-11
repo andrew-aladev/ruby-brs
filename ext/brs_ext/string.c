@@ -56,14 +56,12 @@ static inline brs_ext_result_t compress(
   VALUE               destination_value,
   size_t              destination_buffer_length)
 {
-  BROTLI_BOOL      result;
-  brs_ext_result_t ext_result;
-
-  const brs_ext_byte_t* remaining_source        = (const brs_ext_byte_t*) source;
-  size_t                remaining_source_length = source_length;
-
-  size_t destination_length                  = 0;
-  size_t remaining_destination_buffer_length = destination_buffer_length;
+  BROTLI_BOOL           result;
+  brs_ext_result_t      ext_result;
+  const brs_ext_byte_t* remaining_source                    = (const brs_ext_byte_t*) source;
+  size_t                remaining_source_length             = source_length;
+  size_t                destination_length                  = 0;
+  size_t                remaining_destination_buffer_length = destination_buffer_length;
 
   while (true) {
     brs_ext_byte_t* remaining_destination_buffer =
@@ -159,14 +157,12 @@ static inline brs_ext_result_t decompress(
   VALUE               destination_value,
   size_t              destination_buffer_length)
 {
-  BrotliDecoderResult result;
-  brs_ext_result_t    ext_result;
-
-  const brs_ext_byte_t* remaining_source        = (const brs_ext_byte_t*) source;
-  size_t                remaining_source_length = source_length;
-
-  size_t destination_length                  = 0;
-  size_t remaining_destination_buffer_length = destination_buffer_length;
+  BrotliDecoderResult   result;
+  brs_ext_result_t      ext_result;
+  const brs_ext_byte_t* remaining_source                    = (const brs_ext_byte_t*) source;
+  size_t                remaining_source_length             = source_length;
+  size_t                destination_length                  = 0;
+  size_t                remaining_destination_buffer_length = destination_buffer_length;
 
   while (true) {
     brs_ext_byte_t* remaining_destination_buffer =

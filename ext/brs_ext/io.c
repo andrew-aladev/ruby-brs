@@ -263,9 +263,8 @@ static inline brs_ext_result_t buffered_compressor_finish(
   size_t*             destination_length_ptr,
   size_t              destination_buffer_length)
 {
-  BROTLI_BOOL      result;
-  brs_ext_result_t ext_result;
-
+  BROTLI_BOOL           result;
+  brs_ext_result_t      ext_result;
   const brs_ext_byte_t* source        = NULL;
   size_t                source_length = 0;
 
@@ -315,8 +314,7 @@ static inline brs_ext_result_t compress(
   brs_ext_byte_t*     destination_buffer,
   size_t              destination_buffer_length)
 {
-  brs_ext_result_t ext_result;
-
+  brs_ext_result_t      ext_result;
   const brs_ext_byte_t* source             = source_buffer;
   size_t                source_length      = 0;
   size_t                destination_length = 0;
@@ -462,8 +460,7 @@ static inline brs_ext_result_t decompress(
   brs_ext_byte_t*     destination_buffer,
   size_t              destination_buffer_length)
 {
-  brs_ext_result_t ext_result;
-
+  brs_ext_result_t      ext_result;
   const brs_ext_byte_t* source             = source_buffer;
   size_t                source_length      = 0;
   size_t                destination_length = 0;

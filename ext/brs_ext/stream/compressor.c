@@ -29,8 +29,7 @@ static void free_compressor(brs_ext_compressor_t* compressor_ptr)
 VALUE brs_ext_allocate_compressor(VALUE klass)
 {
   brs_ext_compressor_t* compressor_ptr;
-
-  VALUE self = Data_Make_Struct(klass, brs_ext_compressor_t, NULL, free_compressor, compressor_ptr);
+  VALUE                 self = Data_Make_Struct(klass, brs_ext_compressor_t, NULL, free_compressor, compressor_ptr);
 
   compressor_ptr->state_ptr                           = NULL;
   compressor_ptr->destination_buffer                  = NULL;
@@ -127,8 +126,7 @@ VALUE brs_ext_flush_compressor(VALUE self)
   GET_COMPRESSOR(self);
   DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
-  BrotliEncoderState* state_ptr = compressor_ptr->state_ptr;
-
+  BrotliEncoderState*   state_ptr               = compressor_ptr->state_ptr;
   const brs_ext_byte_t* remaining_source        = NULL;
   size_t                remaining_source_length = 0;
 
@@ -153,8 +151,7 @@ VALUE brs_ext_finish_compressor(VALUE self)
   GET_COMPRESSOR(self);
   DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
-  BrotliEncoderState* state_ptr = compressor_ptr->state_ptr;
-
+  BrotliEncoderState*   state_ptr               = compressor_ptr->state_ptr;
   const brs_ext_byte_t* remaining_source        = NULL;
   size_t                remaining_source_length = 0;
 
@@ -185,8 +182,7 @@ VALUE brs_ext_compressor_read_result(VALUE self)
 
   const char* result        = (const char*) destination_buffer;
   size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
-
-  VALUE result_value = rb_str_new(result, result_length);
+  VALUE       result_value  = rb_str_new(result, result_length);
 
   compressor_ptr->remaining_destination_buffer        = destination_buffer;
   compressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
