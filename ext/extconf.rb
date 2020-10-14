@@ -3,6 +3,8 @@
 
 require "mkmf"
 
+have_func "rb_thread_call_without_gvl", "ruby/thread.h"
+
 def require_header(name, types = [])
   abort "Can't find #{name} header" unless find_header name
 
