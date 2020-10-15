@@ -48,31 +48,33 @@ typedef struct
   brs_ext_option_t large_window;
 } brs_ext_decompressor_options_t;
 
-void brs_ext_get_option(VALUE options, brs_ext_option_t* option, brs_ext_option_type_t type, const char* name);
+void brs_ext_resolve_option(VALUE options, brs_ext_option_t* option, brs_ext_option_type_t type, const char* name);
 
-#define BRS_EXT_GET_OPTION(options, target_options, type, name) \
-  brs_ext_get_option(options, &target_options.name, type, #name);
+#define BRS_EXT_RESOLVE_OPTION(options, target_options, type, name) \
+  brs_ext_resolve_option(options, &target_options.name, type, #name);
 
-#define BRS_EXT_GET_COMPRESSOR_OPTIONS(options)                                                                \
-  brs_ext_compressor_options_t compressor_options;                                                             \
-                                                                                                               \
-  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_MODE, mode);                             \
-  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, quality);                          \
-  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, lgwin);                            \
-  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, lgblock);                          \
-  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_BOOL, disable_literal_context_modeling); \
-  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, size_hint);                        \
-  BRS_EXT_GET_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_BOOL, large_window);
+#define BRS_EXT_GET_COMPRESSOR_OPTIONS(options)                                                                    \
+  brs_ext_compressor_options_t compressor_options;                                                                 \
+                                                                                                                   \
+  BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_MODE, mode);                             \
+  BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, quality);                          \
+  BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, lgwin);                            \
+  BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, lgblock);                          \
+  BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_BOOL, disable_literal_context_modeling); \
+  BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, size_hint);                        \
+  BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_BOOL, large_window);
 
-#define BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options)                                                                \
-  brs_ext_decompressor_options_t decompressor_options;                                                           \
-                                                                                                                 \
-  BRS_EXT_GET_OPTION(options, decompressor_options, BRS_EXT_OPTION_TYPE_BOOL, disable_ring_buffer_reallocation); \
-  BRS_EXT_GET_OPTION(options, decompressor_options, BRS_EXT_OPTION_TYPE_BOOL, large_window);
+#define BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options)                                                                    \
+  brs_ext_decompressor_options_t decompressor_options;                                                               \
+                                                                                                                     \
+  BRS_EXT_RESOLVE_OPTION(options, decompressor_options, BRS_EXT_OPTION_TYPE_BOOL, disable_ring_buffer_reallocation); \
+  BRS_EXT_RESOLVE_OPTION(options, decompressor_options, BRS_EXT_OPTION_TYPE_BOOL, large_window);
 
+bool   brs_ext_get_bool_option_value(VALUE options, const char* name);
 size_t brs_ext_get_size_option_value(VALUE options, const char* name);
 
-#define BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, name) size_t name = brs_ext_get_size_option_value(options, #name);
+#define BRS_EXT_GET_BOOL_OPTION(options, name) size_t name = brs_ext_get_bool_option_value(options, #name);
+#define BRS_EXT_GET_SIZE_OPTION(options, name) size_t name = brs_ext_get_size_option_value(options, #name);
 
 brs_ext_result_t brs_ext_set_compressor_options(BrotliEncoderState* state_ptr, brs_ext_compressor_options_t* options);
 

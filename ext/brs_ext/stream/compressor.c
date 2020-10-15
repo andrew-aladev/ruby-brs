@@ -49,7 +49,7 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
   GET_COMPRESSOR(self);
   Check_Type(options, T_HASH);
   BRS_EXT_GET_COMPRESSOR_OPTIONS(options);
-  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
+  BRS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
 
   BrotliEncoderState* state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {

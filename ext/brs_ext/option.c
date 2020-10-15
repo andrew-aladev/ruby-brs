@@ -11,12 +11,12 @@
 
 // -- values --
 
-static inline VALUE get_raw_option_value(VALUE options, const char* name)
+static inline VALUE get_raw_value(VALUE options, const char* name)
 {
   return rb_funcall(options, rb_intern("[]"), 1, ID2SYM(rb_intern(name)));
 }
 
-static inline bool get_bool_option_value(VALUE raw_value)
+static inline bool get_bool_value(VALUE raw_value)
 {
   int raw_type = TYPE(raw_value);
   if (raw_type != T_TRUE && raw_type != T_FALSE) {
@@ -26,14 +26,21 @@ static inline bool get_bool_option_value(VALUE raw_value)
   return raw_type == T_TRUE;
 }
 
-static inline unsigned int get_uint_option_value(VALUE raw_value)
+static inline unsigned int get_uint_value(VALUE raw_value)
 {
   Check_Type(raw_value, T_FIXNUM);
 
   return NUM2UINT(raw_value);
 }
 
-static inline BrotliEncoderMode get_mode_option_value(VALUE raw_value)
+static inline size_t get_size_value(VALUE raw_value)
+{
+  Check_Type(raw_value, T_FIXNUM);
+
+  return NUM2SIZET(raw_value);
+}
+
+static inline BrotliEncoderMode get_mode_value(VALUE raw_value)
 {
   Check_Type(raw_value, T_SYMBOL);
 
@@ -49,9 +56,9 @@ static inline BrotliEncoderMode get_mode_option_value(VALUE raw_value)
   }
 }
 
-void brs_ext_get_option(VALUE options, brs_ext_option_t* option, brs_ext_option_type_t type, const char* name)
+void brs_ext_resolve_option(VALUE options, brs_ext_option_t* option, brs_ext_option_type_t type, const char* name)
 {
-  VALUE raw_value = get_raw_option_value(options, name);
+  VALUE raw_value = get_raw_value(options, name);
 
   option->has_value = raw_value != Qnil;
   if (!option->has_value) {
@@ -62,13 +69,13 @@ void brs_ext_get_option(VALUE options, brs_ext_option_t* option, brs_ext_option_
 
   switch (type) {
     case BRS_EXT_OPTION_TYPE_BOOL:
-      value = get_bool_option_value(raw_value) ? 1 : 0;
+      value = get_bool_value(raw_value) ? 1 : 0;
       break;
     case BRS_EXT_OPTION_TYPE_UINT:
-      value = (brs_ext_option_value_t) get_uint_option_value(raw_value);
+      value = (brs_ext_option_value_t) get_uint_value(raw_value);
       break;
     case BRS_EXT_OPTION_TYPE_MODE:
-      value = (brs_ext_option_value_t) get_mode_option_value(raw_value);
+      value = (brs_ext_option_value_t) get_mode_value(raw_value);
       break;
     default:
       brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
@@ -77,13 +84,18 @@ void brs_ext_get_option(VALUE options, brs_ext_option_t* option, brs_ext_option_
   option->value = value;
 }
 
+bool brs_ext_get_bool_option_value(VALUE options, const char* name)
+{
+  VALUE raw_value = get_raw_value(options, name);
+
+  return get_bool_value(raw_value);
+}
+
 size_t brs_ext_get_size_option_value(VALUE options, const char* name)
 {
-  VALUE raw_value = get_raw_option_value(options, name);
+  VALUE raw_value = get_raw_value(options, name);
 
-  Check_Type(raw_value, T_FIXNUM);
-
-  return NUM2SIZET(raw_value);
+  return get_size_value(raw_value);
 }
 
 // -- set params --

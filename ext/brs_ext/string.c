@@ -112,7 +112,7 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
   GET_SOURCE_DATA(source_value);
   Check_Type(options, T_HASH);
   BRS_EXT_GET_COMPRESSOR_OPTIONS(options);
-  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
+  BRS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
 
   BrotliEncoderState* state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
@@ -215,7 +215,7 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
   GET_SOURCE_DATA(source_value);
   Check_Type(options, T_HASH);
   BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
-  BRS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
+  BRS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
 
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
