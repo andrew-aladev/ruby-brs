@@ -41,20 +41,24 @@ module BRS
       )
       .freeze
 
-      private_class_method def self.get_invalid_buffer_length_options(buffer_length_names, &_block)
+      private_class_method def self.get_common_invalid_options(buffer_length_names, &block)
+        Validation::INVALID_HASHES.each do |invalid_hash|
+          block.call invalid_hash
+        end
+
         buffer_length_names.each do |name|
           (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
             yield({ name => invalid_integer })
           end
         end
+
+        Validation::INVALID_BOOLS.each do |invalid_bool|
+          yield({ :gvl => invalid_bool })
+        end
       end
 
       def self.get_invalid_compressor_options(buffer_length_names, &block)
-        Validation::INVALID_HASHES.each do |invalid_hash|
-          block.call invalid_hash
-        end
-
-        get_invalid_buffer_length_options buffer_length_names, &block
+        get_common_invalid_options buffer_length_names, &block
 
         INVALID_MODES.each do |invalid_mode|
           yield({ :mode => invalid_mode })
@@ -79,11 +83,7 @@ module BRS
       end
 
       def self.get_invalid_decompressor_options(buffer_length_names, &block)
-        Validation::INVALID_HASHES.each do |invalid_hash|
-          block.call invalid_hash
-        end
-
-        get_invalid_buffer_length_options buffer_length_names, &block
+        get_common_invalid_options buffer_length_names, &block
 
         (Validation::INVALID_BOOLS - [nil]).each do |invalid_bool|
           yield({ :disable_ring_buffer_reallocation => invalid_bool })
@@ -133,16 +133,36 @@ module BRS
       def self.get_compressor_options(buffer_length_names, &_block)
         buffer_length_generator = get_buffer_length_option_generator buffer_length_names
 
-        main_generator = OCG.new(
-          :mode                             => BRS::Option::MODES,
-          :quality                          => QUALITIES,
-          :lgwin                            => LGWINS,
-          :lgblock                          => LGBLOCKS,
-          :disable_literal_context_modeling => BOOLS,
-          :large_window                     => BOOLS
+        # main
+
+        general_generator = OCG.new(
+          :mode    => BRS::Option::MODES,
+          :quality => QUALITIES
         )
 
-        complete_generator = buffer_length_generator.mix main_generator
+        window_generator = OCG.new(
+          :lgwin        => LGWINS,
+          :lgblock      => LGBLOCKS,
+          :large_window => BOOLS
+        )
+
+        main_generator = general_generator.mix window_generator
+
+        # thread
+
+        thread_generator = OCG.new(
+          :gvl => BOOLS
+        )
+
+        # other
+
+        other_generator = OCG.new(
+          :disable_literal_context_modeling => BOOLS
+        )
+
+        # complete
+
+        complete_generator = buffer_length_generator.mix(main_generator).mix(thread_generator).mix other_generator
 
         yield complete_generator.next until complete_generator.finished?
       end
@@ -150,12 +170,27 @@ module BRS
       private_class_method def self.get_decompressor_options(buffer_length_names, &_block)
         buffer_length_generator = get_buffer_length_option_generator buffer_length_names
 
+        # main
+
         main_generator = OCG.new(
-          :disable_ring_buffer_reallocation => BOOLS,
-          :large_window                     => BOOLS
+          :large_window => BOOLS
         )
 
-        complete_generator = buffer_length_generator.mix main_generator
+        # thread
+
+        thread_generator = OCG.new(
+          :gvl => BOOLS
+        )
+
+        # other
+
+        other_generator = OCG.new(
+          :disable_ring_buffer_reallocation => BOOLS
+        )
+
+        # complete
+
+        complete_generator = buffer_length_generator.mix(main_generator).mix(thread_generator).mix other_generator
 
         yield complete_generator.next until complete_generator.finished?
       end

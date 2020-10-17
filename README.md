@@ -89,6 +89,7 @@ end
 |------------------------------------|------------|------------|-------------|
 | `source_buffer_length`             | 0 - inf    | 0 (auto)   | internal buffer length for source data |
 | `destination_buffer_length`        | 0 - inf    | 0 (auto)   | internal buffer length for description data |
+| `gvl`                              | true/false | false      | enables global VM lock where possible |
 | `mode`                             | `MODES`    | `:generic` | compressor mode |
 | `quality`                          | 0 - 11     | 11         | compression level |
 | `lgwin`                            | 10 - 24    | 22         | compressor window size |
@@ -101,6 +102,10 @@ end
 There are internal buffers for compressed and decompressed data.
 For example you want to use 1 KB as `source_buffer_length` for compressor - please use 256 B as `destination_buffer_length`.
 You want to use 256 B as `source_buffer_length` for decompressor - please use 1 KB as `destination_buffer_length`.
+
+`gvl` is disabled by default, this mode allows running multiple compressors/decompressors in different threads simultaneously.
+Please consider enabling `gvl` if you don't want to launch processors in separate threads.
+If `gvl` is enabled ruby won't waste time on acquiring/releasing VM lock.
 
 `String` and `File` will set `:size_hint` automaticaly.
 
@@ -117,6 +122,7 @@ Possible compressor options:
 ```
 :source_buffer_length
 :destination_buffer_length
+:gvl
 :mode
 :quality
 :lgwin
@@ -130,6 +136,7 @@ Possible decompressor options:
 ```
 :source_buffer_length
 :destination_buffer_length
+:gvl
 :disable_ring_buffer_reallocation
 :large_window
 ```

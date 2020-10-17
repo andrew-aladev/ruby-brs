@@ -11,6 +11,7 @@ module BRS
     DEFAULT_BUFFER_LENGTH = 0
 
     COMPRESSOR_DEFAULTS = {
+      :gvl                              => false,
       :mode                             => nil,
       :quality                          => nil,
       :lgwin                            => nil,
@@ -21,6 +22,7 @@ module BRS
     .freeze
 
     DECOMPRESSOR_DEFAULTS = {
+      :gvl                              => false,
       :disable_ring_buffer_reallocation => nil,
       :large_window                     => nil
     }
@@ -33,6 +35,8 @@ module BRS
       options                = COMPRESSOR_DEFAULTS.merge(buffer_length_defaults).merge options
 
       buffer_length_names.each { |name| Validation.validate_not_negative_integer options[name] }
+
+      Validation.validate_bool options[:gvl]
 
       mode = options[:mode]
       unless mode.nil?
@@ -74,6 +78,8 @@ module BRS
       options                = DECOMPRESSOR_DEFAULTS.merge(buffer_length_defaults).merge options
 
       buffer_length_names.each { |name| Validation.validate_not_negative_integer options[name] }
+
+      Validation.validate_bool options[:gvl]
 
       disable_ring_buffer_reallocation = options[:disable_ring_buffer_reallocation]
       Validation.validate_bool disable_ring_buffer_reallocation unless disable_ring_buffer_reallocation.nil?

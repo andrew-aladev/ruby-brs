@@ -8,8 +8,11 @@
 
 #include "brs_ext/buffer.h"
 #include "brs_ext/error.h"
+#include "brs_ext/gvl.h"
 #include "brs_ext/option.h"
 #include "ruby.h"
+
+// -- initialization --
 
 static void free_compressor(brs_ext_compressor_t* compressor_ptr)
 {
@@ -36,6 +39,7 @@ VALUE brs_ext_allocate_compressor(VALUE klass)
   compressor_ptr->destination_buffer_length           = 0;
   compressor_ptr->remaining_destination_buffer        = NULL;
   compressor_ptr->remaining_destination_buffer_length = 0;
+  compressor_ptr->gvl                                 = false;
 
   return self;
 }
@@ -50,6 +54,7 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
   Check_Type(options, T_HASH);
   BRS_EXT_GET_COMPRESSOR_OPTIONS(options);
   BRS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
+  BRS_EXT_GET_BOOL_OPTION(options, gvl);
 
   BrotliEncoderState* state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
@@ -77,61 +82,87 @@ VALUE brs_ext_initialize_compressor(VALUE self, VALUE options)
   compressor_ptr->destination_buffer_length           = destination_buffer_length;
   compressor_ptr->remaining_destination_buffer        = destination_buffer;
   compressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
+  compressor_ptr->gvl                                 = gvl;
 
   return Qnil;
 }
+
+// -- compress --
 
 #define DO_NOT_USE_AFTER_CLOSE(compressor_ptr)                                           \
   if (compressor_ptr->state_ptr == NULL || compressor_ptr->destination_buffer == NULL) { \
     brs_ext_raise_error(BRS_EXT_ERROR_USED_AFTER_CLOSE);                                 \
   }
 
-#define GET_SOURCE_DATA(source_value)                                             \
-  Check_Type(source_value, T_STRING);                                             \
-                                                                                  \
-  const char*           source                  = RSTRING_PTR(source_value);      \
-  size_t                source_length           = RSTRING_LEN(source_value);      \
-  const brs_ext_byte_t* remaining_source        = (const brs_ext_byte_t*) source; \
-  size_t                remaining_source_length = source_length;
+typedef struct
+{
+  brs_ext_compressor_t* compressor_ptr;
+  const brs_ext_byte_t* remaining_source;
+  size_t*               remaining_source_length_ptr;
+  BROTLI_BOOL           result;
+} compress_args_t;
+
+static inline void* compress_wrapper(void* data)
+{
+  compress_args_t*      args           = data;
+  brs_ext_compressor_t* compressor_ptr = args->compressor_ptr;
+
+  args->result = BrotliEncoderCompressStream(
+    compressor_ptr->state_ptr,
+    BROTLI_OPERATION_PROCESS,
+    args->remaining_source_length_ptr,
+    &args->remaining_source,
+    &compressor_ptr->remaining_destination_buffer_length,
+    &compressor_ptr->remaining_destination_buffer,
+    NULL);
+
+  return NULL;
+}
 
 VALUE brs_ext_compress(VALUE self, VALUE source_value)
 {
   GET_COMPRESSOR(self);
   DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
-  GET_SOURCE_DATA(source_value);
+  Check_Type(source_value, T_STRING);
 
-  BrotliEncoderState* state_ptr = compressor_ptr->state_ptr;
+  const char*           source                  = RSTRING_PTR(source_value);
+  size_t                source_length           = RSTRING_LEN(source_value);
+  const brs_ext_byte_t* remaining_source        = (const brs_ext_byte_t*) source;
+  size_t                remaining_source_length = source_length;
 
-  BROTLI_BOOL result = BrotliEncoderCompressStream(
-    state_ptr,
-    BROTLI_OPERATION_PROCESS,
-    &remaining_source_length,
-    &remaining_source,
-    &compressor_ptr->remaining_destination_buffer_length,
-    &compressor_ptr->remaining_destination_buffer,
-    NULL);
+  compress_args_t args = {
+    .compressor_ptr              = compressor_ptr,
+    .remaining_source            = remaining_source,
+    .remaining_source_length_ptr = &remaining_source_length};
 
-  if (!result) {
+  BRS_EXT_GVL_WRAP(compressor_ptr->gvl, compress_wrapper, &args);
+  if (!args.result) {
     brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
   }
 
   VALUE bytes_written          = SIZET2NUM(source_length - remaining_source_length);
-  VALUE needs_more_destination = BrotliEncoderHasMoreOutput(state_ptr) ? Qtrue : Qfalse;
+  VALUE needs_more_destination = BrotliEncoderHasMoreOutput(compressor_ptr->state_ptr) ? Qtrue : Qfalse;
 
   return rb_ary_new_from_args(2, bytes_written, needs_more_destination);
 }
 
-VALUE brs_ext_flush_compressor(VALUE self)
+// -- compressor flush --
+
+typedef struct
 {
-  GET_COMPRESSOR(self);
-  DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
+  brs_ext_compressor_t* compressor_ptr;
+  BROTLI_BOOL           result;
+} compressor_flush_args_t;
 
-  BrotliEncoderState*   state_ptr               = compressor_ptr->state_ptr;
-  const brs_ext_byte_t* remaining_source        = NULL;
-  size_t                remaining_source_length = 0;
+static inline void* compressor_flush_wrapper(void* data)
+{
+  compressor_flush_args_t* args                    = data;
+  brs_ext_compressor_t*    compressor_ptr          = args->compressor_ptr;
+  const brs_ext_byte_t*    remaining_source        = NULL;
+  size_t                   remaining_source_length = 0;
 
-  BROTLI_BOOL result = BrotliEncoderCompressStream(
-    state_ptr,
+  args->result = BrotliEncoderCompressStream(
+    compressor_ptr->state_ptr,
     BROTLI_OPERATION_FLUSH,
     &remaining_source_length,
     &remaining_source,
@@ -139,24 +170,41 @@ VALUE brs_ext_flush_compressor(VALUE self)
     &compressor_ptr->remaining_destination_buffer,
     NULL);
 
-  if (!result) {
-    brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
-  }
-
-  return BrotliEncoderHasMoreOutput(state_ptr) ? Qtrue : Qfalse;
+  return NULL;
 }
 
-VALUE brs_ext_finish_compressor(VALUE self)
+VALUE brs_ext_flush_compressor(VALUE self)
 {
   GET_COMPRESSOR(self);
   DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
-  BrotliEncoderState*   state_ptr               = compressor_ptr->state_ptr;
-  const brs_ext_byte_t* remaining_source        = NULL;
-  size_t                remaining_source_length = 0;
+  compressor_flush_args_t args = {.compressor_ptr = compressor_ptr};
 
-  BROTLI_BOOL result = BrotliEncoderCompressStream(
-    state_ptr,
+  BRS_EXT_GVL_WRAP(compressor_ptr->gvl, compressor_flush_wrapper, &args);
+  if (!args.result) {
+    brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
+  }
+
+  return BrotliEncoderHasMoreOutput(compressor_ptr->state_ptr) ? Qtrue : Qfalse;
+}
+
+// -- compressor finish --
+
+typedef struct
+{
+  brs_ext_compressor_t* compressor_ptr;
+  BROTLI_BOOL           result;
+} compressor_finish_args_t;
+
+static inline void* compressor_finish_wrapper(void* data)
+{
+  compressor_finish_args_t* args                    = data;
+  brs_ext_compressor_t*     compressor_ptr          = args->compressor_ptr;
+  const brs_ext_byte_t*     remaining_source        = NULL;
+  size_t                    remaining_source_length = 0;
+
+  args->result = BrotliEncoderCompressStream(
+    compressor_ptr->state_ptr,
     BROTLI_OPERATION_FINISH,
     &remaining_source_length,
     &remaining_source,
@@ -164,12 +212,28 @@ VALUE brs_ext_finish_compressor(VALUE self)
     &compressor_ptr->remaining_destination_buffer,
     NULL);
 
-  if (!result) {
+  return NULL;
+}
+
+VALUE brs_ext_finish_compressor(VALUE self)
+{
+  GET_COMPRESSOR(self);
+  DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
+
+  compressor_finish_args_t args = {.compressor_ptr = compressor_ptr};
+
+  BRS_EXT_GVL_WRAP(compressor_ptr->gvl, compressor_finish_wrapper, &args);
+  if (!args.result) {
     brs_ext_raise_error(BRS_EXT_ERROR_UNEXPECTED);
   }
 
-  return (BrotliEncoderHasMoreOutput(state_ptr) || !BrotliEncoderIsFinished(state_ptr)) ? Qtrue : Qfalse;
+  return (BrotliEncoderHasMoreOutput(compressor_ptr->state_ptr) ||
+          !BrotliEncoderIsFinished(compressor_ptr->state_ptr)) ?
+           Qtrue :
+           Qfalse;
 }
+
+// -- other --
 
 VALUE brs_ext_compressor_read_result(VALUE self)
 {
@@ -189,6 +253,8 @@ VALUE brs_ext_compressor_read_result(VALUE self)
 
   return result_value;
 }
+
+// -- cleanup --
 
 VALUE brs_ext_compressor_close(VALUE self)
 {
@@ -214,6 +280,8 @@ VALUE brs_ext_compressor_close(VALUE self)
 
   return Qnil;
 }
+
+// -- exports --
 
 void brs_ext_compressor_exports(VALUE root_module)
 {
