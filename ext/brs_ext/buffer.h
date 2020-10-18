@@ -17,12 +17,12 @@ VALUE brs_ext_create_string_buffer(VALUE length);
 #define BRS_EXT_CREATE_STRING_BUFFER(buffer, length, exception) \
   VALUE buffer = rb_protect(brs_ext_create_string_buffer, SIZET2NUM(length), &exception);
 
-VALUE brs_ext_resize_string_buffer(VALUE args);
+VALUE brs_ext_resize_string_buffer(VALUE buffer_args);
 
-#define BRS_EXT_RESIZE_STRING_BUFFER(buffer, length, exception)            \
-  VALUE args = rb_ary_new_from_args(2, buffer, SIZET2NUM(length));         \
-  buffer     = rb_protect(brs_ext_resize_string_buffer, args, &exception); \
-  RB_GC_GUARD(args);
+#define BRS_EXT_RESIZE_STRING_BUFFER(buffer, length, exception)                          \
+  VALUE buffer_args = rb_ary_new_from_args(2, buffer, SIZET2NUM(length));                \
+  buffer            = rb_protect(brs_ext_resize_string_buffer, buffer_args, &exception); \
+  RB_GC_GUARD(buffer_args);
 
 void brs_ext_buffer_exports(VALUE root_module);
 

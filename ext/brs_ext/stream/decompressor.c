@@ -7,8 +7,11 @@
 
 #include "brs_ext/buffer.h"
 #include "brs_ext/error.h"
+#include "brs_ext/gvl.h"
 #include "brs_ext/option.h"
 #include "ruby.h"
+
+// -- initialization --
 
 static void free_decompressor(brs_ext_decompressor_t* decompressor_ptr)
 {
@@ -49,6 +52,7 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
   Check_Type(options, T_HASH);
   BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
   BRS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
+  BRS_EXT_GET_BOOL_OPTION(options, gvl);
 
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
@@ -76,49 +80,74 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
   decompressor_ptr->destination_buffer_length           = destination_buffer_length;
   decompressor_ptr->remaining_destination_buffer        = destination_buffer;
   decompressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
+  decompressor_ptr->gvl                                 = gvl;
 
   return Qnil;
 }
+
+// -- decompress --
 
 #define DO_NOT_USE_AFTER_CLOSE(decompressor_ptr)                                             \
   if (decompressor_ptr->state_ptr == NULL || decompressor_ptr->destination_buffer == NULL) { \
     brs_ext_raise_error(BRS_EXT_ERROR_USED_AFTER_CLOSE);                                     \
   }
 
-#define GET_SOURCE_DATA(source_value)                                             \
-  Check_Type(source_value, T_STRING);                                             \
-                                                                                  \
-  const char*           source                  = RSTRING_PTR(source_value);      \
-  size_t                source_length           = RSTRING_LEN(source_value);      \
-  const brs_ext_byte_t* remaining_source        = (const brs_ext_byte_t*) source; \
-  size_t                remaining_source_length = source_length;
+typedef struct
+{
+  brs_ext_decompressor_t* decompressor_ptr;
+  const brs_ext_byte_t*   remaining_source;
+  size_t*                 remaining_source_length_ptr;
+  BrotliDecoderResult     result;
+} decompress_args_t;
+
+static inline void* decompress_wrapper(void* data)
+{
+  decompress_args_t*      args             = data;
+  brs_ext_decompressor_t* decompressor_ptr = args->decompressor_ptr;
+
+  args->result = BrotliDecoderDecompressStream(
+    decompressor_ptr->state_ptr,
+    args->remaining_source_length_ptr,
+    &args->remaining_source,
+    &decompressor_ptr->remaining_destination_buffer_length,
+    &decompressor_ptr->remaining_destination_buffer,
+    NULL);
+
+  return NULL;
+}
 
 VALUE brs_ext_decompress(VALUE self, VALUE source_value)
 {
   GET_DECOMPRESSOR(self);
   DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
-  GET_SOURCE_DATA(source_value);
+  Check_Type(source_value, T_STRING);
 
-  BrotliDecoderResult result = BrotliDecoderDecompressStream(
-    decompressor_ptr->state_ptr,
-    &remaining_source_length,
-    &remaining_source,
-    &decompressor_ptr->remaining_destination_buffer_length,
-    &decompressor_ptr->remaining_destination_buffer,
-    NULL);
+  const char*           source                  = RSTRING_PTR(source_value);
+  size_t                source_length           = RSTRING_LEN(source_value);
+  const brs_ext_byte_t* remaining_source        = (const brs_ext_byte_t*) source;
+  size_t                remaining_source_length = source_length;
+
+  decompress_args_t args = {
+    .decompressor_ptr            = decompressor_ptr,
+    .remaining_source            = remaining_source,
+    .remaining_source_length_ptr = &remaining_source_length};
+
+  BRS_EXT_GVL_WRAP(decompressor_ptr->gvl, decompress_wrapper, &args);
 
   if (
-    result != BROTLI_DECODER_RESULT_SUCCESS && result != BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT &&
-    result != BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
+    args.result != BROTLI_DECODER_RESULT_SUCCESS && args.result != BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT &&
+    args.result != BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
     BrotliDecoderErrorCode error_code = BrotliDecoderGetErrorCode(decompressor_ptr->state_ptr);
     brs_ext_raise_error(brs_ext_get_decompressor_error(error_code));
   }
 
   VALUE bytes_read             = SIZET2NUM(source_length - remaining_source_length);
-  VALUE needs_more_destination = result == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT ? Qtrue : Qfalse;
+  VALUE needs_more_destination = args.result == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT ? Qtrue : Qfalse;
 
   return rb_ary_new_from_args(2, bytes_read, needs_more_destination);
 }
+
+// -- other --
 
 VALUE brs_ext_decompressor_read_result(VALUE self)
 {
@@ -138,6 +167,8 @@ VALUE brs_ext_decompressor_read_result(VALUE self)
 
   return result_value;
 }
+
+// -- cleanup --
 
 VALUE brs_ext_decompressor_close(VALUE self)
 {
@@ -163,6 +194,8 @@ VALUE brs_ext_decompressor_close(VALUE self)
 
   return Qnil;
 }
+
+// -- exports --
 
 void brs_ext_decompressor_exports(VALUE root_module)
 {
