@@ -50,9 +50,9 @@ VALUE brs_ext_initialize_decompressor(VALUE self, VALUE options)
 {
   GET_DECOMPRESSOR(self);
   Check_Type(options, T_HASH);
-  BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
   BRS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
   BRS_EXT_GET_BOOL_OPTION(options, gvl);
+  BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
 
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {

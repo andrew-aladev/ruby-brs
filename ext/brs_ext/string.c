@@ -39,14 +39,6 @@ static inline brs_ext_result_t increase_destination_buffer(
   return 0;
 }
 
-// -- utils --
-
-#define GET_SOURCE_DATA(source_value)                    \
-  Check_Type(source_value, T_STRING);                    \
-                                                         \
-  const char* source        = RSTRING_PTR(source_value); \
-  size_t      source_length = RSTRING_LEN(source_value);
-
 // -- compress --
 
 static inline brs_ext_result_t compress(
@@ -109,10 +101,10 @@ static inline brs_ext_result_t compress(
 
 VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VALUE options)
 {
-  GET_SOURCE_DATA(source_value);
+  Check_Type(source_value, T_STRING);
   Check_Type(options, T_HASH);
-  BRS_EXT_GET_COMPRESSOR_OPTIONS(options);
   BRS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
+  BRS_EXT_GET_COMPRESSOR_OPTIONS(options);
 
   BrotliEncoderState* state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
@@ -136,6 +128,9 @@ VALUE brs_ext_compress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VA
     BrotliEncoderDestroyInstance(state_ptr);
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
+
+  const char* source        = RSTRING_PTR(source_value);
+  size_t      source_length = RSTRING_LEN(source_value);
 
   ext_result = compress(state_ptr, source, source_length, destination_value, destination_buffer_length);
 
@@ -212,10 +207,10 @@ static inline brs_ext_result_t decompress(
 
 VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, VALUE options)
 {
-  GET_SOURCE_DATA(source_value);
+  Check_Type(source_value, T_STRING);
   Check_Type(options, T_HASH);
-  BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
   BRS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
+  BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
 
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   if (state_ptr == NULL) {
@@ -240,6 +235,9 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
     brs_ext_raise_error(BRS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
+  const char* source        = RSTRING_PTR(source_value);
+  size_t      source_length = RSTRING_LEN(source_value);
+
   ext_result = decompress(state_ptr, source, source_length, destination_value, destination_buffer_length);
 
   BrotliDecoderDestroyInstance(state_ptr);
@@ -250,6 +248,8 @@ VALUE brs_ext_decompress_string(VALUE BRS_EXT_UNUSED(self), VALUE source_value, 
 
   return destination_value;
 }
+
+// -- exports --
 
 void brs_ext_string_exports(VALUE root_module)
 {
