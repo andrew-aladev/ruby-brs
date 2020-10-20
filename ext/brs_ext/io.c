@@ -206,7 +206,33 @@ static inline brs_ext_result_t
     brs_ext_raise_error(BRS_EXT_ERROR_ACCESS_IO);      \
   }
 
-// -- compress --
+// -- buffered compress --
+
+typedef struct
+{
+  BrotliEncoderState*    state_ptr;
+  const brs_ext_byte_t** source_ptr;
+  size_t*                source_length_ptr;
+  brs_ext_byte_t*        remaining_destination_buffer;
+  size_t*                remaining_destination_buffer_length_ptr;
+  BROTLI_BOOL            result;
+} compress_args_t;
+
+static inline void* compress_wrapper(void* data)
+{
+  compress_args_t* args = data;
+
+  args->result = BrotliEncoderCompressStream(
+    args->state_ptr,
+    BROTLI_OPERATION_PROCESS,
+    args->source_length_ptr,
+    args->source_ptr,
+    args->remaining_destination_buffer_length_ptr,
+    &args->remaining_destination_buffer,
+    NULL);
+
+  return NULL;
+}
 
 static inline brs_ext_result_t buffered_compress(
   BrotliEncoderState*    state_ptr,
@@ -215,26 +241,22 @@ static inline brs_ext_result_t buffered_compress(
   FILE*                  destination_file,
   brs_ext_byte_t*        destination_buffer,
   size_t*                destination_length_ptr,
-  size_t                 destination_buffer_length)
+  size_t                 destination_buffer_length,
+  bool                   gvl)
 {
-  BROTLI_BOOL      result;
   brs_ext_result_t ext_result;
+  compress_args_t  args = {.state_ptr = state_ptr, .source_ptr = source_ptr, .source_length_ptr = source_length_ptr};
 
   while (true) {
     brs_ext_byte_t* remaining_destination_buffer             = destination_buffer + *destination_length_ptr;
     size_t          remaining_destination_buffer_length      = destination_buffer_length - *destination_length_ptr;
     size_t          prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
-    result = BrotliEncoderCompressStream(
-      state_ptr,
-      BROTLI_OPERATION_PROCESS,
-      source_length_ptr,
-      source_ptr,
-      &remaining_destination_buffer_length,
-      &remaining_destination_buffer,
-      NULL);
+    args.remaining_destination_buffer            = remaining_destination_buffer;
+    args.remaining_destination_buffer_length_ptr = &remaining_destination_buffer_length;
 
-    if (!result) {
+    BRS_EXT_GVL_WRAP(gvl, compress_wrapper, &args);
+    if (!args.result) {
       return BRS_EXT_ERROR_UNEXPECTED;
     }
 
@@ -257,33 +279,57 @@ static inline brs_ext_result_t buffered_compress(
   return 0;
 }
 
+// -- buffered compressor finish --
+
+typedef struct
+{
+  BrotliEncoderState*    state_ptr;
+  const brs_ext_byte_t** source_ptr;
+  size_t*                source_length_ptr;
+  brs_ext_byte_t*        remaining_destination_buffer;
+  size_t*                remaining_destination_buffer_length_ptr;
+  BROTLI_BOOL            result;
+} compressor_finish_args_t;
+
+static inline void* compressor_finish_wrapper(void* data)
+{
+  compressor_finish_args_t* args = data;
+
+  args->result = BrotliEncoderCompressStream(
+    args->state_ptr,
+    BROTLI_OPERATION_FINISH,
+    args->source_length_ptr,
+    args->source_ptr,
+    args->remaining_destination_buffer_length_ptr,
+    &args->remaining_destination_buffer,
+    NULL);
+
+  return NULL;
+}
+
 static inline brs_ext_result_t buffered_compressor_finish(
   BrotliEncoderState* state_ptr,
   FILE*               destination_file,
   brs_ext_byte_t*     destination_buffer,
   size_t*             destination_length_ptr,
-  size_t              destination_buffer_length)
+  size_t              destination_buffer_length,
+  bool                gvl)
 {
-  BROTLI_BOOL           result;
-  brs_ext_result_t      ext_result;
-  const brs_ext_byte_t* source        = NULL;
-  size_t                source_length = 0;
+  brs_ext_result_t         ext_result;
+  const brs_ext_byte_t*    source        = NULL;
+  size_t                   source_length = 0;
+  compressor_finish_args_t args = {.state_ptr = state_ptr, .source_ptr = &source, .source_length_ptr = &source_length};
 
   while (true) {
     brs_ext_byte_t* remaining_destination_buffer             = destination_buffer + *destination_length_ptr;
     size_t          remaining_destination_buffer_length      = destination_buffer_length - *destination_length_ptr;
     size_t          prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
-    result = BrotliEncoderCompressStream(
-      state_ptr,
-      BROTLI_OPERATION_FINISH,
-      &source_length,
-      &source,
-      &remaining_destination_buffer_length,
-      &remaining_destination_buffer,
-      NULL);
+    args.remaining_destination_buffer            = remaining_destination_buffer;
+    args.remaining_destination_buffer_length_ptr = &remaining_destination_buffer_length;
 
-    if (!result) {
+    BRS_EXT_GVL_WRAP(gvl, compressor_finish_wrapper, &args);
+    if (!args.result) {
       return BRS_EXT_ERROR_UNEXPECTED;
     }
 
@@ -306,6 +352,8 @@ static inline brs_ext_result_t buffered_compressor_finish(
   return 0;
 }
 
+// -- compress --
+
 static inline brs_ext_result_t compress(
   BrotliEncoderState* state_ptr,
   FILE*               source_file,
@@ -313,7 +361,8 @@ static inline brs_ext_result_t compress(
   size_t              source_buffer_length,
   FILE*               destination_file,
   brs_ext_byte_t*     destination_buffer,
-  size_t              destination_buffer_length)
+  size_t              destination_buffer_length,
+  bool                gvl)
 {
   brs_ext_result_t      ext_result;
   const brs_ext_byte_t* source             = source_buffer;
@@ -328,10 +377,11 @@ static inline brs_ext_result_t compress(
     destination_file,
     destination_buffer,
     &destination_length,
-    destination_buffer_length);
+    destination_buffer_length,
+    gvl);
 
   ext_result = buffered_compressor_finish(
-    state_ptr, destination_file, destination_buffer, &destination_length, destination_buffer_length);
+    state_ptr, destination_file, destination_buffer, &destination_length, destination_buffer_length, gvl);
 
   if (ext_result != 0) {
     return ext_result;
@@ -347,6 +397,7 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
   Check_Type(options, T_HASH);
   BRS_EXT_GET_SIZE_OPTION(options, source_buffer_length);
   BRS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
+  BRS_EXT_GET_BOOL_OPTION(options, gvl);
   BRS_EXT_GET_COMPRESSOR_OPTIONS(options);
 
   BrotliEncoderState* state_ptr = BrotliEncoderCreateInstance(NULL, NULL, NULL);
@@ -383,7 +434,8 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
     source_buffer_length,
     destination_file,
     destination_buffer,
-    destination_buffer_length);
+    destination_buffer_length,
+    gvl);
 
   free(source_buffer);
   free(destination_buffer);
@@ -399,7 +451,32 @@ VALUE brs_ext_compress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE destin
   return Qnil;
 }
 
-// -- decompress --
+// -- buffered decompress --
+
+typedef struct
+{
+  BrotliDecoderState*    state_ptr;
+  const brs_ext_byte_t** source_ptr;
+  size_t*                source_length_ptr;
+  brs_ext_byte_t*        remaining_destination_buffer;
+  size_t*                remaining_destination_buffer_length_ptr;
+  BrotliDecoderResult    result;
+} decompress_args_t;
+
+static inline void* decompress_wrapper(void* data)
+{
+  decompress_args_t* args = data;
+
+  args->result = BrotliDecoderDecompressStream(
+    args->state_ptr,
+    args->source_length_ptr,
+    args->source_ptr,
+    args->remaining_destination_buffer_length_ptr,
+    &args->remaining_destination_buffer,
+    NULL);
+
+  return NULL;
+}
 
 static inline brs_ext_result_t buffered_decompress(
   BrotliDecoderState*    state_ptr,
@@ -408,34 +485,32 @@ static inline brs_ext_result_t buffered_decompress(
   FILE*                  destination_file,
   brs_ext_byte_t*        destination_buffer,
   size_t*                destination_length_ptr,
-  size_t                 destination_buffer_length)
+  size_t                 destination_buffer_length,
+  bool                   gvl)
 {
-  BrotliDecoderResult result;
-  brs_ext_result_t    ext_result;
+  brs_ext_result_t  ext_result;
+  decompress_args_t args = {.state_ptr = state_ptr, .source_ptr = source_ptr, .source_length_ptr = source_length_ptr};
 
   while (true) {
     brs_ext_byte_t* remaining_destination_buffer             = destination_buffer + *destination_length_ptr;
     size_t          remaining_destination_buffer_length      = destination_buffer_length - *destination_length_ptr;
     size_t          prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
-    result = BrotliDecoderDecompressStream(
-      state_ptr,
-      source_length_ptr,
-      source_ptr,
-      &remaining_destination_buffer_length,
-      &remaining_destination_buffer,
-      NULL);
+    args.remaining_destination_buffer            = remaining_destination_buffer;
+    args.remaining_destination_buffer_length_ptr = &remaining_destination_buffer_length;
+
+    BRS_EXT_GVL_WRAP(gvl, decompress_wrapper, &args);
 
     if (
-      result != BROTLI_DECODER_RESULT_SUCCESS && result != BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT &&
-      result != BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
+      args.result != BROTLI_DECODER_RESULT_SUCCESS && args.result != BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT &&
+      args.result != BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
       BrotliDecoderErrorCode error_code = BrotliDecoderGetErrorCode(state_ptr);
       return brs_ext_get_decompressor_error(error_code);
     }
 
     *destination_length_ptr += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
 
-    if (result == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
+    if (args.result == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
       ext_result = flush_destination_buffer(
         destination_file, destination_buffer, destination_length_ptr, destination_buffer_length);
 
@@ -452,6 +527,8 @@ static inline brs_ext_result_t buffered_decompress(
   return 0;
 }
 
+// -- decompress --
+
 static inline brs_ext_result_t decompress(
   BrotliDecoderState* state_ptr,
   FILE*               source_file,
@@ -459,7 +536,8 @@ static inline brs_ext_result_t decompress(
   size_t              source_buffer_length,
   FILE*               destination_file,
   brs_ext_byte_t*     destination_buffer,
-  size_t              destination_buffer_length)
+  size_t              destination_buffer_length,
+  bool                gvl)
 {
   brs_ext_result_t      ext_result;
   const brs_ext_byte_t* source             = source_buffer;
@@ -474,7 +552,8 @@ static inline brs_ext_result_t decompress(
     destination_file,
     destination_buffer,
     &destination_length,
-    destination_buffer_length);
+    destination_buffer_length,
+    gvl);
 
   return write_remaining_destination(destination_file, destination_buffer, destination_length);
 }
@@ -486,6 +565,7 @@ VALUE brs_ext_decompress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE dest
   Check_Type(options, T_HASH);
   BRS_EXT_GET_SIZE_OPTION(options, source_buffer_length);
   BRS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
+  BRS_EXT_GET_BOOL_OPTION(options, gvl);
   BRS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
 
   BrotliDecoderState* state_ptr = BrotliDecoderCreateInstance(NULL, NULL, NULL);
@@ -522,7 +602,8 @@ VALUE brs_ext_decompress_io(VALUE BRS_EXT_UNUSED(self), VALUE source, VALUE dest
     source_buffer_length,
     destination_file,
     destination_buffer,
-    destination_buffer_length);
+    destination_buffer_length,
+    gvl);
 
   free(source_buffer);
   free(destination_buffer);
