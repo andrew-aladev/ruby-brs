@@ -61,7 +61,7 @@ ensure
 end
 ```
 
-You can create and read `tar.br` archives with `minitar` for example.
+You can create and read `tar.br` archives with [minitar](https://github.com/halostatue/minitar) for example.
 
 ```ruby
 require "brs"
@@ -80,6 +80,18 @@ BRS::Stream::Reader.open "file.tar.br" do |reader|
       puts entry.read
     end
   end
+end
+```
+
+You can also use `Content-Encoding: br` with [sinatra](http://sinatrarb.com):
+
+```ruby
+require "brs"
+require "sinatra"
+
+get "/" do
+  headers["Content-Encoding"] = "br"
+  BRS::String.compress "sample string"
 end
 ```
 
@@ -148,18 +160,6 @@ require "brs"
 
 data = BRS::String.compress "sample string", :quality => 5
 puts BRS::String.decompress(data, :disable_ring_buffer_reallocation => true)
-```
-
-HTTP encoding (`Content-Encoding: br`) using default options:
-
-```ruby
-require "brs"
-require "sinatra"
-
-get "/" do
-  headers["Content-Encoding"] = "br"
-  BRS::String.compress "sample string"
-end
 ```
 
 ## String
@@ -345,10 +345,10 @@ You should lock all shared data between threads.
 
 ## CI
 
-See universal test script [scripts/ci_test.sh](scripts/ci_test.sh) for CI.
 Please visit [scripts/test-images](scripts/test-images).
-You can run this test script using many native and cross images.
+See universal test script [scripts/ci_test.sh](scripts/ci_test.sh) for CI.
+You can run this script using many native and cross images.
 
 ## License
 
-MIT license, see LICENSE and AUTHORS.
+MIT license, see [LICENSE](LICENSE) and [AUTHORS](AUTHORS).
