@@ -1,6 +1,7 @@
 # Ruby bindings for brotli library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
+require "parallel"
 require "securerandom"
 
 module BRS
@@ -65,6 +66,15 @@ module BRS
         5 * (10**6)
       ]
       .freeze
+
+      # We need at least 2 threads for testing multiple threads support.
+      THREADS_COUNT = [Parallel.processor_count, 2].max.freeze
+
+      def self.parallel_each(producer, &_block)
+        Parallel.each producer, :in_threads => THREADS_COUNT do |item|
+          yield item, Parallel.worker_number
+        end
+      end
     end
   end
 end
