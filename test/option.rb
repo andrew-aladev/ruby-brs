@@ -106,22 +106,32 @@ module BRS
       ]
       .freeze
 
-      QUALITIES = [
+      private_class_method def self.get_option_values(values, min, max)
+        values.map { |value| [[value, min].max, max].min }
+      end
+
+      # Absolute min values works too slow.
+      # We can use more reasonable min and max values defined in "brotli/c/enc/encode.c".
+
+      QUALITIES = get_option_values(
+        [1, 10],
         BRS::Option::MIN_QUALITY,
         BRS::Option::MAX_QUALITY
-      ]
+      )
       .freeze
 
-      LGWINS = [
+      LGWINS = get_option_values(
+        [10, 18],
         BRS::Option::MIN_LGWIN,
         BRS::Option::MAX_LGWIN
-      ]
+      )
       .freeze
 
-      LGBLOCKS = [
+      LGBLOCKS = get_option_values(
+        [16, 22],
         BRS::Option::MIN_LGBLOCK,
         BRS::Option::MAX_LGBLOCK
-      ]
+      )
       .freeze
 
       private_class_method def self.get_buffer_length_option_generator(buffer_length_names)
@@ -141,9 +151,14 @@ module BRS
         )
 
         window_generator = OCG.new(
-          :lgwin        => LGWINS,
-          :lgblock      => LGBLOCKS,
-          :large_window => BOOLS
+          :large_window => [true]
+        )
+        .or(
+          :large_window => [false],
+          :lgwin        => LGWINS
+        )
+        .and(
+          :lgblock => LGBLOCKS
         )
 
         main_generator = general_generator.mix window_generator
