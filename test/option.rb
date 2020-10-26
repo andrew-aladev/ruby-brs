@@ -110,7 +110,7 @@ module BRS
         values.map { |value| [[value, min].max, max].min }
       end
 
-      # Absolute min values works too slow.
+      # Absolute min and max values works too slow.
       # We can use more reasonable min and max values defined in "brotli/c/enc/encode.c".
 
       QUALITIES = get_option_values(
@@ -182,46 +182,21 @@ module BRS
         yield complete_generator.next until complete_generator.finished?
       end
 
-      private_class_method def self.get_decompressor_options(buffer_length_names, &_block)
-        buffer_length_generator = get_buffer_length_option_generator buffer_length_names
+      def self.get_compatible_decompressor_options(compressor_options, buffer_length_name_mapping, &_block)
+        decompressor_options = {
+          :large_window => compressor_options[:large_window],
+          :gvl          => compressor_options[:gvl]
+        }
 
-        # main
-
-        main_generator = OCG.new(
-          :large_window => BOOLS
-        )
-
-        # thread
-
-        thread_generator = OCG.new(
-          :gvl => BOOLS
-        )
-
-        # other
+        buffer_length_name_mapping.each do |compressor_name, decompressor_name|
+          decompressor_options[decompressor_name] = compressor_options[compressor_name]
+        end
 
         other_generator = OCG.new(
           :disable_ring_buffer_reallocation => BOOLS
         )
 
-        # complete
-
-        complete_generator = buffer_length_generator.mix(main_generator).mix(thread_generator).mix other_generator
-
-        yield complete_generator.next until complete_generator.finished?
-      end
-
-      def self.get_compatible_decompressor_options(compressor_options, buffer_length_name_mapping, &_block)
-        buffer_length_names = buffer_length_name_mapping.values
-
-        get_decompressor_options(buffer_length_names) do |decompressor_options|
-          same_buffer_length_values = buffer_length_name_mapping.all? do |compressor_name, decompressor_name|
-            decompressor_options[decompressor_name] == compressor_options[compressor_name]
-          end
-
-          yield decompressor_options if
-            same_buffer_length_values &&
-            compressor_options[:large_window] == decompressor_options[:large_window]
-        end
+        yield decompressor_options.merge(other_generator.next) until other_generator.finished?
       end
     end
   end
