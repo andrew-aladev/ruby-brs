@@ -113,6 +113,11 @@ module BRS
       # Absolute min and max values works too slow.
       # We can use more reasonable min and max values defined in "brotli/c/enc/encode.c".
 
+      MODES = [
+        BRS::Option::MODES.first
+      ]
+      .freeze
+
       QUALITIES = get_option_values(
         [1, 10],
         BRS::Option::MIN_QUALITY,
@@ -146,7 +151,7 @@ module BRS
         # main
 
         general_generator = OCG.new(
-          :mode    => BRS::Option::MODES,
+          :mode    => MODES,
           :quality => QUALITIES
         )
 
