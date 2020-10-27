@@ -140,7 +140,7 @@ module BRS
         )
       end
 
-      def self.get_compressor_options(buffer_length_names, &_block)
+      def self.get_compressor_options_generator(buffer_length_names)
         buffer_length_generator = get_buffer_length_option_generator buffer_length_names
 
         # main
@@ -177,9 +177,13 @@ module BRS
 
         # complete
 
-        complete_generator = buffer_length_generator.mix(main_generator).mix(thread_generator).mix other_generator
+        buffer_length_generator.mix(main_generator).mix(thread_generator).mix other_generator
+      end
 
-        yield complete_generator.next until complete_generator.finished?
+      def self.get_compressor_options(buffer_length_names, &_block)
+        generator = get_compressor_options_generator buffer_length_names
+
+        yield generator.next until generator.finished?
       end
 
       def self.get_compatible_decompressor_options(compressor_options, buffer_length_name_mapping, &_block)
