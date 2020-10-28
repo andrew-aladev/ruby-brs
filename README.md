@@ -83,7 +83,7 @@ BRS::Stream::Reader.open "file.tar.br" do |reader|
 end
 ```
 
-You can also use `Content-Encoding: br` with [sinatra](http://sinatrarb.com):
+You can also use `Content-Encoding: br` with [sinatra](http://sinatrarb.com) for example:
 
 ```ruby
 require "brs"
@@ -92,6 +92,18 @@ require "sinatra"
 get "/" do
   headers["Content-Encoding"] = "br"
   BRS::String.compress "sample string"
+end
+```
+
+All functionality (including streaming) can be used inside multiple threads with [parallel](https://github.com/grosser/parallel) for example.
+This code will provide heavy load for your CPU.
+
+```ruby
+require "brs"
+require "parallel"
+
+Parallel.each(large_datas) do |large_data|
+  BRS::String.compress large_data
 end
 ```
 
