@@ -61,7 +61,7 @@ ensure
 end
 ```
 
-You can create and read `tar.br` archives with [minitar](https://github.com/halostatue/minitar) for example.
+You can create and read `tar.br` archives with [minitar](https://github.com/halostatue/minitar).
 
 ```ruby
 require "brs"
@@ -83,7 +83,7 @@ BRS::Stream::Reader.open "file.tar.br" do |reader|
 end
 ```
 
-You can also use `Content-Encoding: br` with [sinatra](http://sinatrarb.com) for example:
+You can also use `Content-Encoding: br` with [sinatra](http://sinatrarb.com):
 
 ```ruby
 require "brs"
@@ -95,7 +95,7 @@ get "/" do
 end
 ```
 
-All functionality (including streaming) can be used inside multiple threads with [parallel](https://github.com/grosser/parallel) for example.
+All functionality (including streaming) can be used inside multiple threads with [parallel](https://github.com/grosser/parallel).
 This code will provide heavy load for your CPU.
 
 ```ruby
