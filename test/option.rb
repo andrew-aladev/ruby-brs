@@ -185,10 +185,10 @@ module BRS
         buffer_length_generator.mix(main_generator).mix(thread_generator).mix other_generator
       end
 
-      def self.get_compressor_options(buffer_length_names, &_block)
+      def self.get_compressor_options(buffer_length_names, &block)
         generator = get_compressor_options_generator buffer_length_names
 
-        yield generator.next until generator.finished?
+        generator.each(&block)
       end
 
       def self.get_compatible_decompressor_options(compressor_options, buffer_length_name_mapping, &_block)
@@ -205,7 +205,9 @@ module BRS
           :disable_ring_buffer_reallocation => BOOLS
         )
 
-        yield decompressor_options.merge(other_generator.next) until other_generator.finished?
+        other_generator.each do |other_options|
+          yield decompressor_options.merge(other_options)
+        end
       end
     end
   end
