@@ -102,7 +102,7 @@ This code will provide heavy load for your CPU.
 require "brs"
 require "parallel"
 
-Parallel.each(large_datas) do |large_data|
+Parallel.each large_datas do |large_data|
   BRS::String.compress large_data
 end
 ```
