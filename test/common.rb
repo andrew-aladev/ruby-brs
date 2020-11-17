@@ -3,6 +3,7 @@
 
 require "parallel"
 require "securerandom"
+require "tempfile"
 
 module BRS
   module Test
@@ -88,6 +89,17 @@ module BRS
         end
 
         parallel producer, &block
+      end
+
+      def self.file_can_be_used_nonblock?
+        ::File.open(::Tempfile.new, "w") do |file|
+          file.write_nonblock "text"
+        end
+      rescue Errno::EBADF
+        # Nonblock operations with files are not available on Windows.
+        false
+      else
+        true
       end
     end
   end
