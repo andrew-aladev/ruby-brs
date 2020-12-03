@@ -1,8 +1,8 @@
 # Ruby bindings for brotli library
 
-| Travis | AppVeyor | Circle | Codecov | Gem   |
+| AppVeyor | Circle | Travis | Codecov | Gem   |
 | :---:  | :---:    | :---:  | :---:   | :---: |
-| [![Travis test status](https://travis-ci.com/andrew-aladev/ruby-brs.svg?branch=master)](https://travis-ci.com/andrew-aladev/ruby-brs) | [![AppVeyor test status](https://ci.appveyor.com/api/projects/status/github/andrew-aladev/ruby-brs?branch=master&svg=true)](https://ci.appveyor.com/project/andrew-aladev/ruby-brs/branch/master) | [![Circle test status](https://circleci.com/gh/andrew-aladev/ruby-brs/tree/master.svg?style=shield)](https://circleci.com/gh/andrew-aladev/ruby-brs/tree/master) | [![Codecov](https://codecov.io/gh/andrew-aladev/ruby-brs/branch/master/graph/badge.svg)](https://codecov.io/gh/andrew-aladev/ruby-brs) | [![Gem](https://img.shields.io/gem/v/ruby-brs.svg)](https://rubygems.org/gems/ruby-brs) |
+| [![AppVeyor test status](https://ci.appveyor.com/api/projects/status/github/andrew-aladev/ruby-brs?branch=master&svg=true)](https://ci.appveyor.com/project/andrew-aladev/ruby-brs/branch/master) | [![Circle test status](https://circleci.com/gh/andrew-aladev/ruby-brs/tree/master.svg?style=shield)](https://circleci.com/gh/andrew-aladev/ruby-brs/tree/master) | [![Travis test status](https://travis-ci.com/andrew-aladev/ruby-brs.svg?branch=master)](https://travis-ci.com/andrew-aladev/ruby-brs) | [![Codecov](https://codecov.io/gh/andrew-aladev/ruby-brs/branch/master/graph/badge.svg)](https://codecov.io/gh/andrew-aladev/ruby-brs) | [![Gem](https://img.shields.io/gem/v/ruby-brs.svg)](https://rubygems.org/gems/ruby-brs) |
 
 See [brotli library](https://github.com/google/brotli).
 
