@@ -10,11 +10,11 @@ environment:
       appveyor_build_worker_image: macos
       APPVEYOR: True
       CI: True
-    - job_name: Windows
-      appveyor_build_worker_image: Visual Studio 2019
-      CHERE_INVOKING: 1
-      MSYSTEM: MINGW64
-      RUBY_VERSION: 27
+    # - job_name: Windows
+    #   appveyor_build_worker_image: Visual Studio 2019
+    #   CHERE_INVOKING: 1
+    #   MSYSTEM: MINGW64
+    #   RUBY_VERSION: 27
 
 for:
   -
@@ -30,14 +30,16 @@ for:
     matrix:
       only:
         - job_name: MacOS
+    init:
+      - sh: sudo brew install brotli
     test_script:
       - sh: sudo -E scripts/ci_test.sh
 
-  -
-   matrix:
-     only:
-       - job_name: Windows
-   init:
-     - cmd: set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
-   test_script:
-     - cmd: C:\msys64\usr\bin\bash -cl "./scripts/ci_test.sh"
+  # -
+  #  matrix:
+  #    only:
+  #      - job_name: Windows
+  #  init:
+  #    - cmd: set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
+  #  test_script:
+  #    - cmd: C:\msys64\usr\bin\bash -cl "./scripts/ci_test.sh"
