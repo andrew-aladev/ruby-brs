@@ -31,7 +31,7 @@ for:
       only:
         - job_name: MacOS
     init:
-      - sh: sudo brew install brotli
+      - sh: brew install brotli
     test_script:
       - sh: sudo -E scripts/ci_test.sh
 
