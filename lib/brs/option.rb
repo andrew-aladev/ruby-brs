@@ -31,8 +31,11 @@ module BRS
     def self.get_compressor_options(options, buffer_length_names)
       Validation.validate_hash options
 
-      buffer_length_defaults = buffer_length_names.each_with_object({}) { |name, defaults| defaults[name] = DEFAULT_BUFFER_LENGTH }
-      options                = COMPRESSOR_DEFAULTS.merge(buffer_length_defaults).merge options
+      buffer_length_defaults = buffer_length_names.each_with_object({}) do |name, defaults|
+        defaults[name] = DEFAULT_BUFFER_LENGTH
+      end
+
+      options = COMPRESSOR_DEFAULTS.merge(buffer_length_defaults).merge options
 
       buffer_length_names.each { |name| Validation.validate_not_negative_integer options[name] }
 
@@ -74,8 +77,11 @@ module BRS
     def self.get_decompressor_options(options, buffer_length_names)
       Validation.validate_hash options
 
-      buffer_length_defaults = buffer_length_names.each_with_object({}) { |name, defaults| defaults[name] = DEFAULT_BUFFER_LENGTH }
-      options                = DECOMPRESSOR_DEFAULTS.merge(buffer_length_defaults).merge options
+      buffer_length_defaults = buffer_length_names.each_with_object({}) do |name, defaults|
+        defaults[name] = DEFAULT_BUFFER_LENGTH
+      end
+
+      options = DECOMPRESSOR_DEFAULTS.merge(buffer_length_defaults).merge options
 
       buffer_length_names.each { |name| Validation.validate_not_negative_integer options[name] }
 
