@@ -358,6 +358,10 @@ Typical helpers, see [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.7.0/libd
 Please be careful: bindings are not thread safe.
 You should lock all shared data between threads.
 
+## Operating systems
+
+GNU/Linux, FreeBSD, OSX, Windows (MinGW).
+
 ## CI
 
 Please visit [scripts/test-images](scripts/test-images).
