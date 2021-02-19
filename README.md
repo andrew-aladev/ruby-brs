@@ -358,6 +358,9 @@ Typical helpers, see [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.7.0/libd
 Please be careful: bindings are not thread safe.
 You should lock all shared data between threads.
 
+For example: you should not use same compressor/decompressor inside multiple threads.
+Please verify that you are using each processor inside single thread at the same time.
+
 ## Operating systems
 
 GNU/Linux, FreeBSD, OSX, Windows (MinGW).
