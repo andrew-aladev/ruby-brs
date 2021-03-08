@@ -141,7 +141,7 @@ module BRS
 
       private_class_method def self.get_buffer_length_option_generator(buffer_length_names)
         OCG.new(
-          Hash[buffer_length_names.map { |name| [name, BUFFER_LENGTHS] }]
+          buffer_length_names.map { |name| [name, BUFFER_LENGTHS] }.to_h
         )
       end
 
