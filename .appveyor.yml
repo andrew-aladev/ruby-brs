@@ -14,7 +14,7 @@ environment:
       appveyor_build_worker_image: Visual Studio 2019
       CHERE_INVOKING: 1
       MSYSTEM: MINGW64
-      RUBY_VERSION: 27
+      RUBY_VERSION: 30
 
 for:
   -
@@ -44,7 +44,7 @@ for:
       only:
         - job_name: windows
     init:
-      - cmd: set PATH=C:\Ruby%RUBY_VERSION%-x64\bin;%PATH%
+      - cmd: set PATH="C:\Ruby%RUBY_VERSION%-x64\bin;%PATH%"
       - cmd: C:\msys64\usr\bin\bash -cl "pacman --sync --noconfirm --needed mingw-w64-x86_64-brotli"
     test_script:
       - cmd: C:\msys64\usr\bin\bash -cl "./scripts/ci_test.sh"
