@@ -12,7 +12,6 @@ cd ".."
 rm -f "Gemfile.lock"
 
 bash -cl "\
-  rvm use '.' && \
   gem install bundler && \
   bundle update \
 "
