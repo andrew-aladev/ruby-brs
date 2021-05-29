@@ -64,9 +64,9 @@ jobs:
           install: >-
             git
             make
-            mingw-w64-x86_64-gcc
             mingw-w64-x86_64-brotli
             mingw-w64-x86_64-curl
+            mingw-w64-x86_64-gcc
             mingw-w64-x86_64-ruby
       - name: CI test
         run: scripts/ci_test.sh
@@ -87,7 +87,7 @@ jobs:
         with:
           platform: x64
           install-dir: C:\cygwin64
-          packages: curl gcc-g++ git libbrotli-devel make ruby-devel
+          packages: gcc-g++ git curl libbrotli-devel make ruby-devel
       - name: CI test
         run: C:\cygwin64\bin\bash.exe -l "%cd%\scripts\ci_test.sh"
         env:
