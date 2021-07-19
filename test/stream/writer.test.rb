@@ -3,6 +3,7 @@
 
 require "brs/stream/writer"
 require "brs/string"
+require "set"
 require "socket"
 require "stringio"
 
