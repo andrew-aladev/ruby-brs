@@ -3,13 +3,10 @@
 
 #include "brs_ext/stream/decompressor.h"
 
-#include <brotli/decode.h>
-
 #include "brs_ext/buffer.h"
 #include "brs_ext/error.h"
 #include "brs_ext/gvl.h"
 #include "brs_ext/option.h"
-#include "ruby.h"
 
 // -- initialization --
 

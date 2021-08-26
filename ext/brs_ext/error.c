@@ -3,10 +3,6 @@
 
 #include "brs_ext/error.h"
 
-#include <brotli/decode.h>
-
-#include "ruby.h"
-
 brs_ext_result_t brs_ext_get_decompressor_error(BrotliDecoderErrorCode error_code)
 {
   switch (error_code) {

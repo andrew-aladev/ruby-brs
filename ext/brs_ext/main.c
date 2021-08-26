@@ -7,7 +7,6 @@
 #include "brs_ext/stream/compressor.h"
 #include "brs_ext/stream/decompressor.h"
 #include "brs_ext/string.h"
-#include "ruby.h"
 
 void Init_brs_ext()
 {
@@ -19,4 +18,8 @@ void Init_brs_ext()
   brs_ext_compressor_exports(root_module);
   brs_ext_decompressor_exports(root_module);
   brs_ext_string_exports(root_module);
+
+  VALUE version_arguments[] = {INT2FIX(16)};
+  VALUE version = rb_block_call(UINT2NUM(BrotliEncoderVersion()), rb_intern("to_s"), 1, version_arguments, 0, 0);
+  rb_define_const(root_module, "LIBRARY_VERSION", rb_obj_freeze(version));
 }

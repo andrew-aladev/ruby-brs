@@ -3,14 +3,12 @@
 
 #include "brs_ext/stream/compressor.h"
 
-#include <brotli/encode.h>
 #include <brotli/types.h>
 
 #include "brs_ext/buffer.h"
 #include "brs_ext/error.h"
 #include "brs_ext/gvl.h"
 #include "brs_ext/option.h"
-#include "ruby.h"
 
 // -- initialization --
 

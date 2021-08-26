@@ -3,11 +3,7 @@
 
 #include "brs_ext/option.h"
 
-#include <brotli/decode.h>
-#include <brotli/encode.h>
-
 #include "brs_ext/error.h"
-#include "ruby.h"
 
 // -- values --
 

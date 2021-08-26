@@ -15,7 +15,6 @@
 #include "brs_ext/gvl.h"
 #include "brs_ext/macro.h"
 #include "brs_ext/option.h"
-#include "ruby.h"
 #include "ruby/io.h"
 
 // Additional possible results:

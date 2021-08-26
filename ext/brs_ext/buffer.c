@@ -3,8 +3,6 @@
 
 #include "brs_ext/buffer.h"
 
-#include "ruby.h"
-
 VALUE brs_ext_create_string_buffer(VALUE length)
 {
   return rb_str_new(NULL, NUM2SIZET(length));

@@ -5,17 +5,91 @@ require "mkmf"
 
 have_func "rb_thread_call_without_gvl", "ruby/thread.h"
 
-def require_header(name, types = [])
+def require_header(name, constants: [], macroses: [], types: [])
   abort "Can't find #{name} header" unless find_header name
+
+  constants.each do |constant|
+    abort "Can't find #{constant} constant in #{name} header" unless have_const constant, name
+  end
+
+  macroses.each do |macro|
+    abort "Can't find #{macro} macro in #{name} header" unless have_macro macro, name
+  end
 
   types.each do |type|
     abort "Can't find #{type} type in #{name} header" unless find_type type, nil, name
   end
 end
 
-require_header "brotli/types.h", %w[BROTLI_BOOL]
-require_header "brotli/encode.h", ["BrotliEncoderState *", "BrotliEncoderMode"]
-require_header "brotli/decode.h", ["BrotliDecoderState *", "BrotliDecoderResult", "BrotliDecoderErrorCode"]
+require_header(
+  "brotli/types.h",
+  :macroses => %w[BROTLI_BOOL]
+)
+require_header(
+  "brotli/encode.h",
+  :constants => %w[
+    BROTLI_MAX_INPUT_BLOCK_BITS
+    BROTLI_MAX_QUALITY
+    BROTLI_MAX_WINDOW_BITS
+    BROTLI_MIN_INPUT_BLOCK_BITS
+    BROTLI_MIN_QUALITY
+    BROTLI_MIN_WINDOW_BITS
+    BROTLI_MODE_GENERIC
+    BROTLI_MODE_FONT
+    BROTLI_MODE_TEXT
+    BROTLI_OPERATION_FINISH
+    BROTLI_OPERATION_FLUSH
+    BROTLI_OPERATION_PROCESS
+    BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING
+    BROTLI_PARAM_LARGE_WINDOW
+    BROTLI_PARAM_LGBLOCK
+    BROTLI_PARAM_LGWIN
+    BROTLI_PARAM_MODE
+    BROTLI_PARAM_SIZE_HINT
+    BROTLI_PARAM_QUALITY
+  ],
+  :types     => [
+    "BrotliEncoderMode",
+    "BrotliEncoderState *"
+  ]
+)
+require_header(
+  "brotli/decode.h",
+  :constants => %w[
+    BROTLI_DECODER_ERROR_ALLOC_BLOCK_TYPE_TREES
+    BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MAP
+    BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MODES
+    BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_1
+    BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_2
+    BROTLI_DECODER_ERROR_ALLOC_TREE_GROUPS
+    BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_1
+    BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_2
+    BROTLI_DECODER_ERROR_FORMAT_CL_SPACE
+    BROTLI_DECODER_ERROR_FORMAT_CONTEXT_MAP_REPEAT
+    BROTLI_DECODER_ERROR_FORMAT_DICTIONARY
+    BROTLI_DECODER_ERROR_FORMAT_DISTANCE
+    BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_META_NIBBLE
+    BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_NIBBLE
+    BROTLI_DECODER_ERROR_FORMAT_HUFFMAN_SPACE
+    BROTLI_DECODER_ERROR_FORMAT_PADDING_1
+    BROTLI_DECODER_ERROR_FORMAT_PADDING_2
+    BROTLI_DECODER_ERROR_FORMAT_RESERVED
+    BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_ALPHABET
+    BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_SAME
+    BROTLI_DECODER_ERROR_FORMAT_TRANSFORM
+    BROTLI_DECODER_ERROR_FORMAT_WINDOW_BITS
+    BROTLI_DECODER_PARAM_DISABLE_RING_BUFFER_REALLOCATION
+    BROTLI_DECODER_PARAM_LARGE_WINDOW
+    BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT
+    BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT
+    BROTLI_DECODER_RESULT_SUCCESS
+  ],
+  :types     => [
+    "BrotliDecoderErrorCode",
+    "BrotliDecoderResult",
+    "BrotliDecoderState *"
+  ]
+)
 
 def require_library(name, functions)
   functions.each do |function|
@@ -26,12 +100,13 @@ end
 require_library(
   "brotlienc",
   %w[
-    BrotliEncoderCreateInstance
-    BrotliEncoderSetParameter
     BrotliEncoderCompressStream
+    BrotliEncoderCreateInstance
+    BrotliEncoderDestroyInstance
     BrotliEncoderHasMoreOutput
     BrotliEncoderIsFinished
-    BrotliEncoderDestroyInstance
+    BrotliEncoderSetParameter
+    BrotliEncoderVersion
   ]
 )
 
@@ -39,10 +114,11 @@ require_library(
   "brotlidec",
   %w[
     BrotliDecoderCreateInstance
-    BrotliDecoderSetParameter
     BrotliDecoderDecompressStream
-    BrotliDecoderGetErrorCode
     BrotliDecoderDestroyInstance
+    BrotliDecoderGetErrorCode
+    BrotliDecoderSetParameter
+    BrotliDecoderVersion
   ]
 )
 
