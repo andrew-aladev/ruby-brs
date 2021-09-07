@@ -22,38 +22,6 @@ def require_header(name, constants: [], macroses: [], types: [])
 end
 
 require_header(
-  "brotli/types.h",
-  :macroses => %w[BROTLI_BOOL]
-)
-require_header(
-  "brotli/encode.h",
-  :constants => %w[
-    BROTLI_MAX_INPUT_BLOCK_BITS
-    BROTLI_MAX_QUALITY
-    BROTLI_MAX_WINDOW_BITS
-    BROTLI_MIN_INPUT_BLOCK_BITS
-    BROTLI_MIN_QUALITY
-    BROTLI_MIN_WINDOW_BITS
-    BROTLI_MODE_GENERIC
-    BROTLI_MODE_FONT
-    BROTLI_MODE_TEXT
-    BROTLI_OPERATION_FINISH
-    BROTLI_OPERATION_FLUSH
-    BROTLI_OPERATION_PROCESS
-    BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING
-    BROTLI_PARAM_LARGE_WINDOW
-    BROTLI_PARAM_LGBLOCK
-    BROTLI_PARAM_LGWIN
-    BROTLI_PARAM_MODE
-    BROTLI_PARAM_SIZE_HINT
-    BROTLI_PARAM_QUALITY
-  ],
-  :types     => [
-    "BrotliEncoderMode",
-    "BrotliEncoderState *"
-  ]
-)
-require_header(
   "brotli/decode.h",
   :constants => %w[
     BROTLI_DECODER_ERROR_ALLOC_BLOCK_TYPE_TREES
@@ -89,6 +57,38 @@ require_header(
     "BrotliDecoderResult",
     "BrotliDecoderState *"
   ]
+)
+require_header(
+  "brotli/encode.h",
+  :constants => %w[
+    BROTLI_MAX_INPUT_BLOCK_BITS
+    BROTLI_MAX_QUALITY
+    BROTLI_MAX_WINDOW_BITS
+    BROTLI_MIN_INPUT_BLOCK_BITS
+    BROTLI_MIN_QUALITY
+    BROTLI_MIN_WINDOW_BITS
+    BROTLI_MODE_FONT
+    BROTLI_MODE_GENERIC
+    BROTLI_MODE_TEXT
+    BROTLI_OPERATION_FINISH
+    BROTLI_OPERATION_FLUSH
+    BROTLI_OPERATION_PROCESS
+    BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING
+    BROTLI_PARAM_LARGE_WINDOW
+    BROTLI_PARAM_LGBLOCK
+    BROTLI_PARAM_LGWIN
+    BROTLI_PARAM_MODE
+    BROTLI_PARAM_QUALITY
+    BROTLI_PARAM_SIZE_HINT
+  ],
+  :types     => [
+    "BrotliEncoderMode",
+    "BrotliEncoderState *"
+  ]
+)
+require_header(
+  "brotli/types.h",
+  :macroses => %w[BROTLI_BOOL]
 )
 
 def require_library(name, functions)
