@@ -81,7 +81,7 @@ module BRS
         raise ValidateError, "invalid ndirect" if
           !npostfix.nil? && (
             (ndirect - MIN_NDIRECT) % (NDIRECT_NPOSTFIX_STEP_BASE << npostfix) != 0 ||
-            (ndirect - MIN_NDIRECT) > (MAX_NDIRECT_NPOSTFIX_BASE << npostfix)
+            (ndirect - MIN_NDIRECT) > (NDIRECT_NPOSTFIX_MAX_BASE << npostfix)
           )
       end
 

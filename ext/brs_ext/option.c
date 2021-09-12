@@ -141,8 +141,8 @@ brs_ext_result_t brs_ext_set_decompressor_options(
 
 #define BROTLI_MIN_NDIRECT                0
 #define BROTLI_NDIRECT_NPOSTFIX_STEP_BASE 1
-#define BROTLI_MAX_NDIRECT_NPOSTFIX_BASE  0xf
-#define BROTLI_MAX_NDIRECT                (BROTLI_MAX_NDIRECT_NPOSTFIX_BASE << BROTLI_MAX_NPOSTFIX)
+#define BROTLI_NDIRECT_NPOSTFIX_MAX_BASE  0xf
+#define BROTLI_MAX_NDIRECT                (BROTLI_NDIRECT_NPOSTFIX_MAX_BASE << BROTLI_MAX_NPOSTFIX)
 
 #define EXPORT_PARAM_BOUNDS(module, param, name)                      \
   rb_define_const(module, "MIN_" name, UINT2NUM(BROTLI_MIN_##param)); \
@@ -164,5 +164,5 @@ void brs_ext_option_exports(VALUE root_module)
   EXPORT_PARAM_BOUNDS(module, NDIRECT, "NDIRECT");
 
   rb_define_const(module, "NDIRECT_NPOSTFIX_STEP_BASE", UINT2NUM(BROTLI_NDIRECT_NPOSTFIX_STEP_BASE));
-  rb_define_const(module, "MAX_NDIRECT_NPOSTFIX_BASE", UINT2NUM(BROTLI_MAX_NDIRECT_NPOSTFIX_BASE));
+  rb_define_const(module, "NDIRECT_NPOSTFIX_MAX_BASE", UINT2NUM(BROTLI_NDIRECT_NPOSTFIX_MAX_BASE));
 }

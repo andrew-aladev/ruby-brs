@@ -113,7 +113,7 @@ module BRS
         # Exceeding max ndirect based on current npostfix.
         yield(
           :npostfix => valid_npostfix,
-          :ndirect  => BRS::Option::MIN_NDIRECT + (BRS::Option::MAX_NDIRECT_NPOSTFIX_BASE << valid_npostfix) + 1
+          :ndirect  => BRS::Option::MIN_NDIRECT + (BRS::Option::NDIRECT_NPOSTFIX_MAX_BASE << valid_npostfix) + 1
         )
 
         (Validation::INVALID_BOOLS - [nil]).each do |invalid_bool|
@@ -193,7 +193,7 @@ module BRS
             BRS::Option::MIN_NDIRECT + 2 * (BRS::Option::NDIRECT_NPOSTFIX_STEP_BASE << npostfix)
           ],
           BRS::Option::MIN_NDIRECT,
-          BRS::Option::MIN_NDIRECT + (BRS::Option::MAX_NDIRECT_NPOSTFIX_BASE << npostfix)
+          BRS::Option::MIN_NDIRECT + (BRS::Option::NDIRECT_NPOSTFIX_MAX_BASE << npostfix)
         )
       end
 

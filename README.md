@@ -144,7 +144,7 @@ You can also read brotli docs for more info about options.
 | `lgwin`    | `BRS::Option::MIN_LGWIN` = 10, `BRS::Option::MAX_LGWIN` = 24 |
 | `lgblock`  | `BRS::Option::MIN_LGBLOCK` = 16, `BRS::Option::MAX_LGBLOCK` = 24 |
 | `npostfix` | `BRS::Option::MIN_NPOSTFIX` = 0, `BRS::Option::MAX_NPOSTFIX` = 3 |
-| `ndirect`  | `BRS::Option::MIN_NDIRECT` = 0, `BRS::Option::MAX_NDIRECT` = 120, `BRS::Option::NDIRECT_NPOSTFIX_STEP_BASE` = 1, `BRS::Option::MAX_NDIRECT_NPOSTFIX_BASE` = 15 |
+| `ndirect`  | `BRS::Option::MIN_NDIRECT` = 0, `BRS::Option::MAX_NDIRECT` = 120, `BRS::Option::NDIRECT_NPOSTFIX_STEP_BASE` = 1, `BRS::Option::NDIRECT_NPOSTFIX_MAX_BASE` = 15 |
 
 Possible compressor options:
 ```
