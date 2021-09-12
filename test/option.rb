@@ -41,6 +41,24 @@ module BRS
       )
       .freeze
 
+      INVALID_NPOSTFIXES = (
+        Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil] +
+        [
+          BRS::Option::MIN_NPOSTFIX - 1,
+          BRS::Option::MAX_NPOSTFIX + 1
+        ]
+      )
+      .freeze
+
+      INVALID_NDIRECTS = (
+        Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil] +
+        [
+          BRS::Option::MIN_NDIRECT - 1,
+          BRS::Option::MAX_NDIRECT + 1
+        ]
+      )
+      .freeze
+
       private_class_method def self.get_common_invalid_options(buffer_length_names, &block)
         Validation::INVALID_HASHES.each do |invalid_hash|
           block.call invalid_hash
@@ -75,6 +93,28 @@ module BRS
         INVALID_LGBLOCKS.each do |invalid_lgblock|
           yield({ :lgblock => invalid_lgblock })
         end
+
+        INVALID_NPOSTFIXES.each do |invalid_npostfix|
+          yield({ :npostfix => invalid_npostfix })
+        end
+
+        INVALID_NDIRECTS.each do |invalid_ndirect|
+          yield({ :ndirect => invalid_ndirect })
+        end
+
+        valid_npostfix = [BRS::Option::MIN_NPOSTFIX + 1, BRS::Option::MAX_NPOSTFIX].min
+
+        # Exceeding max ndirect based on current npostfix.
+        yield(
+          :npostfix => valid_npostfix,
+          :ndirect  => BRS::Option::MIN_NDIRECT + (BRS::Option::MAX_NDIRECT_NPOSTFIX_BASE << valid_npostfix) + 1
+        )
+
+        # Ignoring ndirect step based on current npostfix.
+        yield(
+          :npostfix => valid_npostfix,
+          :ndirect  => BRS::Option::MIN_NDIRECT + (BRS::Option::NDIRECT_NPOSTFIX_STEP_BASE << valid_npostfix) - 1
+        )
 
         (Validation::INVALID_BOOLS - [nil]).each do |invalid_bool|
           yield({ :disable_literal_context_modeling => invalid_bool })
@@ -139,6 +179,24 @@ module BRS
       )
       .freeze
 
+      NPOSTFIXES = get_option_values(
+        [1, 2],
+        BRS::Option::MIN_NPOSTFIX,
+        BRS::Option::MAX_NPOSTFIX
+      )
+      .freeze
+
+      def self.get_ndirects(npostfix)
+        get_option_values(
+          [
+            BRS::Option::MIN_NDIRECT + (BRS::Option::NDIRECT_NPOSTFIX_STEP_BASE << npostfix),
+            BRS::Option::MIN_NDIRECT + 2 * (BRS::Option::NDIRECT_NPOSTFIX_STEP_BASE << npostfix)
+          ],
+          BRS::Option::MIN_NDIRECT,
+          BRS::Option::MIN_NDIRECT + (BRS::Option::MAX_NDIRECT_NPOSTFIX_BASE << npostfix)
+        )
+      end
+
       private_class_method def self.get_buffer_length_option_generator(buffer_length_names)
         OCG.new(
           buffer_length_names.map { |name| [name, BUFFER_LENGTHS] }.to_h
@@ -167,6 +225,13 @@ module BRS
         )
 
         main_generator = general_generator.mix window_generator
+
+        NPOSTFIXES.each do |npostfix|
+          main_generator = main_generator.or(
+            :npostfix => [npostfix],
+            :ndirect  => get_ndirects(npostfix)
+          )
+        end
 
         # thread
 

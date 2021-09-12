@@ -110,6 +110,8 @@ brs_ext_result_t brs_ext_set_compressor_options(BrotliEncoderState* state_ptr, b
   SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_QUALITY, options->quality);
   SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_LGWIN, options->lgwin);
   SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_LGBLOCK, options->lgblock);
+  SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_NPOSTFIX, options->npostfix);
+  SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_NDIRECT, options->ndirect);
   SET_ENCODER_PARAM(
     state_ptr, BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING, options->disable_literal_context_modeling);
   SET_ENCODER_PARAM(state_ptr, BROTLI_PARAM_SIZE_HINT, options->size_hint);
@@ -134,6 +136,14 @@ brs_ext_result_t brs_ext_set_decompressor_options(
 
 // -- exports --
 
+#define BROTLI_MIN_NPOSTFIX 0
+#define BROTLI_MAX_NPOSTFIX 3
+
+#define BROTLI_MIN_NDIRECT                0
+#define BROTLI_MAX_NDIRECT_NPOSTFIX_BASE  0xf
+#define BROTLI_NDIRECT_NPOSTFIX_STEP_BASE 1
+#define BROTLI_MAX_NDIRECT                (BROTLI_MAX_NDIRECT_NPOSTFIX_BASE << BROTLI_MAX_NPOSTFIX)
+
 #define EXPORT_PARAM_BOUNDS(module, param, name)                      \
   rb_define_const(module, "MIN_" name, UINT2NUM(BROTLI_MIN_##param)); \
   rb_define_const(module, "MAX_" name, UINT2NUM(BROTLI_MAX_##param));
@@ -147,7 +157,12 @@ void brs_ext_option_exports(VALUE root_module)
   rb_define_const(module, "MODES", modes);
   RB_GC_GUARD(modes);
 
-  EXPORT_PARAM_BOUNDS(module, QUALITY, "QUALITY");
-  EXPORT_PARAM_BOUNDS(module, WINDOW_BITS, "LGWIN");
   EXPORT_PARAM_BOUNDS(module, INPUT_BLOCK_BITS, "LGBLOCK");
+  EXPORT_PARAM_BOUNDS(module, WINDOW_BITS, "LGWIN");
+  EXPORT_PARAM_BOUNDS(module, QUALITY, "QUALITY");
+  EXPORT_PARAM_BOUNDS(module, NPOSTFIX, "NPOSTFIX");
+  EXPORT_PARAM_BOUNDS(module, NDIRECT, "NDIRECT");
+
+  rb_define_const(module, "MAX_NDIRECT_NPOSTFIX_BASE", UINT2NUM(BROTLI_MAX_NDIRECT_NPOSTFIX_BASE));
+  rb_define_const(module, "NDIRECT_NPOSTFIX_STEP_BASE", UINT2NUM(BROTLI_NDIRECT_NPOSTFIX_STEP_BASE));
 }

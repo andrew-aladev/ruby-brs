@@ -118,6 +118,8 @@ end
 | `quality`                          | 0 - 11     | 11         | compression level |
 | `lgwin`                            | 10 - 24    | 22         | compressor window size |
 | `lgblock`                          | 16 - 24    | nil (auto) | compressor input block size |
+| `npostfix`                         | 0 - 3      | nil (auto) | Recommended number of postfix bits |
+| `ndirect`                          | 0 - 120    | nil (auto) | Recommended number of direct distance codes (step 1 << npostfix, max 15 << npostfix) |
 | `disable_literal_context_modeling` | true/false | false      | disables literal context modeling format |
 | `disable_ring_buffer_reallocation` | true/false | false      | disables ring buffer reallocation |
 | `size_hint`                        | 0 - inf    | 0 (auto)   | size of input (if known) |
@@ -135,12 +137,14 @@ If `gvl` is enabled ruby won't waste time on acquiring/releasing VM lock.
 
 You can also read brotli docs for more info about options.
 
-| Option    | Related constants |
-|-----------|-------------------|
-| `mode`    | `BRS::Option::MODES` = `%i[text font generic]` |
-| `quality` | `BRS::Option::MIN_QUALITY` = 0, `BRS::Option::MAX_QUALITY` = 11 |
-| `lgwin`   | `BRS::Option::MIN_LGWIN` = 10, `BRS::Option::MAX_LGWIN` = 24 |
-| `lgblock` | `BRS::Option::MIN_LGBLOCK` = 16, `BRS::Option::MAX_LGBLOCK` = 24 |
+| Option     | Related constants |
+|------------|-------------------|
+| `mode`     | `BRS::Option::MODES` = `%i[text font generic]` |
+| `quality`  | `BRS::Option::MIN_QUALITY` = 0, `BRS::Option::MAX_QUALITY` = 11 |
+| `lgwin`    | `BRS::Option::MIN_LGWIN` = 10, `BRS::Option::MAX_LGWIN` = 24 |
+| `lgblock`  | `BRS::Option::MIN_LGBLOCK` = 16, `BRS::Option::MAX_LGBLOCK` = 24 |
+| `npostfix` | `BRS::Option::MIN_NPOSTFIX` = 0, `BRS::Option::MAX_NPOSTFIX` = 3 |
+| `ndirect`  | `BRS::Option::MIN_NDIRECT` = 0, `BRS::Option::MAX_NDIRECT` = 120, `BRS::Option::NDIRECT_NPOSTFIX_STEP_BASE` = 1, `BRS::Option::MAX_NDIRECT_NPOSTFIX_BASE` = 15 |
 
 Possible compressor options:
 ```
@@ -151,6 +155,8 @@ Possible compressor options:
 :quality
 :lgwin
 :lgblock
+:npostfix
+:ndirect
 :disable_literal_context_modeling
 :size_hint
 :large_window

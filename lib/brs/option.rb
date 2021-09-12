@@ -16,6 +16,8 @@ module BRS
       :quality                          => nil,
       :lgwin                            => nil,
       :lgblock                          => nil,
+      :npostfix                         => nil,
+      :ndirect                          => nil,
       :disable_literal_context_modeling => nil,
       :large_window                     => nil
     }
@@ -63,6 +65,24 @@ module BRS
       unless lgblock.nil?
         Validation.validate_not_negative_integer lgblock
         raise ValidateError, "invalid lgblock" if lgblock < MIN_LGBLOCK || lgblock > MAX_LGBLOCK
+      end
+
+      npostfix = options[:npostfix]
+      unless npostfix.nil?
+        Validation.validate_not_negative_integer npostfix
+        raise ValidateError, "invalid npostfix" if npostfix < MIN_NPOSTFIX || npostfix > MAX_NPOSTFIX
+      end
+
+      ndirect = options[:ndirect]
+      unless ndirect.nil?
+        Validation.validate_not_negative_integer ndirect
+        raise ValidateError, "invalid ndirect" if ndirect < MIN_NDIRECT || ndirect > MAX_NDIRECT
+
+        raise ValidateError, "invalid ndirect" if
+          !npostfix.nil? && (
+            (ndirect - MIN_NDIRECT) > (MAX_NDIRECT_NPOSTFIX_BASE << npostfix) ||
+            (ndirect - MIN_NDIRECT) % (NDIRECT_NPOSTFIX_STEP_BASE << npostfix) != 0
+          )
       end
 
       disable_literal_context_modeling = options[:disable_literal_context_modeling]

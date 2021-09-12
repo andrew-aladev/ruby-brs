@@ -37,6 +37,8 @@ typedef struct
   brs_ext_option_t quality;
   brs_ext_option_t lgwin;
   brs_ext_option_t lgblock;
+  brs_ext_option_t npostfix;
+  brs_ext_option_t ndirect;
   brs_ext_option_t disable_literal_context_modeling;
   brs_ext_option_t size_hint;
   brs_ext_option_t large_window;
@@ -60,6 +62,8 @@ void brs_ext_resolve_option(VALUE options, brs_ext_option_t* option, brs_ext_opt
   BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, quality);                          \
   BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, lgwin);                            \
   BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, lgblock);                          \
+  BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, npostfix);                         \
+  BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, ndirect);                          \
   BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_BOOL, disable_literal_context_modeling); \
   BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_UINT, size_hint);                        \
   BRS_EXT_RESOLVE_OPTION(options, compressor_options, BRS_EXT_OPTION_TYPE_BOOL, large_window);
