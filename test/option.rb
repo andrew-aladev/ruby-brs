@@ -224,14 +224,16 @@ module BRS
           :lgblock => LGBLOCKS
         )
 
-        main_generator = general_generator.mix window_generator
+        npostfix_generator = OCG.new
 
         NPOSTFIXES.each do |npostfix|
-          main_generator = main_generator.or(
+          npostfix_generator = npostfix_generator.or(
             :npostfix => [npostfix],
             :ndirect  => get_ndirects(npostfix)
           )
         end
+
+        main_generator = general_generator.mix(window_generator).mix npostfix_generator
 
         # thread
 
