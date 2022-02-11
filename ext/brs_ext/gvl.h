@@ -4,7 +4,7 @@
 #if !defined(BRS_EXT_GVL_H)
 #define BRS_EXT_GVL_H
 
-#ifdef HAVE_RB_THREAD_CALL_WITHOUT_GVL
+#if defined(HAVE_RB_THREAD_CALL_WITHOUT_GVL)
 
 #include "ruby/thread.h"
 
@@ -19,6 +19,6 @@
 
 #define BRS_EXT_GVL_WRAP(_gvl, function, data) function((void*) data);
 
-#endif
+#endif // HAVE_RB_THREAD_CALL_WITHOUT_GVL
 
 #endif // BRS_EXT_GVL_H

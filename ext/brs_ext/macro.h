@@ -8,6 +8,6 @@
 #define BRS_EXT_UNUSED(x) x __attribute__((__unused__))
 #else
 #define BRS_EXT_UNUSED(x) x
-#endif
+#endif // __GNUC__
 
 #endif // BRS_EXT_MACRO_H
