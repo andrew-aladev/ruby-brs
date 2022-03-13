@@ -8,7 +8,17 @@ See [brotli library](https://github.com/google/brotli).
 
 ## Installation
 
-Please install brotli library first, use latest 1.0.0+ version.
+Operating systems: GNU/Linux, FreeBSD, OSX, Windows (MinGW).
+
+Dependencies: [brotli](https://github.com/google/brotli) 1.0.0+ version.
+
+| Popular OS | Dependencies              |
+|------------|---------------------------|
+| Ubuntu     | `libbrotli-dev`           |
+| CentOS     | `brotli-devel`            |
+| ArchLinux  | `brotli`                  |
+| OSX        | `brotli`                  |
+| Windows    | `mingw-w64-x86_64-brotli` |
 
 ```sh
 gem install ruby-brs
@@ -366,10 +376,6 @@ You should lock all shared data between threads.
 
 For example: you should not use same compressor/decompressor inside multiple threads.
 Please verify that you are using each processor inside single thread at the same time.
-
-## Operating systems
-
-GNU/Linux, FreeBSD, OSX, Windows (MinGW).
 
 ## CI
 
