@@ -1,15 +1,17 @@
 # Ruby bindings for brotli library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
+require "adsp/string"
 require "brs_ext"
 
 require_relative "option"
 require_relative "validation"
 
 module BRS
-  # BRS::String module.
-  module String
-    BUFFER_LENGTH_NAMES = %i[destination_buffer_length].freeze
+  # BRS::String class.
+  class String < ADSP::String
+    # Current option class.
+    Option = BRS::Option
 
     def self.compress(source, options = {})
       Validation.validate_string source
@@ -18,15 +20,15 @@ module BRS
 
       options[:size_hint] = source.bytesize
 
-      BRS._native_compress_string source, options
+      super source, options
     end
 
-    def self.decompress(source, options = {})
-      Validation.validate_string source
+    def self.native_compress_string(*args)
+      BRS._native_compress_string(*args)
+    end
 
-      options = Option.get_decompressor_options options, BUFFER_LENGTH_NAMES
-
-      BRS._native_decompress_string source, options
+    def self.native_decompress_string(*args)
+      BRS._native_decompress_string(*args)
     end
   end
 end
