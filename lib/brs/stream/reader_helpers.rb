@@ -7,6 +7,7 @@ require_relative "../validation"
 
 module BRS
   module Stream
+    # BRS::Stream::ReaderHelpers module.
     module ReaderHelpers
       def getbyte
         read 1
@@ -169,6 +170,7 @@ module BRS
 
       # -- etc --
 
+      # BRS::Stream::ReaderHelpers::ClassMethods class.
       module ClassMethods
         def open(file_path, *args, &block)
           Validation.validate_string file_path

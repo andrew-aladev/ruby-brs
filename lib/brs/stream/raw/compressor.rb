@@ -11,6 +11,7 @@ require_relative "../../validation"
 module BRS
   module Stream
     module Raw
+      # BRS::Stream::Raw::Compressor class.
       class Compressor < Abstract
         BUFFER_LENGTH_NAMES = %i[destination_buffer_length].freeze
 

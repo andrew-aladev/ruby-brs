@@ -7,6 +7,7 @@ require_relative "error"
 require_relative "validation"
 
 module BRS
+  # BRS::Option module.
   module Option
     DEFAULT_BUFFER_LENGTH = 0
 

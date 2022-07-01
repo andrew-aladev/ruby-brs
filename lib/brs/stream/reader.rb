@@ -8,6 +8,7 @@ require_relative "../validation"
 
 module BRS
   module Stream
+    # BRS::Stream::Reader class.
     class Reader < Abstract
       include ReaderHelpers
 

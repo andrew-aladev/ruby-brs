@@ -7,6 +7,7 @@ require_relative "../../validation"
 module BRS
   module Stream
     module Raw
+      # BRS::Stream::Raw::Abstract class.
       class Abstract
         def initialize(native_stream)
           @native_stream = native_stream

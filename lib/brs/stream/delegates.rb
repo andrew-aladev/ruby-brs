@@ -5,6 +5,7 @@ require "forwardable"
 
 module BRS
   module Stream
+    # BRS::Stream::Delegates module.
     module Delegates
       DELEGATES = %i[
         autoclose=

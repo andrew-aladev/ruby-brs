@@ -7,6 +7,7 @@ require_relative "writer_helpers"
 
 module BRS
   module Stream
+    # BRS::Stream::Writer class.
     class Writer < Abstract
       include WriterHelpers
 
