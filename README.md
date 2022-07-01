@@ -132,6 +132,10 @@ Parallel.each large_datas do |large_data|
 end
 ```
 
+# Docs
+
+Please review [rdoc generated docs](https://andrew-aladev.github.io/ruby-brs).
+
 ## Options
 
 | Option                             | Values     | Default    | Description |
