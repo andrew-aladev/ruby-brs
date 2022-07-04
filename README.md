@@ -147,8 +147,8 @@ Please review [rdoc generated docs](https://andrew-aladev.github.io/ruby-brs).
 | `quality`                          | 0 - 11     | 11         | compression level |
 | `lgwin`                            | 10 - 24    | 22         | compressor window size |
 | `lgblock`                          | 16 - 24    | nil (auto) | compressor input block size |
-| `npostfix`                         | 0 - 3      | nil (auto) | Recommended number of postfix bits |
-| `ndirect`                          | 0 - 120    | nil (auto) | Recommended number of direct distance codes (step 1 << npostfix, max 15 << npostfix) |
+| `npostfix`                         | 0 - 3      | nil (auto) | recommended number of postfix bits |
+| `ndirect`                          | 0 - 120    | nil (auto) | recommended number of direct distance codes (step 1 << npostfix, max 15 << npostfix) |
 | `disable_literal_context_modeling` | true/false | false      | disables literal context modeling format |
 | `disable_ring_buffer_reallocation` | true/false | false      | disables ring buffer reallocation |
 | `size_hint`                        | 0 - inf    | 0 (auto)   | size of input (if known) |

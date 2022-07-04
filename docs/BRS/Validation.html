@@ -109,10 +109,10 @@
         </div>
 
         <div class="method-description">
-          
+          <p>Raises error when <code>value</code> is not boolean.</p>
 
           <div class="method-source-code" id="validate_bool-source">
-            <pre><span class="ruby-comment"># File lib/brs/validation.rb, line 9</span>
+            <pre><span class="ruby-comment"># File lib/brs/validation.rb, line 10</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier ruby-title">validate_bool</span>(<span class="ruby-identifier">value</span>)
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">ValidateError</span>, <span class="ruby-string">&quot;invalid bool&quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">value</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-operator">::</span><span class="ruby-constant">TrueClass</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">value</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-operator">::</span><span class="ruby-constant">FalseClass</span>)
 <span class="ruby-keyword">end</span></pre>

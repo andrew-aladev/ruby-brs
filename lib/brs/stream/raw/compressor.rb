@@ -18,6 +18,9 @@ module BRS
         # Current option class.
         Option = BRS::Option
 
+        # Initializes compressor.
+        # Option: +:destination_buffer_length+ destination buffer length.
+        # Option: +:size_hint+ source bytesize.
         def initialize(options = {})
           options = Option.get_compressor_options options, BUFFER_LENGTH_NAMES
 

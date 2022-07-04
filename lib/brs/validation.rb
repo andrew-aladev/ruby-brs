@@ -6,6 +6,7 @@ require "adsp/validation"
 module BRS
   # BRS::Validation class.
   class Validation < ADSP::Validation
+    # Raises error when +value+ is not boolean.
     def self.validate_bool(value)
       raise ValidateError, "invalid bool" unless value.is_a?(::TrueClass) || value.is_a?(::FalseClass)
     end

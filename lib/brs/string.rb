@@ -13,6 +13,10 @@ module BRS
     # Current option class.
     Option = BRS::Option
 
+    # Compresses +source+ string using +options+.
+    # Option: +:destination_buffer_length+ destination buffer length.
+    # Option: +:size_hint+ source bytesize.
+    # Returns compressed string.
     def self.compress(source, options = {})
       Validation.validate_string source
 
@@ -23,10 +27,12 @@ module BRS
       super source, options
     end
 
+    # Bypasses native compress.
     def self.native_compress_string(*args)
       BRS._native_compress_string(*args)
     end
 
+    # Bypasses native decompress.
     def self.native_decompress_string(*args)
       BRS._native_decompress_string(*args)
     end
