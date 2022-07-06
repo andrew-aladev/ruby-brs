@@ -1,13 +1,13 @@
 # Ruby bindings for brotli library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
+require "adsp/test/stream/abstract"
 require "brs/stream/writer"
 require "brs/string"
 require "set"
 require "socket"
 require "stringio"
 
-require_relative "abstract"
 require_relative "../common"
 require_relative "../minitest"
 require_relative "../option"
@@ -15,7 +15,7 @@ require_relative "../option"
 module BRS
   module Test
     module Stream
-      class Writer < Abstract
+      class Writer < ADSP::Test::Stream::Abstract
         Target = BRS::Stream::Writer
         String = BRS::String
 
