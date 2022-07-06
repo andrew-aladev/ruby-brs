@@ -5,8 +5,6 @@ require "parallel"
 require "securerandom"
 require "tempfile"
 
-require_relative "coverage_helper"
-
 module BRS
   module Test
     module Common
