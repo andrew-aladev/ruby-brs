@@ -1,4 +1,4 @@
-Wed, 06 Jul 2022 23:10:50 +0300
+Sat, 09 Jul 2022 12:12:58 +0300
 lib/brs.rb	Tue, 08 Sep 2020 12:23:41 +0300
 lib/brs/error.rb	Wed, 06 Jul 2022 22:46:56 +0300
 lib/brs/file.rb	Wed, 06 Jul 2022 22:46:56 +0300
@@ -9,7 +9,7 @@ lib/brs/stream/reader.rb	Wed, 06 Jul 2022 22:46:56 +0300
 lib/brs/stream/writer.rb	Wed, 06 Jul 2022 22:46:56 +0300
 lib/brs/string.rb	Wed, 06 Jul 2022 22:46:56 +0300
 lib/brs/validation.rb	Wed, 06 Jul 2022 22:46:56 +0300
-lib/brs/version.rb	Thu, 31 Mar 2022 00:51:07 +0300
+lib/brs/version.rb	Wed, 06 Jul 2022 23:41:44 +0300
 AUTHORS	Thu, 31 Mar 2022 00:51:07 +0300
 LICENSE	Tue, 08 Sep 2020 12:23:41 +0300
 README.md	Wed, 06 Jul 2022 22:46:56 +0300
