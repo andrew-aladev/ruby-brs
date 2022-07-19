@@ -6,6 +6,8 @@
 
 See [brotli library](https://github.com/google/brotli).
 
+Other bindings: [lzw](https://github.com/andrew-aladev/ruby-lzws), [zstd](https://github.com/andrew-aladev/ruby-zstds), [bzip2](https://github.com/andrew-aladev/ruby-bzs)
+
 ## Installation
 
 Operating systems: GNU/Linux, FreeBSD, OSX.
