@@ -145,7 +145,7 @@ module BRS
       .freeze
 
       private_class_method def self.get_option_values(values, min, max)
-        values.map { |value| [[value, min].max, max].min }
+        values.map { |value| value.clamp(min, max) }
       end
 
       # Absolute min and max values works too slow.
