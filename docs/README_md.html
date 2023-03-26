@@ -57,20 +57,47 @@
 <div class="nav-section">
   <h3>Table of Contents</h3>
 
+
+
   <ul class="link-list" role="directory">
-    <li><a href="#label-Ruby+bindings+for+brotli+library">Ruby bindings for brotli library</a>
-    <li><a href="#label-Installation">Installation</a>
-    <li><a href="#label-Installation+in+macOS+on+Apple+Silicon">Installation in macOS on Apple Silicon</a>
-    <li><a href="#label-Usage">Usage</a>
-    <li><a href="#label-Docs">Docs</a>
-    <li><a href="#label-Options">Options</a>
-    <li><a href="#label-String">String</a>
-    <li><a href="#label-File">File</a>
-    <li><a href="#label-Stream-3A-3AWriter">Stream::Writer</a>
-    <li><a href="#label-Stream-3A-3AReader">Stream::Reader</a>
-    <li><a href="#label-Thread+safety">Thread safety</a>
-    <li><a href="#label-CI">CI</a>
-    <li><a href="#label-License">License</a>
+              <li>
+            <details open>
+              <summary>      <a href="#label-Ruby+bindings+for+brotli+library">Ruby bindings for brotli library</a>
+</summary>
+              <ul class="link-list" role="directory">
+                          <li>
+            <details open>
+              <summary>      <a href="#label-Installation">Installation</a>
+</summary>
+              <ul class="link-list" role="directory">
+                          <li>      <a href="#label-Installation+in+macOS+on+Apple+Silicon">Installation in macOS on Apple Silicon</a>
+
+              </ul>
+            </details>
+          </li>
+          <li>      <a href="#label-Usage">Usage</a>
+
+              </ul>
+            </details>
+          </li>
+          <li>
+            <details open>
+              <summary>      <a href="#label-Docs">Docs</a>
+</summary>
+              <ul class="link-list" role="directory">
+                          <li>      <a href="#label-Options">Options</a>
+          <li>      <a href="#label-String">String</a>
+          <li>      <a href="#label-File">File</a>
+          <li>      <a href="#label-Stream-3A-3AWriter">Stream::Writer</a>
+          <li>      <a href="#label-Stream-3A-3AReader">Stream::Reader</a>
+          <li>      <a href="#label-Thread+safety">Thread safety</a>
+          <li>      <a href="#label-CI">CI</a>
+          <li>      <a href="#label-License">License</a>
+
+              </ul>
+            </details>
+          </li>
+
   </ul>
 </div>
 
@@ -94,7 +121,22 @@
 
 <h1 id="label-Ruby+bindings+for+brotli+library">Ruby bindings for brotli library<span><a href="#label-Ruby+bindings+for+brotli+library">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
-<p>| AppVeyor | Jenkins | Github actions | Codecov | Gem | | :——: | :—–: | :————: | :—–: | :–: | | <a href="https://ci.appveyor.com/project/andrew-aladev/ruby-brs/branch/master"><img src="https://ci.appveyor.com/api/projects/status/github/andrew-aladev/ruby-brs?branch=master&svg=true"></a> | <a href="http://37.187.122.190:58182/job/ruby-brs"><img src="http://37.187.122.190:58182/buildStatus/icon?job=ruby-brs"></a> | <a href="https://github.com/andrew-aladev/ruby-brs/actions"><img src="https://github.com/andrew-aladev/ruby-brs/workflows/test/badge.svg?branch=master"></a> | <a href="https://codecov.io/gh/andrew-aladev/ruby-brs"><img src="https://codecov.io/gh/andrew-aladev/ruby-brs/branch/master/graph/badge.svg"></a> | <a href="https://rubygems.org/gems/ruby-brs"><img src="https://img.shields.io/gem/v/ruby-brs.svg"></a> |</p>
+<table role="table">
+<thead>
+<tr>
+<th align="center">Github actions</th>
+<th align="center">Codecov</th>
+<th align="center">Gem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">[![Github Actions test status](<a href="https://github.com/andrew-aladev/ruby-brs/workflows/test/badge.svg?branch=master)](https://github.com/andrew-aladev/ruby-brs/actions">github.com/andrew-aladev/ruby-brs/workflows/test/badge.svg?branch=master)](https://github.com/andrew-aladev/ruby-brs/actions</a>)</td>
+<td align="center">[![Codecov](<a href="https://codecov.io/gh/andrew-aladev/ruby-brs/branch/master/graph/badge.svg)](https://codecov.io/gh/andrew-aladev/ruby-brs">codecov.io/gh/andrew-aladev/ruby-brs/branch/master/graph/badge.svg)](https://codecov.io/gh/andrew-aladev/ruby-brs</a>)</td>
+<td align="center">[![Gem](<a href="https://img.shields.io/gem/v/ruby-brs.svg)](https://rubygems.org/gems/ruby-brs">img.shields.io/gem/v/ruby-brs.svg)](https://rubygems.org/gems/ruby-brs</a>)</td>
+</tr>
+</tbody>
+</table>
 
 <p>See <a href="https://github.com/google/brotli">brotli library</a>.</p>
 
@@ -116,19 +158,19 @@
 <tbody>
 <tr>
 <td>Ubuntu</td>
-<td>`libbrotli-dev`</td>
+<td>‘libbrotli-dev`</td>
 </tr>
 <tr>
 <td>CentOS</td>
-<td>`brotli-devel`</td>
+<td>‘brotli-devel`</td>
 </tr>
 <tr>
 <td>ArchLinux</td>
-<td>`brotli`</td>
+<td>‘brotli`</td>
 </tr>
 <tr>
 <td>OSX</td>
-<td>`brotli`</td>
+<td>‘brotli`</td>
 </tr>
 </tbody>
 </table>
@@ -250,79 +292,79 @@ gem install ruby-brs -- --with-opt-include=/opt/homebrew/include --with-opt-lib=
 </thead>
 <tbody>
 <tr>
-<td>`source_buffer_length`</td>
+<td>‘source_buffer_length`</td>
 <td>0 - inf</td>
 <td>0 (auto)</td>
 <td>internal buffer length for source data</td>
 </tr>
 <tr>
-<td>`destination_buffer_length`</td>
+<td>‘destination_buffer_length`</td>
 <td>0 - inf</td>
 <td>0 (auto)</td>
 <td>internal buffer length for description data</td>
 </tr>
 <tr>
-<td>`gvl`</td>
+<td>‘gvl`</td>
 <td>true/false</td>
 <td>false</td>
 <td>enables global VM lock where possible</td>
 </tr>
 <tr>
-<td>`mode`</td>
-<td>`MODES`</td>
-<td>`:generic`</td>
+<td>‘mode`</td>
+<td>‘MODES`</td>
+<td>‘:generic`</td>
 <td>compressor mode</td>
 </tr>
 <tr>
-<td>`quality`</td>
+<td>‘quality`</td>
 <td>0 - 11</td>
 <td>11</td>
 <td>compression level</td>
 </tr>
 <tr>
-<td>`lgwin`</td>
+<td>‘lgwin`</td>
 <td>10 - 24</td>
 <td>22</td>
 <td>compressor window size</td>
 </tr>
 <tr>
-<td>`lgblock`</td>
+<td>‘lgblock`</td>
 <td>16 - 24</td>
 <td>nil (auto)</td>
 <td>compressor input block size</td>
 </tr>
 <tr>
-<td>`npostfix`</td>
+<td>‘npostfix`</td>
 <td>0 - 3</td>
 <td>nil (auto)</td>
 <td>recommended number of postfix bits</td>
 </tr>
 <tr>
-<td>`ndirect`</td>
+<td>‘ndirect`</td>
 <td>0 - 120</td>
 <td>nil (auto)</td>
 <td>recommended number of direct distance codes (step 1 &lt;&lt; npostfix, max 15 &lt;&lt; npostfix)</td>
 </tr>
 <tr>
-<td>`disable_literal_context_modeling`</td>
+<td>‘disable_literal_context_modeling`</td>
 <td>true/false</td>
 <td>false</td>
 <td>disables literal context modeling format</td>
 </tr>
 <tr>
-<td>`disable_ring_buffer_reallocation`</td>
+<td>‘disable_ring_buffer_reallocation`</td>
 <td>true/false</td>
 <td>false</td>
 <td>disables ring buffer reallocation</td>
 </tr>
 <tr>
-<td>`size_hint`</td>
+<td>‘size_hint`</td>
 <td>0 - inf</td>
 <td>0 (auto)</td>
 <td>size of input (if known)</td>
 </tr>
 <tr>
-<td>`large_window`</td>
+<td>‘large_window`</td>
 <td>true/false</td>
 <td>false</td>
 <td>enables large window</td>
@@ -347,28 +389,28 @@ gem install ruby-brs -- --with-opt-include=/opt/homebrew/include --with-opt-lib=
 </thead>
 <tbody>
 <tr>
-<td>`mode`</td>
-<td>`BRS::Option::MODES` = `%i[text font generic]`</td>
+<td>‘mode`</td>
+<td>‘BRS::Option::MODES` = `%i[text font generic]`</td>
 </tr>
 <tr>
-<td>`quality`</td>
-<td>`BRS::Option::MIN_QUALITY` = 0, `BRS::Option::MAX_QUALITY` = 11</td>
+<td>‘quality`</td>
+<td>‘BRS::Option::MIN_QUALITY` = 0, `BRS::Option::MAX_QUALITY` = 11</td>
 </tr>
 <tr>
-<td>`lgwin`</td>
-<td>`BRS::Option::MIN_LGWIN` = 10, `BRS::Option::MAX_LGWIN` = 24</td>
+<td>‘lgwin`</td>
+<td>‘BRS::Option::MIN_LGWIN` = 10, `BRS::Option::MAX_LGWIN` = 24</td>
 </tr>
 <tr>
-<td>`lgblock`</td>
-<td>`BRS::Option::MIN_LGBLOCK` = 16, `BRS::Option::MAX_LGBLOCK` = 24</td>
+<td>‘lgblock`</td>
+<td>‘BRS::Option::MIN_LGBLOCK` = 16, `BRS::Option::MAX_LGBLOCK` = 24</td>
 </tr>
 <tr>
-<td>`npostfix`</td>
-<td>`BRS::Option::MIN_NPOSTFIX` = 0, `BRS::Option::MAX_NPOSTFIX` = 3</td>
+<td>‘npostfix`</td>
+<td>‘BRS::Option::MIN_NPOSTFIX` = 0, `BRS::Option::MAX_NPOSTFIX` = 3</td>
 </tr>
 <tr>
-<td>`ndirect`</td>
-<td>`BRS::Option::MIN_NDIRECT` = 0, `BRS::Option::MAX_NDIRECT` = 120, `BRS::Option::NDIRECT_NPOSTFIX_STEP_BASE` = 1, `BRS::Option::NDIRECT_NPOSTFIX_MAX_BASE` = 15</td>
+<td>‘ndirect`</td>
+<td>‘BRS::Option::MIN_NDIRECT` = 0, `BRS::Option::MAX_NDIRECT` = 120, `BRS::Option::NDIRECT_NPOSTFIX_STEP_BASE` = 1, `BRS::Option::NDIRECT_NPOSTFIX_MAX_BASE` = 15</td>
 </tr>
 </tbody>
 </table>
@@ -572,7 +614,7 @@ gem install ruby-brs -- --with-opt-include=/opt/homebrew/include --with-opt-lib=
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.4.0.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 
